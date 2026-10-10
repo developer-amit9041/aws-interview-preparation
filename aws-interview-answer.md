@@ -14802,3 +14802,88 @@ Replace placeholders with your actual subnet and security-group IDs. For Fargate
 **Interview-ready answer:** An ECS task is a running instance of a task definition. The definition specifies the container image, CPU, memory, networking, and other settings. A task can contain one or more containers, and an ECS service can maintain a desired number of task instances for a continuously running application.
 
 ---
+
+### Q195. What is ECS Service?
+
+#### 1. English Definition
+
+An **Amazon ECS Service** manages the deployment and desired number of running tasks for an application. It can replace stopped or unhealthy tasks and integrate with load balancers and deployment strategies.
+
+#### 2. Hindi Definition
+
+ECS Service application ke tasks ki desired number ko running maintain karti hai. Agar koi task stop ho jaye ya unhealthy ho, toh service usse replace karne ki koshish kar sakti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js API ko production mein hamesha available rakhna hai aur tumhe 3 copies run karni hain.
+
+Agar tum sirf 3 tasks manually run kar do, toh task fail hone par unhe manage karna tumhari responsibility hogi. ECS Service mein desired count `3` set karne par ECS service teen tasks running maintain karne ki koshish karti hai.
+
+- Task Definition batati hai container kaise run hoga.
+- Task ek running instance hai.
+- ECS Service desired number of tasks ko maintain karti hai.
+- Service load balancer ke saath integrate ho sakti hai aur deployments manage kar sakti hai.
+
+#### 4. Practical Architecture
+
+```text
+Users
+  |
+  v
+Application Load Balancer
+  |
+  v
+ECS Service (desired count = 3)
+  |
+  +---- Task 1: Node.js API
+  +---- Task 2: Node.js API
+  +---- Task 3: Node.js API
+```
+
+Agar Task 2 stop ho jaye, ECS service replacement task launch karne ki koshish karti hai, provided cluster/Fargate capacity, networking, permissions, and configuration allow it. Load balancer health checks help keep unhealthy targets out of traffic; service replacement and target health checks are related but distinct mechanisms.
+
+#### 5. Practical AWS CLI Commands
+
+List services in a cluster:
+
+```bash
+aws ecs list-services \
+  --cluster mern-production-cluster \
+  --region ap-south-1
+```
+
+Describe a service:
+
+```bash
+aws ecs describe-services \
+  --cluster mern-production-cluster \
+  --services node-api-service \
+  --region ap-south-1
+```
+
+Update desired task count:
+
+```bash
+aws ecs update-service \
+  --cluster mern-production-cluster \
+  --service node-api-service \
+  --desired-count 3 \
+  --region ap-south-1
+```
+
+These commands assume the cluster and service already exist. For production, also configure health checks, deployment settings, IAM roles, networking, logs, and appropriate scaling policies.
+
+#### 6. Summary Table
+
+| ECS Concept | Responsibility |
+|---|---|
+| Task Definition | Defines container configuration |
+| Task | Runs the defined containers |
+| Service | Maintains desired task count and manages service deployments |
+| Desired count | Number of tasks the service should keep running |
+| Load balancer | Routes traffic to healthy registered targets |
+| Service Auto Scaling | Adjusts desired task count based on configured policies |
+
+**Interview-ready answer:** An ECS service manages a long-running application by maintaining the desired number of tasks based on a task definition. It can replace stopped tasks, integrate with an Application Load Balancer, and perform deployments. For example, setting desired count to three tells ECS to maintain three running task instances, subject to available capacity and correct configuration.
+
+---
