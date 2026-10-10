@@ -8478,3 +8478,54 @@ API Gateway mein HTTP API create karke Lambda integration select karo, route jai
 - Lambda proxy integration mein response format important hota hai: `statusCode`, optional `headers`, and `body`.
 - CORS configure karna pad sakta hai jab browser-based frontend kisi different origin se API call kare.
 - API Gateway aur Lambda dono ki pricing, quotas, timeout limits, and monitoring ko consider karo.
+
+### Q132. How does Lambda work with SQS?
+
+#### 1. English Definition
+
+AWS Lambda integrates with Amazon SQS by polling a queue through an event source mapping and invoking the Lambda function with batches of messages for processing.
+
+#### 2. Hindi Definition
+
+Lambda aur SQS integration mein SQS queue messages store karti hai, aur Lambda un messages ko process karti hai. Lambda ko har message ke liye manually call karne ki zaroorat nahi hoti; event source mapping queue se messages poll karke function ko invoke karti hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhare MERN application mein user order place karta hai. Order API ek message SQS queue mein add kar deti hai. Lambda queue ke messages ko process karti hai, jaise order confirmation email bhejna ya order-processing task perform karna.
+
+Flow:
+
+**Application/API → SQS Queue → Lambda → Process message → Successful messages deleted from queue**
+
+SQS aur Lambda ka yeh setup background jobs ko API request se alag rakhta hai. Isse frontend ko background task complete hone ka wait nahi karna padta. Lambda queue se messages batch mein receive kar sakti hai.
+
+#### 4. Practical Example
+
+Lambda handler example:
+
+```js
+exports.handler = async (event) => {
+  for (const record of event.Records) {
+    const message = JSON.parse(record.body);
+    console.log("Processing order:", message.orderId);
+    // Perform the background task for this order
+  }
+};
+```
+
+Setup karne ke liye:
+
+1. SQS queue create karo.
+2. Lambda function create karo aur handler mein `event.Records` process karo.
+3. Lambda function ke liye SQS execution permissions configure karo, including required receive/delete/get-attributes actions.
+4. Lambda console mein **Add trigger → SQS** select karke queue connect karo.
+5. Batch size, visibility timeout, and retry/error handling ko workload ke hisaab se configure karo.
+
+#### 5. Important Points
+
+- Lambda event source mapping SQS queue ko poll karti hai; SQS directly normal HTTP request ki tarah Lambda ko push nahi karti.
+- By default, SQS-triggered Lambda processing at-least-once hoti hai, so duplicate messages possible hain. Handler ko idempotent banana chahiye.
+- Successfully processed messages ko Lambda integration delete karti hai; failed processing par messages retry ho sakte hain.
+- Repeatedly failing messages ke liye dead-letter queue (DLQ) configure karna useful hai.
+- Visibility timeout itna suitable rakho ki processing ke dauran message doosre consumer ko jaldi available na ho; AWS ke recommended timeout relationship ko follow karo.
+- SQS standard queues may deliver messages more than once and not guarantee order. FIFO queues provide ordering within message groups, with their own throughput and configuration considerations.
