@@ -77,3 +77,70 @@ Ye command configured AWS credentials se associated AWS account aur identity ki 
 | Main purpose | Applications ko deploy, run aur scale karna |
 
 **Yaad rakhne ki trick:** AWS ek platform hai, aur EC2, S3 aur IAM uski alag-alag services hain.
+
+
+### Q2. Why do we use AWS?
+
+#### 1. English Definition
+
+**We use AWS to host applications, store data, manage databases, and scale resources over the internet without maintaining our own physical servers.**
+
+#### 2. Hindi Definition
+
+Hum AWS ka use applications ko host karne, data store karne, databases manage karne aur zaroorat ke according resources badhane ke liye karte hain, bina apne physical servers maintain kiye.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumne MERN Stack mein ek e-commerce website banayi hai. Ab tum chahte ho ki website internet par live ho aur bahut saare users use kar sakein.
+
+Agar tum apne laptop par backend chalaoge, toh laptop band hone par application available nahi rahegi. Production application ke liye reliable hosting infrastructure chahiye.
+
+AWS use karne ke main reasons:
+
+1. **Application hosting:** EC2 par Node.js backend run kar sakte ho.
+2. **Storage:** S3 mein product images aur files store kar sakte ho.
+3. **Scalability:** Traffic badhne par resources increase kar sakte ho.
+4. **Availability:** Multiple servers aur Availability Zones use karke downtime ka risk kam kar sakte ho.
+5. **Security:** IAM se users aur services ki permissions manage kar sakte ho.
+6. **Cost flexibility:** Zaroorat ke according resources select kar sakte ho; pricing service ke model par depend karti hai.
+
+**Simple words mein:** AWS ka use isliye karte hain taaki hum apni applications ko internet par host, manage aur scale kar sakein, bina apna physical data center maintain kiye.
+
+#### 4. Practical Example — MERN E-commerce App
+
+Maan lo tum apni e-commerce application deploy kar rahe ho:
+
+```text
+React.js Frontend
+       |
+       v
+Amazon EC2
+(Node.js + Express API)
+       |
+       +------> MongoDB Atlas
+       |
+       +------> Amazon S3
+                (Product Images)
+```
+
+**Working flow:**
+1. User product search karta hai.
+2. React frontend EC2 par hosted backend ko API request bhejta hai.
+3. Backend database se product details fetch karta hai.
+4. Product images S3 se load ho sakti hain.
+5. Backend response frontend ko return karta hai.
+
+Is tarah AWS hosting, storage aur infrastructure services provide karta hai.
+
+#### 5. Summary Table
+
+| Reason | AWS service / benefit |
+|---|---|
+| Application host karna | EC2 |
+| Files aur images store karna | S3 |
+| Traffic ke according resources badhana | Auto Scaling |
+| Application availability improve karna | Multiple AZs / Load Balancer |
+| Permissions manage karna | IAM |
+| Application monitor karna | CloudWatch |
+
+**Yaad rakhne ki trick:** Hosting + Storage + Scalability + Availability + Security.
