@@ -298,3 +298,74 @@ Maan lo tum apni MERN application Mumbai Region mein deploy karte ho:
 **Yaad rakhne ki trick:** Region = Geographic area; Availability Zone = Region ke andar isolated location.
 
 ---
+
+---
+
+### Q5. What is an Availability Zone (AZ)?
+
+#### 1. English Definition
+
+**An Availability Zone (AZ) is an isolated location within an AWS Region, made up of one or more data centers with independent infrastructure. AZs help build applications that remain available even if one location has a problem.**
+
+#### 2. Hindi Definition
+
+Availability Zone, AWS Region ke andar ek alag aur isolated location hoti hai, jismein ek ya ek se zyada data centers ho sakte hain. Multiple AZs ka use karke application ki availability aur fault tolerance improve ki ja sakti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application Mumbai Region mein deploy hai. Sirf ek AZ mein backend chal raha hai. Agar us AZ mein infrastructure problem aa jaaye, toh tumhara backend unavailable ho sakta hai.
+
+Is risk ko kam karne ke liye tum backend ko multiple AZs mein deploy kar sakte ho:
+
+- **AZ-a:** EC2 instance 1 par Node.js backend.
+- **AZ-b:** EC2 instance 2 par Node.js backend.
+- **Application Load Balancer (ALB):** Incoming requests ko healthy instances tak route karta hai.
+
+Agar ek AZ mein problem aati hai, toh ALB doosri AZ ke healthy backend ko traffic bhej sakta hai—provided health checks, routing aur capacity properly configured hon.
+
+#### 4. Architecture Example
+
+```text
+AWS Region: Mumbai (ap-south-1)
+                  |
+                  v
+      Application Load Balancer
+             /          \\
+            v            v
+         AZ-a            AZ-b
+       EC2 #1           EC2 #2
+    Node.js API      Node.js API
+            \\            /
+             v          v
+          Shared / Accessible Data
+```
+
+**Flow:**
+
+1. User API request bhejta hai.
+2. ALB healthy EC2 instance ko request forward karta hai.
+3. Agar AZ-a unavailable ho jaaye, toh health checks ke baad ALB AZ-b ke healthy instance ko request bhej sakta hai.
+4. Isse single-location failure ka impact kam ho sakta hai.
+
+Note: Sirf do AZs mein servers create karna enough nahi hai. Load balancing, database availability, application configuration aur sufficient capacity bhi plan karni hoti hai.
+
+#### 5. Region vs Availability Zone
+
+| AWS Region | Availability Zone (AZ) |
+|---|---|
+| Ek geographic area hota hai. | Region ke andar isolated location/group hoti hai. |
+| Example: Mumbai (ap-south-1) | Example: Mumbai Region ki AZ |
+| Multiple AZs contain karta hai. | Ek Region ka part hoti hai. |
+
+#### 6. Summary Table
+
+| Term | Meaning |
+|---|---|
+| Availability Zone | Region ke andar isolated infrastructure location/group |
+| Multiple AZs | Availability aur resilience improve karne ka ek tareeka |
+| ALB health checks | Unhealthy targets ko identify karne mein help karte hain |
+| Multi-AZ architecture | Resources ko multiple AZs mein distribute karna |
+
+**Yaad rakhne ki trick:** Region = bada geographic area; AZ = us Region ke andar isolated location. Multiple AZs = single-location failure ka risk kam.
+
+---
