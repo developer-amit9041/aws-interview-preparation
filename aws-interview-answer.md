@@ -3380,3 +3380,84 @@ The backend should authenticate the user, restrict the bucket/key and operation,
 - Use short expiration times and avoid logging or exposing URLs unnecessarily.
 
 ---
+
+### Q50. Why use Pre-Signed URLs?
+
+#### 1. English Definition
+
+**Pre-signed URLs are used to provide temporary, controlled access to private S3 objects without making the bucket public or requiring end users to have AWS credentials.**
+
+#### 2. Hindi Definition
+
+Pre-Signed URLs ka use private S3 files ko limited time ke liye securely upload ya download karne ki permission dene ke liye hota hai, bina bucket ko public banaye ya user ko AWS credentials diye.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein users invoices, profile photos ya documents access karte hain. Tum nahi chahte ki S3 bucket public ho. Isliye Node.js backend user ki identity aur file access permission check karke ek temporary pre-signed URL generate karta hai.
+
+Iske main benefits hain:
+
+1. **Security:** Bucket ko public banane ki zaroorat nahi hoti.
+2. **Temporary access:** URL ki expiry set kar sakte ho, jaise 5 minutes.
+3. **Direct upload/download:** Browser file ko S3 se directly upload ya download kar sakta hai; Node.js server ko file bytes proxy karne ki zaroorat nahi hoti.
+4. **No AWS credentials for users:** End users ko AWS access keys ya IAM account dene ki zaroorat nahi hoti.
+5. **Lower backend workload:** Direct upload large files ke case mein application server ka bandwidth aur processing workload reduce kar sakta hai.
+
+#### 4. Practical MERN Example
+
+Maan lo user apni invoice download karna chahta hai:
+
+```text
+React asks Node.js for invoice access
+              |
+              v
+Node.js authenticates user and checks invoice ownership
+              |
+              v
+Node.js generates a short-lived pre-signed URL
+              |
+              v
+React downloads the invoice directly from private S3
+```
+
+Node.js SDK se download URL generate karne ka example:
+
+```javascript
+const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+
+const s3 = new S3Client({ region: process.env.AWS_REGION });
+
+async function getInvoiceUrl(invoiceKey) {
+  // Authenticate the user and verify access to this invoice first.
+  return getSignedUrl(
+    s3,
+    new GetObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: invoiceKey,
+    }),
+    { expiresIn: 300 }
+  );
+}
+```
+
+`expiresIn: 300` means 5 minutes. The function should only be called after the backend has verified that the requesting user is allowed to access that exact invoice.
+
+#### 5. Why Not Make the S3 Bucket Public?
+
+| Pre-Signed URL | Public bucket/object |
+|---|---|
+| Temporary, signed access | Public access remains available while permissions allow it |
+| Can target one specific object and action | A public policy may expose many matching objects |
+| Suitable for private invoices and documents | Suitable only for intentionally public assets, with careful scope |
+| End user does not need AWS credentials | End user does not need AWS credentials either |
+
+#### 6. Important Points
+
+- Pre-signed URLs grant a specific signed operation, such as `GetObject` or `PutObject`.
+- Anyone who possesses the URL may use it for the permitted action until it expires, subject to AWS authorization conditions; treat it like a temporary secret.
+- Expiration can be earlier than requested if the signing credentials expire or are revoked, or permissions change.
+- Always authenticate the user and authorize access to the specific object before generating the URL.
+- For browser direct uploads, configure S3 CORS as needed; CORS does not replace S3 permissions.
+
+---
