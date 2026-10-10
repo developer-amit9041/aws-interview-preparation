@@ -12176,3 +12176,112 @@ Console mein **CloudWatch → Alarms → Create alarm** se metric, threshold, ev
 **Interview answer:** A CloudWatch alarm evaluates a metric against configured conditions and changes state to OK, ALARM, or INSUFFICIENT_DATA. It can send notifications through SNS or trigger supported configured actions when a threshold is breached.
 
 ---
+
+### Q170. How do you monitor EC2?
+
+#### 1. English Definition
+
+**You can monitor an EC2 instance using Amazon CloudWatch metrics, logs, alarms, dashboards, and health checks to track performance, troubleshoot issues, and receive alerts.**
+
+#### 2. Hindi Definition
+
+EC2 ko monitor karne ke liye CloudWatch metrics, logs, alarms aur dashboards use karte hain. Isse CPU usage, network activity, application errors aur server health track karke problems par alerts mil sakte hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application EC2 par deployed hai. Tumhe pata karna hai ki server healthy hai ya nahi, CPU high toh nahi, application errors aa rahe hain ya nahi, aur disk full toh nahi ho rahi.
+
+EC2 monitoring ke main steps:
+- **CloudWatch Metrics:** CPU utilization, network in/out, disk read/write activity aur status checks monitor karo.
+- **CloudWatch Agent:** Memory utilization, filesystem/disk space aur application log files jaise guest OS data collect karne ke liye configure karo.
+- **CloudWatch Logs:** Node.js, Nginx aur system logs collect/search karo.
+- **CloudWatch Alarms:** CPU high, status check failure, ya low disk space (custom metric ke through) par alert configure karo.
+- **Dashboards:** Important metrics ek jagah visualize karo.
+- **EC2 status checks:** AWS infrastructure aur instance reachability problems identify karne mein help karte hain.
+
+Important: EC2 basic monitoring mein CPU, network, disk I/O aur status-check metrics milte hain, lekin guest OS memory aur filesystem free space jaise metrics automatically har instance ke liye publish nahi hote. Unke liye CloudWatch Agent ya custom metric collection configure karo.
+
+#### 4. Practical Example
+
+Maan lo tumhari production EC2 instance par Node.js API chal rahi hai. Monitoring setup kuch aisa ho sakta hai:
+
+| What to monitor | CloudWatch source | Example alert |
+|---|---|---|
+| CPU usage | EC2 metric `CPUUtilization` | CPU > 80% for configured periods |
+| Instance health | EC2 status check metrics | Status check failed |
+| Memory usage | CloudWatch Agent metric | Memory usage > 85% |
+| Disk space | Agent/custom filesystem metric | Free disk space below limit |
+| Application errors | CloudWatch Logs | Search or metric filter for error patterns |
+| Network traffic | `NetworkIn`, `NetworkOut` | Unusual traffic trend |
+
+Thresholds examples hain; actual values workload ke hisaab se set karo. Application logs ko metrics mein convert karne ke liye CloudWatch Logs metric filters ya other supported processing use kar sakte ho.
+
+#### 5. Architecture Diagram — EC2 Monitoring
+
+```text
+            EC2 Instance
+                 |
+       +---------+----------+
+       |         |          |
+       v         v          v
+   EC2 Metrics  OS Metrics  App/System Logs
+   (default)    (Agent)     (Agent/integration)
+       |         |          |
+       +---------+----------+
+                 |
+                 v
+          Amazon CloudWatch
+           /      |       \\
+          v       v        v
+       Dashboard Metrics  Logs
+                    |
+                    v
+              CloudWatch Alarm
+                    |
+                    v
+                SNS Alert
+```
+
+**Flow:** EC2 basic metrics automatically publish hote hain → agent additional OS metrics aur logs collect kar sakta hai → CloudWatch mein data visualize/analyze hota hai → configured alarm condition meet hone par SNS notification bhej sakta hai.
+
+#### 6. Practical Command / Configuration
+
+**Check EC2 instance status:**
+
+```bash
+aws ec2 describe-instance-status \
+  --instance-ids i-0123456789abcdef0 \
+  --include-all-instances
+```
+
+**Read recent application logs** (assuming the log group exists and permissions are configured):
+
+```bash
+aws logs tail "/myapp/production" --since 1h
+```
+
+**CloudWatch console setup:**
+1. CloudWatch → Metrics → EC2 se CPU, network, disk I/O aur status-check metrics inspect karo.
+2. CloudWatch Agent install/configure karo for memory, filesystem and log collection.
+3. CloudWatch Logs mein log groups aur streams verify karo.
+4. CloudWatch → Alarms mein CPU/status-check alarms create karo.
+5. Dashboard bana kar key metrics ek jagah monitor karo.
+6. Notifications ke liye SNS topic aur subscription configure karo.
+
+Ensure the EC2 instance role grants only the required CloudWatch permissions, and verify the agent's configuration and service status after installation.
+
+#### 7. Summary Table
+
+| Monitoring need | Tool / feature |
+|---|---|
+| CPU and network | CloudWatch EC2 metrics |
+| Instance reachability | EC2 status checks |
+| Memory and filesystem usage | CloudWatch Agent / custom metrics |
+| Application and system errors | CloudWatch Logs |
+| Threshold alerts | CloudWatch Alarms |
+| One-screen overview | CloudWatch Dashboards |
+| Email notifications | CloudWatch Alarm + SNS |
+
+**Interview answer:** I monitor EC2 with CloudWatch metrics, status checks, logs, dashboards, and alarms. I use default EC2 metrics for CPU, network, and disk I/O, install the CloudWatch Agent for memory and filesystem metrics and log collection, and configure alarms with SNS notifications for important thresholds or failures.
+
+---
