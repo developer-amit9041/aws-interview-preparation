@@ -4504,3 +4504,60 @@ Diagram mein NAT Gateway ka outbound path dikhaya gaya hai. Private subnet ki ro
 - NAT Gateway inbound public access dene ke liye nahi hai. Internet se users ko application access karwani ho toh load balancer ya another suitable public entry point use karo.
 
 ---
+
+### Q66. What is a Route Table?
+
+#### 1. English Definition
+
+**A route table is a set of rules, called routes, that determines where network traffic from a subnet or gateway is directed.**
+
+#### 2. Hindi Definition
+
+Route Table rules ka ek set hota hai jo decide karta hai ki subnet ya gateway se aane wala network traffic apni destination ke liye kahan jayega.
+
+#### 3. Hinglish Explanation
+
+Bhai, VPC mein Route Table ko traffic ka direction decide karne wala map samjho. Ye decide karti hai ki traffic local VPC ke andar jayega, Internet Gateway ki taraf, NAT Gateway ki taraf, ya kisi doosre network destination ki taraf.
+
+Route Table ke andar har rule ko **route** kehte hain. Ek route mein destination network aur target hota hai.
+
+Example:
+
+- `10.0.0.0/16 → local`: VPC ke address range ke andar traffic ko VPC ke local network route par bhejo.
+- `0.0.0.0/0 → Internet Gateway`: IPv4 ke baaki destinations ke liye Internet Gateway ka use karo, if this route table is associated with a suitable public subnet.
+- `0.0.0.0/0 → NAT Gateway`: Private subnet ka outbound IPv4 internet traffic NAT Gateway ki taraf bhejo.
+
+#### 4. Practical Example
+
+```text
+Public Subnet Route Table
+--------------------------------
+Destination       Target
+10.0.0.0/16       local
+0.0.0.0/0         Internet Gateway
+
+Private Subnet Route Table
+--------------------------------
+Destination       Target
+10.0.0.0/16       local
+0.0.0.0/0         NAT Gateway
+```
+
+Yeh simplified example hai. `10.0.0.0/16` tumhari VPC range ko represent karta hai. Actual routes tumhare network design aur required connectivity par depend karte hain.
+
+#### 5. How Route Table Works
+
+1. EC2 ya doosra resource network packet bhejta hai.
+2. Subnet se traffic ke liye associated route table mein matching destination routes check hote hain.
+3. AWS destination ke liye most specific matching route choose karta hai.
+4. Route ka target decide karta hai ki traffic local rahega ya kisi gateway/network target ki taraf jayega.
+
+#### 6. Important Points
+
+- Har subnet ek route table ke saath associated hota hai; agar explicit association nahi ho, toh VPC ki main route table apply hoti hai.
+- Route table traffic ka path decide karti hai; woh khud security firewall nahi hai.
+- Security Groups aur Network ACLs traffic filtering ke liye alag mechanisms hain.
+- `0.0.0.0/0` ka matlab all IPv4 destinations hai; IPv6 ke liye `::/0` use hota hai.
+- Internet Gateway route hone ke bawajood public IP/endpoint aur suitable security rules ke bina resource necessarily internet-accessible nahi hota.
+
+---
