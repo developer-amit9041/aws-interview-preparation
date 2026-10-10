@@ -3284,3 +3284,99 @@ Install the presigner package with `npm install @aws-sdk/s3-request-presigner`. 
 - If public access still fails, check the bucket policy, account-level Block Public Access, bucket-level Block Public Access, and any organization-level restrictions.
 
 ---
+
+### Q49. What is a Pre-Signed URL?
+
+#### 1. English Definition
+
+**A pre-signed URL is a time-limited URL that grants temporary permission to perform a specific action on a private S3 object, without requiring the recipient to have AWS credentials.**
+
+#### 2. Hindi Definition
+
+Pre-signed URL ek temporary link hota hai, jiske through user bina AWS credentials ke S3 ki private file ko limited time ke liye upload ya download kar sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein user apni invoice PDF ya profile image download karna chahta hai. Tum bucket ko public nahi karna chahte. Backend user ki permission verify karke S3 ke liye ek pre-signed URL generate karta hai.
+
+Flow:
+
+```text
+User -> Node.js API -> Authentication/Authorization
+                         |
+                         v
+                 Generate Pre-Signed URL
+                         |
+                         v
+User uses temporary URL -> Private S3 Object
+```
+
+URL sirf specified operation (jaise download ya upload) aur expiry time ke liye valid hota hai. **Jiske paas URL hai, woh expiry tak uski permission use kar sakta hai**, isliye ise secret ki tarah treat karo.
+
+#### 4. Practical Example — Generate a Download URL in Node.js
+
+**Install package:**
+
+```bash
+npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
+```
+
+**Generate URL:**
+
+```javascript
+const {
+  S3Client,
+  GetObjectCommand,
+} = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+});
+
+async function createDownloadUrl(key) {
+  const command = new GetObjectCommand({
+    Bucket: process.env.S3_BUCKET_NAME,
+    Key: key,
+  });
+
+  return getSignedUrl(s3, command, {
+    expiresIn: 300, // 5 minutes
+  });
+}
+```
+
+Call `createDownloadUrl('private/invoice.pdf')` from an authenticated and authorized backend route. Return the URL to the authorized user. The SDK uses the configured AWS credentials or the EC2 task/instance role; the backend should not hardcode access keys.
+
+#### 5. Upload Using a Pre-Signed URL
+
+A pre-signed URL can also authorize an upload. For example, a backend can sign a `PutObjectCommand`, then the browser uploads the file directly to S3 using that URL. This reduces the need to send the file bytes through the Node.js server. The upload request must match the signed method and any signed headers.
+
+Typical flow:
+
+```text
+React -> Node.js: request upload URL
+Node.js -> React: temporary pre-signed PUT URL
+React -> S3: upload file directly using URL
+```
+
+The backend should authenticate the user, restrict the bucket/key and operation, set a short expiry, and validate the upload workflow. Configure S3 CORS if browser-based direct uploads require it; CORS does not itself grant S3 permission.
+
+#### 6. Pre-Signed URL vs Public URL
+
+| Pre-Signed URL | Public URL |
+|---|---|
+| Temporary access | Usually accessible whenever public permissions remain enabled |
+| Can work with a private bucket/object | Requires effective public-read access for the object |
+| Grants a specific signed operation | Public read policy generally allows anyone to read matching objects |
+| URL should be kept confidential | Not a secret once intentionally public |
+
+#### 7. Important Points
+
+- `expiresIn: 300` means 300 seconds (5 minutes); actual usability can end sooner if the signing credentials expire or are revoked, or permissions change.
+- A pre-signed URL does not make the object public or change the bucket policy.
+- Anyone who obtains the URL can use it for the signed action until it expires, subject to AWS authorization conditions.
+- Generate URLs only after authenticating the user and checking their access to the specific file.
+- Use short expiration times and avoid logging or exposing URLs unnecessarily.
+
+---
