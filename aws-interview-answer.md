@@ -14172,3 +14172,111 @@ Yahan SNS fan-out karta hai aur SQS har subscriber ke liye messages ko buffer/st
 Amazon SNS and Amazon SQS are both messaging services, but they solve different problems. SNS is a pub/sub service that pushes notifications to multiple subscribers, while SQS is a queue that stores messages for consumers to poll and process. In production systems, SNS is often combined with multiple SQS queues to fan out an event while allowing each service to process it independently and reliably.
 
 ---
+
+### Q188. How do SNS and SQS work together?
+
+#### 1. English Definition
+
+Amazon SNS and SQS work together in a **fan-out architecture**: SNS publishes an event to multiple subscribers, and each subscribed SQS queue stores a copy of the message for its own consumer to process independently.
+
+#### 2. Hindi Definition
+
+SNS aur SQS ko saath use karne par SNS ek event ko multiple SQS queues tak pahunchata hai, aur har SQS queue us message ko store karti hai taaki uska worker independently process kar sake.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo MERN e-commerce app mein customer order place karta hai. Order service SNS topic par `OrderPlaced` event publish karti hai.
+
+1. SNS topic par event publish hota hai.
+2. SNS us event ko subscribed SQS queues tak deliver karta hai.
+3. Invoice queue ka worker invoice generate karta hai.
+4. Inventory queue ka worker stock update karta hai.
+5. Analytics queue ka worker sales metrics update karta hai.
+
+Har queue apni message copy ko independently process karti hai. Agar ek worker down ho, toh doosri queues ka processing zaroori nahi ki ruk jaaye. SQS messages ko buffer kar sakta hai aur consumer failure par visibility timeout ke baad message dobara available ho sakta hai.
+
+#### 4. Practical Architecture
+
+```text
+            MERN / Node.js Order Service
+                       |
+                       | publish OrderPlaced
+                       v
+                    SNS Topic
+                 /      |      \
+                v       v       v
+          Invoice SQS Inventory SQS Analytics SQS
+                |       |       |
+                v       v       v
+             Worker  Worker  Worker
+             invoice  stock   metrics
+```
+
+#### 5. Practical Configuration
+
+**Step 1: Create an SNS topic.**
+
+```bash
+aws sns create-topic --name order-events --region ap-south-1
+```
+
+**Step 2: Create each SQS queue.**
+
+```bash
+aws sqs create-queue --queue-name invoice-queue --region ap-south-1
+aws sqs create-queue --queue-name inventory-queue --region ap-south-1
+aws sqs create-queue --queue-name analytics-queue --region ap-south-1
+```
+
+**Step 3: Subscribe each queue to the SNS topic.**
+
+```bash
+aws sns subscribe \
+  --topic-arn "<SNS_TOPIC_ARN>" \
+  --protocol sqs \
+  --notification-endpoint "<SQS_QUEUE_ARN>" \
+  --region ap-south-1
+```
+
+Repeat the subscription command for each queue. Each SQS queue's resource policy must allow `sqs:SendMessage` from the intended SNS topic; restrict the permission with the topic ARN (and `aws:SourceArn` condition) rather than allowing arbitrary publishers. The application's IAM role also needs `sns:Publish` permission.
+
+**Step 4: Publish an event from Node.js.**
+
+```javascript
+import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
+
+const sns = new SNSClient({ region: "ap-south-1" });
+
+await sns.send(new PublishCommand({
+  TopicArn: process.env.ORDER_TOPIC_ARN,
+  Message: JSON.stringify({
+    event: "OrderPlaced",
+    orderId: "ORD-1001",
+  }),
+}));
+```
+
+Each subscribed queue receives the SNS notification, typically as an SNS envelope containing the published message. If a consumer expects the raw event JSON directly, configure the SQS subscription's `RawMessageDelivery` attribute to `true`.
+
+#### 6. Important Points
+
+- **Fan-out:** Each subscribed SQS queue receives its own message copy.
+- **Independent processing:** Each queue can have separate consumers and scaling.
+- **Permissions:** The queue policy must authorize the SNS topic to send messages.
+- **Retries and DLQ:** Configure SQS redrive policies and DLQs for repeatedly failing consumer messages; SNS delivery retry policies are a separate concern.
+- **Duplicate handling:** Design consumers to be idempotent because duplicate delivery can occur.
+- **Ordering:** If ordering is required, select compatible FIFO SNS/SQS configurations and understand their ordering and deduplication constraints.
+
+#### 7. Summary Table
+
+| Component | Responsibility |
+|---|---|
+| Node.js producer | Publishes the business event |
+| SNS topic | Distributes the event to subscribers |
+| SQS queues | Buffer separate copies for independent services |
+| Consumers/workers | Poll queues and process messages |
+| DLQ | Isolates messages that repeatedly fail processing |
+
+**Interview-ready answer:** SNS and SQS work together to implement fan-out. A producer publishes one event to an SNS topic, which delivers a copy to each subscribed SQS queue. Each queue buffers the message for its own consumer, enabling independent, scalable processing. Correct queue policies, retry/DLQ configuration, and idempotent consumers are important for reliability.
+
+---
