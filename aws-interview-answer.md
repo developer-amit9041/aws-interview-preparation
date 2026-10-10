@@ -5089,3 +5089,67 @@ For example, MongoDB commonly uses TCP `27017`, MySQL uses `3306`, and PostgreSQ
 - NAT Gateway enables outbound connections from private subnets; it does not allow unsolicited inbound internet connections to those private instances.
 
 ---
+
+### Q76. What is a Load Balancer?
+
+#### 1. English Definition
+
+**A load balancer distributes incoming application traffic across multiple healthy servers or targets to improve availability, scalability, and reliability.**
+
+#### 2. Hindi Definition
+
+Load Balancer incoming traffic ko multiple healthy servers ke beech distribute karta hai, jisse application ki availability, scalability aur reliability improve hoti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application par bahut saare users ek saath request bhej rahe hain. Agar saari requests sirf ek backend EC2 instance par aayengi, toh woh overloaded ho sakta hai ya fail bhi ho sakta hai.
+
+Load Balancer ek entry point ki tarah kaam karta hai. Woh incoming requests ko available aur healthy backend servers par forward karta hai. Agar koi server unhealthy ho jaye, toh health checks ke basis par load balancer us server ko traffic bhejna rok sakta hai.
+
+#### 4. Practical Example: MERN Application on AWS
+
+```text
+                 Users
+                   |
+                   v
+       Application Load Balancer
+                   |
+          +--------+--------+
+          |                 |
+          v                 v
+     EC2 Instance 1    EC2 Instance 2
+     Node.js API       Node.js API
+          |                 |
+          +--------+--------+
+                   |
+                   v
+                Database
+```
+
+Example: agar do healthy backend instances hain, load balancer requests ko un instances ke beech distribute kar sakta hai. Exact distribution algorithm aur behavior load balancer type aur configuration par depend karta hai; zaroori nahi ki har situation mein requests exactly 50/50 split hon.
+
+#### 5. Why Do We Use a Load Balancer?
+
+1. **Traffic distribution:** Multiple servers ke beech incoming requests distribute karta hai.
+2. **High availability:** Unhealthy targets ko health checks ke basis par traffic se hata sakta hai.
+3. **Scalability:** More backend instances add karne par unhe target group mein register kiya ja sakta hai.
+4. **Reliability:** Ek backend instance fail ho jaaye toh healthy instances requests serve kar sakte hain.
+5. **TLS termination:** Supported configuration mein HTTPS connection load balancer par terminate ho sakta hai.
+
+#### 6. AWS Load Balancer Types
+
+| Type | Common use |
+|---|---|
+| Application Load Balancer (ALB) | HTTP/HTTPS traffic; host-based and path-based routing |
+| Network Load Balancer (NLB) | Layer 4 TCP/UDP/TLS use cases and very high-performance networking |
+| Gateway Load Balancer (GWLB) | Deploying and scaling virtual network appliances |
+| Classic Load Balancer (CLB) | Legacy load-balancing use cases; generally prefer newer options for new designs |
+
+#### 7. Important Points
+
+- A load balancer does not itself guarantee that the whole application is highly available; backend instances and other dependencies also need resilient design.
+- In AWS, an ALB commonly forwards requests to a target group containing EC2 instances, IP addresses, or supported compute targets.
+- Security Groups should allow backend traffic from the load balancer's Security Group rather than broadly opening application ports to the internet.
+- A load balancer can distribute traffic, but it does not replace database replication, caching, or application-level fault handling.
+
+---
