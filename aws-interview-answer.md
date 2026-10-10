@@ -12626,3 +12626,124 @@ Replace the example instance ID and UTC time range with your actual values.
 **Interview-ready answer:** CloudWatch is used to monitor AWS resources and applications through metrics, logs, dashboards, and alarms. CloudTrail records AWS account activity and API calls, helping with auditing and security investigations. For example, CloudWatch can alert me when EC2 CPU is high, while CloudTrail can help identify who stopped an EC2 instance.
 
 ---
+
+### Q174. How can CloudWatch trigger an alert?
+
+#### 1. English Definition
+
+**Amazon CloudWatch triggers an alert by evaluating a metric or metric expression against a configured alarm threshold. When the alarm enters the ALARM state, it can perform configured actions, such as publishing a notification to an Amazon SNS topic.**
+
+#### 2. Hindi Definition
+
+CloudWatch kisi metric ko configured threshold ke saath compare karta hai. Jab condition meet hoti hai, alarm `ALARM` state mein ja sakta hai aur configured action—jaise SNS ke through email notification—trigger kar sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari EC2 instance ka CPU usage bahut high ho gaya. Tum chahte ho ki CPU 80% se upar continuously rahe toh tumhe email mil jaye.
+
+Iske liye:
+
+1. CloudWatch mein metric select karo, jaise `CPUUtilization`.
+2. Threshold set karo, jaise average CPU > 80%.
+3. Period aur evaluation periods set karo, jaise 5-minute period ke 2 consecutive data points.
+4. Alarm action mein SNS topic select karo.
+5. SNS topic par email subscription confirm karo.
+
+CloudWatch metric ko continuously evaluate karta hai. Condition ke according alarm ki state `OK`, `ALARM`, ya `INSUFFICIENT_DATA` ho sakti hai. Notification tabhi milegi jab relevant alarm action aur destination correctly configured hon.
+
+#### 4. Practical Example
+
+Suppose production EC2 ka CPU 80% se upar do consecutive 5-minute periods tak rehta hai.
+
+- **Metric:** `CPUUtilization`
+- **Condition:** Greater than 80%
+- **Period:** 300 seconds
+- **Evaluation periods:** 2
+- **Action:** Publish to an SNS topic
+- **Result:** Alarm `ALARM` state mein enter karega aur configured SNS notification action execute ho sakta hai.
+
+Threshold example hai; production workload ke hisaab se ise adjust karo.
+
+#### 5. Architecture Diagram — CloudWatch Alert Flow
+
+```text
+          EC2 Instance
+               |
+               v
+     CloudWatch CPU Metric
+               |
+               v
+       CloudWatch Alarm
+       (CPU > 80% for
+        configured periods)
+               |
+               v
+         Alarm = ALARM
+               |
+               v
+          Amazon SNS
+               |
+               v
+       Confirmed Email
+        Subscription
+               |
+               v
+        Email Notification
+```
+
+**Flow:** EC2 metric publish karta hai → CloudWatch alarm threshold evaluate karta hai → condition meet hone par alarm ALARM state mein jaata hai → configured SNS action notification bhejta hai.
+
+#### 6. Practical Command / Configuration
+
+**A. Create an SNS topic**
+
+```bash
+aws sns create-topic --name ec2-alerts
+```
+
+Command output mein returned TopicArn ko note karo.
+
+**B. Subscribe an email address**
+
+```bash
+aws sns subscribe \
+  --topic-arn <SNS_TOPIC_ARN> \
+  --protocol email \
+  --notification-endpoint you@example.com
+```
+
+Email mein aaya confirmation link click karna zaroori hai.
+
+**C. Create a CloudWatch CPU alarm with an SNS action**
+
+```bash
+aws cloudwatch put-metric-alarm \
+  --alarm-name "EC2-High-CPU" \
+  --namespace AWS/EC2 \
+  --metric-name CPUUtilization \
+  --dimensions Name=InstanceId,Value=i-0123456789abcdef0 \
+  --statistic Average \
+  --period 300 \
+  --evaluation-periods 2 \
+  --datapoints-to-alarm 2 \
+  --threshold 80 \
+  --comparison-operator GreaterThanThreshold \
+  --alarm-actions <SNS_TOPIC_ARN>
+```
+
+Replace the instance ID, SNS topic ARN, and email with your actual values. The command creates the alarm; the metric must breach the configured threshold for the alarm to enter ALARM state.
+
+#### 7. Summary Table
+
+| Step | AWS service / setting | Purpose |
+|---|---|---|
+| 1 | CloudWatch Metric | Collect performance data |
+| 2 | Alarm threshold | Define when to alert |
+| 3 | Period and evaluation settings | Decide how long the condition must hold |
+| 4 | Alarm action | Choose the response |
+| 5 | SNS topic and subscription | Deliver email or other supported notifications |
+| 6 | Alarm state | Shows OK, ALARM, or INSUFFICIENT_DATA |
+
+**Interview-ready answer:** CloudWatch triggers an alert using an alarm that evaluates a metric against a configured threshold. For example, I can create an alarm when EC2 CPU utilization exceeds 80% for two consecutive five-minute periods and configure its alarm action to publish to an SNS topic. Once the email subscription is confirmed and the condition is met, SNS sends the notification.
+
+---
