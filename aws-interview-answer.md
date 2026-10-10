@@ -6127,3 +6127,62 @@ Suppose ASG settings are minimum `2`, desired `2`, and maximum `6`. A scaling po
 - Scaling is not always instantaneous; new instances need time to launch and become ready.
 
 ---
+
+### Q93. Scale Up vs Scale Out?
+
+#### 1. English Definition
+
+**Scale Up (vertical scaling) means increasing the capacity of an existing server, while Scale Out (horizontal scaling) means adding more servers or instances to share the workload.**
+
+#### 2. Hindi Definition
+
+Scale Up ka matlab existing server ki capacity badhana hai, jaise CPU ya RAM increase karna. Scale Out ka matlab workload handle karne ke liye additional servers ya EC2 instances add karna hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application ek EC2 instance par chal rahi hai aur traffic badhne ki wajah se server slow ho raha hai. Capacity badhane ke do common tareeke hain:
+
+- **Scale Up:** Existing EC2 instance ko zyada CPU aur RAM wale larger instance type par move karna.
+- **Scale Out:** Application ko multiple EC2 instances par run karna, taaki workload share ho sake. AWS mein Auto Scaling Group additional instances launch kar sakta hai.
+
+#### 4. Practical Example
+
+```text
+SCALE UP (Vertical Scaling)
+Before:  EC2 t3.small (smaller CPU/RAM)
+                  |
+                  v
+After:   EC2 t3.large (more CPU/RAM)
+         One larger server
+
+SCALE OUT (Horizontal Scaling)
+Before:  EC2 #1
+                  |
+                  v
+After:   EC2 #1 + EC2 #2 + EC2 #3
+         Multiple servers share workload
+```
+
+MERN production example: ALB incoming requests ko multiple Node.js EC2 instances par route karta hai, aur Auto Scaling Group demand ke according instances add ya remove kar sakta hai. Yeh Scale Out ka example hai.
+
+#### 5. Difference Table
+
+| Basis | Scale Up | Scale Out |
+|---|---|---|
+| Meaning | Existing server ki capacity increase karna | More servers/instances add karna |
+| Also called | Vertical scaling | Horizontal scaling |
+| Example | Smaller EC2 instance se larger instance type par jaana | 1 EC2 se 3 EC2 instances tak jaana |
+| Application changes | Often simpler, though maintenance or restart may be needed | Application ko multiple instances ke across work karna chahiye; shared state/session handling may be needed |
+| Availability | Single server bottleneck ya failure risk reh sakta hai | Multiple instances ke saath availability improve ho sakti hai if architecture and health checks are configured correctly |
+| Limit | Instance types ki capacity limits hoti hain | Service quotas, architecture, and cost limits apply |
+| AWS example | EC2 instance type change karna | EC2 Auto Scaling Group ke through instances add karna |
+
+#### 6. Important Points
+
+- Scale Up = **bigger server**; Scale Out = **more servers**.
+- EC2 Auto Scaling Group commonly horizontal scaling ke liye use hota hai.
+- Scale Out ke liye ALB jaise load balancer useful hota hai, taaki requests multiple targets par distribute ho sakein.
+- Multiple instances par run karte waqt sessions, uploaded files, and other shared state ko carefully manage karna hota hai. Shared storage or managed services may be appropriate depending on the application.
+- Dono approaches ek architecture mein saath bhi use ho sakti hain.
+
+---
