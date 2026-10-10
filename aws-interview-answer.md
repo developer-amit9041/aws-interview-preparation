@@ -17032,3 +17032,131 @@ Suppose a Node.js developer pushes a change to GitHub. The pipeline obtains the 
 **Interview-ready answer:** AWS CodePipeline works by connecting stages such as Source, Build, optional Approval, and Deploy. When a configured source change triggers the pipeline, it passes source and artifacts between actions, invokes services such as CodeBuild for testing and building, and runs a configured deployment action. This automates software releases and provides visibility into each stage's status.
 
 ---
+
+### Q219. GitHub + AWS CI/CD kaise configure karoge?
+
+#### 1. English Definition
+
+GitHub + AWS CI/CD is configured by connecting a GitHub repository to an automated workflow that validates code, builds release artifacts or container images, and deploys them to AWS when configured conditions are met.
+
+#### 2. Hindi Definition
+
+GitHub + AWS CI/CD configure karne ke liye GitHub repository ko AWS deployment workflow se connect karte hain, taaki code push hone par automatically tests, build aur deployment ke steps run ho saken.
+
+#### 3. Hinglish Explanation
+
+Bhai, MERN application ke liye do common approaches hain:
+
+- **GitHub Actions + AWS:** Workflow `.github/workflows/` mein YAML file se define karte hain. AWS access ke liye OIDC federation aur least-privilege IAM role use kar sakte hain.
+- **AWS CodePipeline + GitHub:** CodePipeline ko GitHub source provider se connect karte hain, phir CodeBuild aur deployment actions configure karte hain.
+
+Is answer mein GitHub Actions + AWS ka example dekhte hain, kyunki ismein poori pipeline repository ke saath version control mein rehti hai.
+
+#### 4. Typical Docker / ECR Deployment Flow
+
+```text
+Developer pushes code to GitHub
+            |
+            v
+GitHub Actions workflow
+  - Checkout source
+  - Install dependencies and test
+  - Authenticate to AWS using OIDC
+            |
+            v
+Build Docker image
+            |
+            v
+Push image to Amazon ECR
+            |
+            v
+Deploy to ECS or EKS
+            |
+            v
+Verify rollout and application health
+```
+
+#### 5. Configure GitHub OIDC Access to AWS
+
+1. In AWS IAM, create an OIDC identity provider for `https://token.actions.githubusercontent.com` if your account does not already have one.
+2. Create an IAM role whose trust policy restricts access to your exact GitHub organization/user and repository, and preferably the intended branch or GitHub Environment.
+3. Give the role only the permissions needed for the task, such as pushing to one ECR repository and the specific deployment operations.
+4. In GitHub Actions, grant `id-token: write` and `contents: read` permissions. Use `aws-actions/configure-aws-credentials` to assume the role.
+
+OIDC avoids storing long-lived AWS access keys as GitHub secrets. Do not use a broad trust policy that lets arbitrary repositories assume the role.
+
+#### 6. Practical GitHub Actions Example: Test, Build, and Push to ECR
+
+Create `.github/workflows/deploy.yml`. Replace the placeholders with your AWS account ID, region, ECR repository, and IAM role ARN. The role must trust this repository and branch and have the required ECR permissions.
+
+```yaml
+name: Node API CI/CD
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install and test
+        run: |
+          npm ci
+          npm test --if-present
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/<GITHUB_ACTIONS_ROLE>
+          aws-region: ap-south-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: node-api
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+```
+
+This example tests the Node.js app and pushes an image to ECR. It does not yet deploy the image to ECS or EKS. Add a deployment job or action with appropriate permissions, and pass the immutable image tag (`github.sha`) to that stage. Pin third-party actions to reviewed commit SHAs according to your organization's supply-chain security policy.
+
+#### 7. Deploy to ECS or EKS
+
+- **ECS:** Add a deployment step that updates the ECS task definition to use the newly pushed ECR image and deploys the service. Grant only the required ECS and `iam:PassRole` permissions.
+- **EKS:** Configure secure cluster access and use a suitable deployment tool/action to update Kubernetes manifests or Helm values to the new image tag. The role and Kubernetes authorization must permit only the required operations.
+
+For production, consider a GitHub Environment with required reviewers, branch protection, image scanning, health checks, rollback strategy, and separate roles for staging and production.
+
+#### 8. Summary Table
+
+| Step | Tool / Service | Purpose |
+|---|---|---|
+| Source control | GitHub | Stores code and workflow files |
+| CI | GitHub Actions | Runs linting, tests, and build jobs |
+| AWS authentication | GitHub OIDC + IAM role | Temporary, scoped AWS credentials |
+| Image registry | Amazon ECR | Stores Docker images |
+| Deployment | ECS or EKS tooling | Releases the image to the application environment |
+
+**Interview-ready answer:** I would configure a GitHub Actions workflow triggered by pushes or pull requests, run tests, and authenticate to AWS through GitHub OIDC and a least-privilege IAM role instead of long-lived access keys. The workflow would build and tag a Docker image, push it to Amazon ECR, and then deploy that exact image to ECS or EKS using a restricted deployment step. For production, I would add approvals, secrets management, image scanning, health checks, and rollback controls.
+
+---
