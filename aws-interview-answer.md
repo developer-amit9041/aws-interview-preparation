@@ -7224,3 +7224,75 @@ Suppose your Node.js backend needs a relational database for users, products, or
 - Select based on engine compatibility, workload, high-availability requirements, operational needs, and budget.
 
 ---
+
+## 8. DynamoDB
+
+### Q111. What is DynamoDB?
+
+#### 1. English Definition
+
+**Amazon DynamoDB is a fully managed, serverless NoSQL database service that provides key-value and document data models with automatic scaling options and low-latency performance at scale.**
+
+#### 2. Hindi Definition
+
+Amazon DynamoDB AWS ki fully managed, serverless NoSQL database service hai. Ye key-value aur document type data store kar sakti hai aur large-scale applications ke liye low-latency access provide karne ke liye designed hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, DynamoDB ko AWS ki NoSQL database service samjho. MySQL ya PostgreSQL ki tarah tables, rows aur relational joins par based design ke bajay, DynamoDB tables mein items aur attributes store karta hai.
+
+AWS infrastructure management ka kaafi hissa handle karta hai, isliye tumhe database server khud provision aur maintain karne ki zaroorat nahi hoti. DynamoDB automatically scale karne ke options deta hai, aur use cases jaise user sessions, shopping carts, gaming data, event metadata aur high-traffic key-based lookups ke liye useful ho sakta hai.
+
+DynamoDB mein data model aur primary key pehle achhe se design karna important hai, kyunki queries commonly partition key aur optional sort key ke around plan hoti hain.
+
+#### 4. Practical Example
+
+Suppose tumhari Node.js e-commerce application shopping cart items store karti hai. DynamoDB table mein `userId` partition key aur `itemId` sort key rakh sakte ho.
+
+```text
+Table: ShoppingCart
+
+Partition key: userId
+Sort key:      itemId
+Attributes:    productId, quantity, updatedAt
+
+Example item:
+{
+  "userId": "user-101",
+  "itemId": "product-500",
+  "productId": "product-500",
+  "quantity": 2,
+  "updatedAt": "2026-10-10T12:00:00Z"
+}
+```
+
+Node.js AWS SDK ke through item read/write kar sakta hai. Actual table key design tumhari query patterns par depend karega.
+
+#### 5. DynamoDB vs Relational Database
+
+| Basis | DynamoDB | Relational database (e.g. RDS MySQL) |
+|---|---|---|
+| Database type | NoSQL key-value/document | SQL relational |
+| Data structure | Items and attributes | Tables, rows, columns, relationships |
+| Schema | Flexible item attributes; key schema required | Defined table schema and relational constraints |
+| Query design | Key-based access patterns; indexes for other patterns | SQL queries, joins, indexes |
+| Operations | AWS-managed, serverless service | Managed with RDS, but engine/instance choices vary |
+| Common use | High-scale key-value lookups, sessions, carts | Relational data, transactions and complex joins |
+
+#### 6. Benefits of DynamoDB
+
+- **Managed/serverless:** AWS manages the underlying database infrastructure.
+- **Low latency at scale:** Designed for consistent, low-latency key-value access when appropriately modeled.
+- **Scaling options:** Supports on-demand and provisioned capacity modes.
+- **High availability:** Designed for durability and availability across multiple Availability Zones.
+- **Flexible data model:** Items can have different non-key attributes.
+
+#### 7. Important Points
+
+- DynamoDB is NoSQL; it is not a drop-in replacement for MongoDB, MySQL, or PostgreSQL.
+- Design partition keys and sort keys around expected access patterns to avoid hot partitions and inefficient queries.
+- DynamoDB supports secondary indexes, transactions, backups, point-in-time recovery, and encryption features; specific behavior and costs depend on configuration.
+- On-demand does not mean unlimited or free; usage is billed and service quotas still apply.
+- For MERN applications, choose DynamoDB only when its access patterns and data model fit the application requirements.
+
+---
