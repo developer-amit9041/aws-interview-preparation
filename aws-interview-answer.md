@@ -7947,3 +7947,72 @@ Is example mein Lambda order change ke event par kaam karti hai. Tumhe sirf is b
 - For long-running or OS-level workloads, compare Lambda with EC2, ECS, or AWS Fargate before choosing.
 
 ---
+
+### Q124. Lambda vs EC2?
+
+#### 1. English Definition
+
+**AWS Lambda is a serverless compute service that runs code in response to events, while Amazon EC2 provides virtual servers that you can configure and manage to run applications and workloads.**
+
+#### 2. Hindi Definition
+
+AWS Lambda ek serverless service hai jahan event aane par code execute hota hai aur underlying infrastructure AWS manage karta hai. EC2 ek virtual server hai jise tum configure karke apni application continuously ya apni zaroorat ke mutabik chala sakte ho.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application hai.
+
+**EC2 mein:** tum virtual machine launch karte ho, Node.js install karte ho, app deploy karte ho, aur PM2/Nginx jaise tools configure kar sakte ho. Server ka OS, updates, security configuration aur capacity ka kaafi management tumhari responsibility hota hai.
+
+**Lambda mein:** tum function ka code deploy karte ho aur event ya invocation par execute hota hai. AWS underlying servers manage karta hai. Tumhe OS manage nahi karna padta, lekin runtime, IAM permissions, memory, timeout aur concurrency jaise settings configure karni hoti hain.
+
+Simple way:
+- Long-running Express API server ya full-control workload ke liye EC2 suitable ho sakta hai.
+- Event ke baad image process karna, scheduled job run karna, ya API Gateway ke through individual function chalana ho toh Lambda suitable ho sakti hai.
+
+#### 4. Practical Example
+
+**EC2 deployment:**
+
+```text
+Users -> Nginx -> Node.js/Express app on EC2 -> Database
+```
+
+EC2 instance par Express server running rehta hai aur requests accept karta hai.
+
+**Lambda deployment:**
+
+```text
+API Gateway request / S3 upload / DynamoDB event
+                       |
+                       v
+                 AWS Lambda
+                       |
+                       v
+              Run function code
+```
+
+Lambda invocation ke response mein result de sakti hai ya background task perform kar sakti hai. HTTP API ke liye aam taur par API Gateway ya supported HTTP integration configure ki jaati hai.
+
+#### 5. Lambda vs EC2
+
+| Basis | AWS Lambda | Amazon EC2 |
+|---|---|---|
+| Compute model | Serverless functions | Virtual machines |
+| Server/OS management | AWS underlying infrastructure manage karta hai | Customer OS aur instance configuration manage karta hai |
+| Execution | Invocation/event-driven | Long-running services aur varied workloads chala sakta hai |
+| Scaling | Managed automatic scaling, within limits | Manual ya Auto Scaling Group se |
+| Billing | Requests aur compute duration ke basis par | Instance usage aur attached resources ke basis par |
+| Runtime duration | Per-invocation execution limits hoti hain | Instance chalne tak processes run kar sakte hain |
+| Control | OS-level control nahi | OS-level configuration ka zyada control |
+| Good fit | Event-driven tasks, lightweight APIs, background processing | Persistent APIs, custom software, long-running workloads |
+
+#### 6. Important Points
+
+- Lambda aur EC2 mein se koi ek har situation mein better nahi hota; workload ke basis par choose karo.
+- Lambda server management kam karti hai, lekin function configuration, IAM, logs, retries aur limits ko manage karna hota hai.
+- EC2 zyada OS-level control aur long-running process support deta hai, lekin maintenance aur scaling ki responsibility zyada hoti hai.
+- Cost traffic pattern, execution duration, instance size, uptime aur supporting services par depend karti hai.
+- Hybrid architecture possible hai: main application EC2/ECS par aur event-driven background tasks Lambda par.
+
+---
