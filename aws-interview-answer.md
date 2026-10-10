@@ -5517,3 +5517,68 @@ Exact options load balancer type aur target group configuration par depend karte
 - Health checks help with traffic routing, but they do not automatically repair a failed instance. Auto Scaling or another recovery mechanism may be needed.
 
 ---
+
+### Q83. How does ALB route requests?
+
+#### 1. English Definition
+
+**An Application Load Balancer (ALB) routes incoming HTTP/HTTPS requests to target groups based on listener rules, such as hostnames, URL paths, HTTP headers, or query strings, depending on the configured conditions.**
+
+#### 2. Hindi Definition
+
+ALB incoming HTTP/HTTPS requests ko listener rules ke basis par appropriate Target Group tak forward karta hai. Rules hostname, URL path aur supported HTTP request details par based ho sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, ALB request receive karne ke baad sirf random server choose nahi karta. Sabse pehle request listener par aati hai, phir ALB configured listener rules check karta hai. Jo rule match hota hai, uske action ke according request appropriate Target Group ko forward ho sakti hai. Agar koi rule match nahi karta, toh listener ka default action apply hota hai.
+
+Common routing conditions:
+
+- **Path-based routing:** `/api/*` ko API Target Group par bhejna.
+- **Host-based routing:** `admin.example.com` aur `shop.example.com` ko alag Target Groups par bhejna.
+- **Other supported conditions:** HTTP headers, query strings, source IP, and HTTP method, as supported by ALB rule conditions.
+
+#### 4. Practical Example: MERN Application
+
+```text
+Users
+  |
+  v
+ALB Listener: HTTPS : 443
+  |
+  +-- Path /api/* --------> API Target Group
+  |                         +--> Node.js EC2-1
+  |                         +--> Node.js EC2-2
+  |
+  +-- Host admin.example.com -> Admin Target Group
+  |                             +--> Admin App targets
+  |
+  +-- No rule matches ------> Default action
+```
+
+Example requests:
+
+- `https://example.com/api/users` → API Target Group
+- `https://admin.example.com/` → Admin Target Group, if that host rule is configured
+- A request that matches no custom rule → Listener's default action
+
+ALB chooses healthy registered targets within the selected Target Group according to its routing behavior and configuration.
+
+#### 5. Request Routing Steps
+
+1. User sends an HTTP/HTTPS request to the ALB DNS name or configured domain.
+2. The ALB listener accepts the connection on its configured protocol and port, such as HTTPS `443`.
+3. ALB evaluates listener rules in priority order.
+4. A matching rule performs its configured action, such as forwarding to a Target Group, redirecting, or returning a fixed response.
+5. If forwarding, ALB selects an eligible healthy target in that Target Group and sends the request to it.
+6. If no custom rule matches, the listener's default action is used.
+
+#### 6. Important Points
+
+- The listener accepts traffic; listener rules decide how matching requests are handled.
+- A Target Group identifies the backend targets that can receive forwarded traffic.
+- Path-based routing and host-based routing are common ALB features for microservices and multiple web applications.
+- Health checks help ALB determine target health, but do not themselves define which Target Group a request belongs to.
+- Configure backend Security Groups to permit application traffic from the ALB Security Group.
+
+---
