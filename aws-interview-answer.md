@@ -9542,3 +9542,93 @@ If browser requests include cookies or other browser credentials:
 | Security note | CORS is not authentication or authorization |
 
 ---
+
+## 11. CloudFront ⭐⭐
+
+### Q144. What is CloudFront?
+
+#### 1. English Definition
+
+**Amazon CloudFront is a content delivery network (CDN) service that securely delivers websites, APIs, videos, and other content to users with low latency by caching content at edge locations around the world.**
+
+#### 2. Hindi Definition
+
+Amazon CloudFront AWS ki CDN service hai jo websites, APIs, videos aur doosre content ko duniya bhar ke edge locations se deliver karti hai. Content ko user ke kareeb cache karne se latency kam ho sakti hai aur origin server par load bhi kam pad sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application AWS par deployed hai aur users India, USA aur Europe se website open karte hain.
+
+Agar har image, CSS, JavaScript file ya doosra cacheable content origin server se hi download ho, toh users ko extra latency mil sakti hai aur origin par load badh sakta hai.
+
+CloudFront ek **CDN (Content Delivery Network)** hai. Yeh content ko edge locations par cache kar sakta hai. Jab user request karta hai, CloudFront cached content serve karne ki koshish karta hai. Cache miss hone par, configuration ke mutabiq, request origin—jaise S3 bucket, load balancer, ya web server—tak ja sakti hai.
+
+**Simple words mein:** CloudFront content ko users ke geographically closer locations se deliver karke website ko faster banane mein help karta hai.
+
+#### 4. Practical Example — MERN Application
+
+Suppose tumhari application mein:
+
+- React frontend ke static files S3 bucket mein hain.
+- Node.js/Express API ALB ya API Gateway ke through accessible hai.
+- Product images S3 mein stored hain.
+
+CloudFront ko frontend assets aur images ke liye configure kar sakte ho. API traffic ko bhi CloudFront ke through route kar sakte ho if the behavior, caching, security, and origin configuration suit the application.
+
+```text
+          Users
+            |
+            v
+       CloudFront CDN
+            |
+      +-----+------+
+      |            |
+      v            v
+   S3 origin    API origin
+ React assets   ALB / API Gateway
+ images         Node.js backend
+```
+
+**Request flow:**
+
+1. User website ya asset request karta hai.
+2. Request CloudFront ke edge location par reach karti hai.
+3. Cached aur still-valid content available ho, toh CloudFront wahi serve kar sakta hai.
+4. Cache miss ya revalidation ki zaroorat ho, toh CloudFront configured origin se content fetch karta hai.
+5. Content user ko return hota hai aur caching policy ke according cache ho sakta hai.
+
+#### 5. Important CloudFront Terms
+
+| Term | Meaning |
+|---|---|
+| CDN | Content Delivery Network |
+| Edge location | CloudFront ka location jahan requests handle aur content cache ho sakta hai |
+| Origin | Original source, jaise S3, ALB, ya web server |
+| Cache hit | Requested content cache se serve hota hai |
+| Cache miss | Content cache mein available nahi, origin se fetch karna pad sakta hai |
+| Distribution | CloudFront configuration that defines origins, behaviors, and delivery settings |
+| Cache policy | Decide karti hai cache key aur TTL-related behavior |
+| Origin access control (OAC) | Supported S3 origins ko private rakhne aur CloudFront ko authorized access dene ka mechanism |
+
+#### 6. Benefits of CloudFront
+
+- **Low latency:** Users ko content nearby edge locations se mil sakta hai.
+- **Reduced origin load:** Cache hits se origin requests kam ho sakti hain.
+- **Scalability:** Large-scale content delivery handle karne mein help karta hai.
+- **Security:** HTTPS/TLS, AWS WAF integration, and supported access controls use kar sakte ho.
+- **Global delivery:** Users ko multiple geographic regions mein content deliver kar sakta hai.
+- **Flexible origins:** S3, load balancers, and custom HTTP origins jaise supported origins configure kar sakte ho.
+
+#### 7. Important Interview Points
+
+- CloudFront is a CDN, not a database or a replacement for your backend.
+- Static assets are common caching candidates; dynamic API responses need carefully designed cache policies.
+- Do not cache personalized or sensitive responses publicly unless the cache key and access design explicitly make it safe.
+- HTTPS, origin access restrictions, and AWS WAF can add security layers, but must be configured correctly.
+- CloudFront caching behavior depends on cache policies, origin headers, TTLs, and invalidations.
+
+#### 8. Summary
+
+Amazon CloudFront is AWS's CDN. It caches and delivers content through edge locations to reduce latency, lower origin load, and improve content delivery performance for websites and APIs.
+
+---
