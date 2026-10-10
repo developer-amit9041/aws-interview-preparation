@@ -16557,3 +16557,108 @@ Access the API through the address shown in `EXTERNAL-IP` or the provisioned hos
 **Interview-ready answer:** To deploy a Node.js application on EKS, I first containerize it with Docker and push the image to Amazon ECR. Then I configure `kubectl` for the EKS cluster and create a Kubernetes Deployment that runs the image in Pods. I expose the Pods through a Service or a load balancer, then verify the rollout, Pod health, and external connectivity. For production, I also configure secrets, health checks, resource limits, IAM permissions, and monitoring.
 
 ---
+
+### Q213. What is CI/CD?
+
+#### 1. English Definition
+
+CI/CD stands for Continuous Integration and Continuous Delivery or Continuous Deployment. CI automatically builds and tests code changes, while CD automates preparing releases or deploying validated changes to target environments.
+
+#### 2. Hindi Definition
+
+CI/CD ek software development practice hai jisme code changes ko automatically integrate, test, build aur release/deploy kiya jata hai. Isse manual work kam hota hai aur software ko reliably aur frequently deliver karna easier hota hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tum MERN application par kaam kar rahe ho aur tum GitHub par code push karte ho.
+
+- **CI (Continuous Integration):** Code push ya pull request par pipeline automatically code install/build/test karti hai. Agar test fail hota hai, team ko jaldi pata chal jata hai.
+- **CD (Continuous Delivery):** Successful build aur tests ke baad application release ke liye ready hoti hai; production deployment aksar approval ke baad hota hai.
+- **Continuous Deployment:** Har change jo pipeline ke required checks pass karta hai, automatically production mein deploy ho sakta hai.
+
+Easy way to remember: **CI = integrate and test code automatically; CD = deliver or deploy it automatically.**
+
+#### 4. Practical MERN Example
+
+Suppose your Node.js API is stored in GitHub and you use GitHub Actions for CI/CD.
+
+```text
+Developer pushes code to GitHub
+          |
+          v
+CI pipeline: install dependencies
+          |
+          v
+Run linting and automated tests
+          |
+          v
+Build Docker image
+          |
+          v
+Push image to Amazon ECR
+          |
+          v
+Deploy to EKS / ECS
+          |
+          v
+Verify deployment and monitor
+```
+
+This is a typical pipeline; exact stages depend on the project. Production deployment can require a manual approval gate, especially in a Continuous Delivery workflow.
+
+#### 5. Practical GitHub Actions Example
+
+Create `.github/workflows/ci.yml`:
+
+```yaml
+name: Node.js CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test --if-present
+```
+
+This example demonstrates CI checks. To add CD, extend the workflow with secure AWS authentication (prefer OIDC and least-privilege IAM), build and push the Docker image to ECR, and deploy to ECS or EKS. Do not store AWS access keys or application secrets directly in the workflow file.
+
+#### 6. Benefits of CI/CD
+
+- Detects bugs earlier through automated tests.
+- Reduces repetitive manual build and deployment steps.
+- Makes releases more consistent and repeatable.
+- Enables smaller, more frequent releases.
+- Improves feedback for developers and teams.
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| CI | Automatically integrate, build, and test code changes |
+| Continuous Delivery | Keep validated changes ready for release; production release may need approval |
+| Continuous Deployment | Automatically deploy every change that passes the required pipeline checks |
+| Pipeline | Automated sequence of build, test, release, and deployment jobs |
+| Common tools | GitHub Actions, GitLab CI/CD, Jenkins, AWS CodePipeline |
+
+**Interview-ready answer:** CI/CD stands for Continuous Integration and Continuous Delivery or Continuous Deployment. CI automatically builds and tests code whenever changes are integrated. Continuous Delivery keeps validated changes ready for release, while Continuous Deployment automatically releases changes that pass the required checks. CI/CD improves release speed, consistency, and software quality by automating repetitive steps.
+
+---
