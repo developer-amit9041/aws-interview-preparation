@@ -7626,3 +7626,56 @@ Iska matlab table ko configured throughput limits ke andar read aur write reques
 - Predictable traffic ke liye provisioned mode cost-effective ho sakta hai; unpredictable traffic ke liye on-demand mode simpler ho sakta hai.
 
 ---
+
+### Q118. What is On-Demand Capacity?
+
+#### 1. English Definition
+
+**On-Demand Capacity is a DynamoDB throughput mode in which AWS automatically accommodates read and write traffic without requiring you to specify RCUs and WCUs in advance, and you pay for the read and write requests your application makes.**
+
+#### 2. Hindi Definition
+
+DynamoDB On-Demand Capacity mein humein pehle se RCUs aur WCUs set karne ki zaroorat nahi hoti. AWS traffic ke hisaab se read aur write requests ko automatically handle karta hai, aur billing requests ke usage ke basis par hoti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application mein DynamoDB table hai. Kabhi 100 users aate hain aur kabhi achanak 10,000 users aa jaate hain. Agar traffic ka accurate estimate nahi hai, toh On-Demand mode convenient ho sakta hai.
+
+Is mode mein tum manually `Read capacity = 10 RCUs` ya `Write capacity = 5 WCUs` configure nahi karte. DynamoDB request traffic ke according capacity manage karta hai, aur tumse read/write requests ke usage ke hisaab se charge liya jata hai.
+
+Dhyan rahe: On-Demand ka matlab unlimited traffic ya zero throttling guarantee nahi hai. DynamoDB ke service quotas, table ki traffic history, aur sudden traffic spikes ke behavior ko phir bhi consider karna chahiye.
+
+#### 4. Practical Example
+
+```text
+MERN application
+       |
+       v
+DynamoDB table (On-Demand mode)
+       |
+       +-- 100 read requests  -> usage-based billing
+       +-- 20 write requests  -> usage-based billing
+       +-- traffic increases  -> DynamoDB automatically adapts
+```
+
+Tumhe pehle se read/write throughput numbers select karne ki zaroorat nahi hoti. Agar application ka traffic unpredictable hai, toh yeh setup start karna aur manage karna aasaan bana sakta hai.
+
+#### 5. On-Demand vs Provisioned Capacity
+
+| Basis | On-Demand | Provisioned |
+|---|---|---|
+| Capacity setup | RCUs/WCUs pehle se specify nahi karte | RCUs/WCUs configure karte ho |
+| Billing | Read/write request usage ke basis par | Provisioned throughput ke basis par |
+| Best for | Unpredictable ya variable traffic | Predictable, steady traffic |
+| Capacity management | DynamoDB automatically adjusts | Manual changes ya Auto Scaling |
+| Cost planning | Variable request volume ke saath cost vary karti hai | Steady usage mein cost optimize karna easier ho sakta hai |
+
+#### 6. Important Points
+
+- On-Demand mode mein RCUs/WCUs manually provision nahi karne padte.
+- Billing read/write request usage par based hoti hai; item size aur request type cost ko affect karte hain.
+- Sudden traffic spikes, service quotas, aur table ki previous traffic levels relevant ho sakti hain; throttling impossible nahi hai.
+- Unpredictable workloads ya nayi applications ke liye yeh convenient option ho sakta hai.
+- Stable, predictable high traffic ke liye Provisioned Capacity kabhi-kabhi zyada cost-effective ho sakti hai; actual choice workload aur pricing par depend karti hai.
+
+---
