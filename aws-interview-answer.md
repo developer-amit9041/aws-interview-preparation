@@ -10993,3 +10993,116 @@ Route 53 console mein:
 **Remember:** A Record hostname ko IPv4 address se map karta hai; CNAME hostname ko doosre hostname se map karta hai.
 
 ---
+
+### Q159. A Record vs CNAME?
+
+#### 1. English Definition
+
+- **A Record:** Maps a hostname directly to an IPv4 address.
+- **CNAME Record:** Maps one hostname to another hostname (canonical name).
+
+#### 2. Hindi Definition
+
+- **A Record:** Domain ya hostname ko directly IPv4 address se connect karta hai.
+- **CNAME Record:** Ek hostname ko doosre hostname se connect karta hai; destination hostname hota hai, direct IP address nahi.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application ka API domain `api.myapp.com` hai.
+
+**A Record example:**
+
+```text
+api.myapp.com -> 203.0.113.10
+```
+
+Yahan DNS directly IPv4 address return karta hai.
+
+**CNAME example:**
+
+```text
+www.myapp.com -> myapp.com
+```
+
+Yahan DNS pehle target hostname `myapp.com` batata hai. Resolver phir us hostname ko resolve karke address find karta hai.
+
+Main difference yaad rakho: **A = hostname to IPv4; CNAME = hostname to hostname.**
+
+#### 4. Practical Example
+
+| Feature | A Record | CNAME Record |
+|---|---|---|
+| Maps to | IPv4 address | Another hostname |
+| Example | `api.myapp.com → 203.0.113.10` | `www.myapp.com → myapp.com` |
+| Target value | IPv4 address | Hostname/domain name |
+| IPv6 support | No; use AAAA | Can point to a hostname that resolves to IPv6 or IPv4 |
+| Common use | Point a name to an IPv4 endpoint | Point a subdomain to another hostname |
+| Root/apex domain | Can be used, subject to DNS setup | Standard CNAME generally cannot coexist with other records at the zone apex |
+| AWS Route 53 | A record can contain an IPv4 address or be an Alias record | CNAME can target another hostname |
+
+**AWS example:** Agar `www.myapp.com` ko CloudFront hostname par point karna hai, to subdomain ke liye CNAME use kar sakte ho. Root domain `myapp.com` ko CloudFront par point karne ke liye Route 53 A-type Alias record commonly use hota hai.
+
+The IP `203.0.113.10` above is reserved for documentation examples, not a real production endpoint.
+
+#### 5. Architecture Diagram — Difference
+
+```text
+A Record
+api.myapp.com
+      |
+      v
+IPv4 address (203.0.113.10)
+
+
+CNAME Record
+www.myapp.com
+      |
+      v
+myapp.com
+      |
+      v
+Resolve target hostname to its address
+```
+
+**Request flow:** A Record directly IPv4 address deta hai. CNAME target hostname deta hai, jise DNS resolver ko aage resolve karna padta hai.
+
+#### 6. Practical Command / Configuration
+
+A Record query:
+
+```bash
+dig api.myapp.com A
+```
+
+CNAME query:
+
+```bash
+dig www.myapp.com CNAME
+```
+
+Windows par:
+
+```powershell
+nslookup -type=A api.myapp.com
+nslookup -type=CNAME www.myapp.com
+```
+
+Route 53 records inspect karne ke liye:
+
+```bash
+aws route53 list-resource-record-sets \
+  --hosted-zone-id YOUR_HOSTED_ZONE_ID
+```
+
+#### 7. Summary Table
+
+| Interview point | A Record | CNAME Record |
+|---|---|---|
+| Mapping | Hostname → IPv4 | Hostname → hostname |
+| Direct IP returned by record? | Yes | No |
+| Typical use | IPv4 endpoint | Alias-like hostname mapping |
+| Root domain in Route 53 | A or A Alias, depending on target | Use Alias for supported root-domain targets instead of standard CNAME |
+
+**Interview answer:** An A record maps a hostname to an IPv4 address, whereas a CNAME record maps one hostname to another hostname. In Route 53, an Alias record is often used to point a root domain to supported AWS resources such as CloudFront.
+
+---
