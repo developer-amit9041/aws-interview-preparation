@@ -9636,3 +9636,100 @@ Replace `YOUR_DISTRIBUTION_ID` with your actual CloudFront distribution ID. Comm
 **Remember:** CloudFront CDN hai, backend ya database ka replacement nahi. Yeh content delivery ko faster banane, origin load reduce karne, aur global users ko content serve karne mein help karta hai.
 
 ---
+
+### Q145. Why use CloudFront?
+
+#### 1. English Definition
+
+**Amazon CloudFront is used to deliver content with low latency, reduce load on origin servers through caching, improve global content delivery, and add security features such as HTTPS and AWS WAF integration.**
+
+#### 2. Hindi Definition
+
+CloudFront ka use website aur application ke content ko users tak jaldi pahunchane, origin server ka load kam karne, aur content delivery ki performance aur security improve karne ke liye kiya jata hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application AWS par hosted hai aur users India, USA aur Europe se access karte hain.
+
+CloudFront use karne ke main reasons:
+
+- **Faster delivery:** Cacheable content user ke kareeb edge location se mil sakta hai.
+- **Less origin traffic:** Cache hit hone par har request origin server tak nahi jaati.
+- **Better global experience:** Different regions ke users ko content deliver karne mein help milti hai.
+- **Scalability:** Large amounts of static content serve karne mein help karta hai.
+- **Security options:** HTTPS/TLS aur AWS WAF integration jaise options use kar sakte ho.
+
+Dhyan rahe: CloudFront automatically har request ko cache nahi karta. Cache behavior aur policies ko content ke according configure karna hota hai.
+
+#### 4. Practical Example
+
+Suppose tumhari e-commerce MERN application mein product images aur React static files S3 bucket mein hain. Agar har user image ko directly S3 origin se fetch kare, toh origin requests aur latency badh sakti hai.
+
+CloudFront ko S3 ke saamne configure karne par cacheable images aur assets edge locations se serve ho sakte hain. Node.js API ko ALB/API Gateway ke through serve kar sakte ho, aur API ko CloudFront ke through route karna ho toh uske behaviors aur caching rules carefully configure karo.
+
+#### 5. Architecture Diagram — Request Flow
+
+```text
+User / Browser
+      |
+      v
+CloudFront Edge Location
+      |
+      v
+Is content cached and valid?
+      |
+   +--+--+
+   |     |
+  Yes    No
+   |     |
+   v     v
+Serve   Fetch from configured origin
+cache   (e.g. S3 / ALB / API origin)
+   |     |
+   |     v
+   |   Response returned to CloudFront
+   |     |
+   +-----+
+      |
+      v
+   User receives response
+```
+
+**Request flow:** User request karta hai → CloudFront cache check karta hai → valid cache hit par content serve hota hai → cache miss par origin se content fetch ho sakta hai → response user ko milta hai.
+
+#### 6. Practical AWS CLI Command / Configuration
+
+CloudFront distributions list karo:
+
+```bash
+aws cloudfront list-distributions
+```
+
+Distribution ki configuration check karo:
+
+```bash
+aws cloudfront get-distribution --id YOUR_DISTRIBUTION_ID
+```
+
+**Configuration checklist:**
+- Static files ke liye appropriate cache policy aur TTL choose karo.
+- Content update hone par TTL expiry ka wait kar sakte ho ya zaroorat par invalidation create kar sakte ho.
+- HTTPS enable karo.
+- Private S3 origin ke liye suitable Origin Access Control (OAC) setup karo.
+- Personalized ya sensitive API responses ko accidentally shared cache mein store mat hone do.
+- AWS CLI commands ke liye configured credentials aur required IAM permissions honi chahiye.
+
+#### 7. Summary Table
+
+| Why use CloudFront? | Benefit |
+|---|---|
+| Low latency | Content edge location se deliver ho sakta hai |
+| Caching | Repeat requests par origin load kam ho sakta hai |
+| Global delivery | Multiple regions ke users ko content serve karne mein help |
+| Scalability | Static content ki large-scale delivery |
+| Security | HTTPS/TLS aur AWS WAF integration options |
+| Origin protection | Suitable private-origin configuration se direct access restrict kar sakte ho |
+
+**Remember:** CloudFront ka main purpose content delivery ko faster banana, cacheable content ke liye origin load reduce karna, aur global users ko better experience dena hai.
+
+---
