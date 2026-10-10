@@ -3533,3 +3533,76 @@ Here, `imageBuffer` represents the file data received by your backend. If bucket
 - Versioning helps recover from accidental overwrites and deletes, but it does not protect against every disaster or malicious action by itself.
 
 ---
+
+### Q52. What is S3 Lifecycle Policy?
+
+#### 1. English Definition
+
+**An S3 Lifecycle Policy is a set of rules that automatically transitions objects between storage classes or expires objects and noncurrent versions according to specified conditions and time periods.**
+
+#### 2. Hindi Definition
+
+S3 Lifecycle Policy rules ka ek set hai jo specified time ya conditions ke according files ko automatically cheaper storage class mein move kar sakta hai, ya eligible files aur old versions ko expire/delete kar sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application S3 mein user uploads, product images aur invoices store karti hai. Kuch files frequently access hoti hain, lekin kuch purani files months tak use nahi hoti. Un files ko manually manage karna mushkil ho sakta hai.
+
+S3 Lifecycle Policy se tum rules set kar sakte ho, jaise:
+
+- 30 days baad eligible objects ko S3 Standard-IA mein transition karna.
+- 90 days baad objects ko Glacier storage class mein move karna, agar retrieval requirements uske liye suitable hon.
+- 365 days baad eligible objects expire karna.
+- Versioning enabled bucket mein old, noncurrent versions ko kuch time baad expire karna.
+
+Exact timings aur storage classes apne access pattern, minimum storage duration, retrieval charges aur retention requirements ke hisaab se choose karo.
+
+#### 4. How to Configure an S3 Lifecycle Rule
+
+1. AWS Console mein **S3** open karo.
+2. Apni bucket select karo.
+3. **Management → Lifecycle rules** open karo.
+4. **Create lifecycle rule** select karo.
+5. Rule ka naam do aur scope select karo: entire bucket ya specific prefix/tags.
+6. Actions configure karo: current versions transition/expiration aur, if needed, noncurrent-version transition/expiration.
+7. Review karke rule create karo.
+
+Example: `archive-uploads` prefix ke objects ko 90 days baad archive storage class mein transition karne ka rule. Pehle verify karo ki archive storage ki retrieval latency aur cost tumhari application ke liye acceptable hain.
+
+#### 5. Example Lifecycle Rule Configuration
+
+```json
+{
+  "Rules": [
+    {
+      "ID": "ExpireTemporaryUploads",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "temporary/"
+      },
+      "Expiration": {
+        "Days": 30
+      }
+    }
+  ]
+}
+```
+
+Yeh example `temporary/` prefix ke eligible objects ko 30 days baad expire karne ke liye rule dikhata hai. Lifecycle expiration asynchronous ho sakti hai; rule create karte hi object turant delete hone ki guarantee nahi hoti. Is rule ko production mein apply karne se pehle confirm karo ki prefix mein koi required data nahi hai.
+
+#### 6. S3 Lifecycle Policy vs S3 Versioning
+
+| S3 Lifecycle Policy | S3 Versioning |
+|---|---|
+| Objects ko transition ya expire karne ke rules automate karti hai | Same object ke multiple versions retain karti hai |
+| Storage cost aur retention manage karne mein help karti hai | Accidental overwrite/deletion se recovery mein help karti hai |
+| Noncurrent versions ko expire karne ke rules bhi bana sakti hai | Versions apne aap expire nahi hote jab tak lifecycle/other action configure na ho |
+
+#### 7. Important Points
+
+- Lifecycle rules can filter by prefix, object tags, or other supported filters.
+- Storage class transition karne se pehle retrieval needs, minimum storage duration and transition/retrieval charges check karo.
+- Versioning-enabled buckets ke liye current-version expiration aur noncurrent-version expiration ka behavior alag hota hai; old versions delete karne ke liye explicit noncurrent-version lifecycle action configure karna pad sakta hai.
+- Lifecycle policies are useful for cost optimization and automated data retention, but expiration rules can permanently remove data; test scope carefully.
+
+---
