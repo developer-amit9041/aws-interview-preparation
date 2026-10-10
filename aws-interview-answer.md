@@ -15062,3 +15062,196 @@ EC2 launch type ke liye task definition mein `requiresCompatibilities` ko `["EC2
 **Interview-ready answer:** ECS Fargate and EC2 launch type both run containers managed by ECS. Fargate is serverless from the user's infrastructure-management perspective: I specify task resources and AWS manages the underlying servers. With EC2 launch type, I manage the EC2 instances, capacity, patching, and scaling. I would choose Fargate to reduce operational overhead, and EC2 when I need more host-level control or want to manage my own compute capacity.
 
 ---
+
+### Q198. How do you deploy a Dockerized Node.js application to ECS?
+
+#### 1. English Definition
+
+Deploying a Dockerized Node.js application to Amazon ECS involves building a Docker image, pushing it to Amazon ECR, creating an ECS task definition, and deploying it through an ECS service using Fargate or EC2 compute.
+
+#### 2. Hindi Definition
+
+Node.js application ko ECS par deploy karne ke liye pehle uski Docker image banate hain, phir image ko ECR par upload karte hain. Uske baad ECS task definition aur service create karke application ko AWS par run karte hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application ka backend Node.js aur Express mein bana hai aur locally port `3000` par run hota hai. ECS + Fargate use karke deploy karne ka typical flow hai:
+
+1. Application ko Dockerize karo.
+2. Amazon ECR mein repository banao.
+3. Image build, tag aur ECR par push karo.
+4. ECS cluster aur task definition configure karo.
+5. ECS service create karo jo Fargate par tasks run kare.
+6. Networking, IAM roles, logs aur health checks configure karo.
+7. Application ko load balancer ya appropriate public endpoint se expose karo.
+
+#### 4. Practical Example
+
+Example Node.js app structure:
+
+```text
+node-api/
+  server.js
+  package.json
+  package-lock.json
+  Dockerfile
+```
+
+Example `server.js`:
+
+```javascript
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res) => {
+  res.json({ message: 'Node.js API running on ECS' });
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server listening on ${port}`);
+});
+```
+
+Example `Dockerfile`:
+
+```dockerfile
+FROM node:22-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY . .
+ENV NODE_ENV=production
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+Add a `.dockerignore` file to avoid copying unnecessary files:
+
+```text
+node_modules
+.git
+.env
+npm-debug.log
+```
+
+Keep production secrets out of the image. Supply them securely through an appropriate secrets manager or task configuration.
+
+#### 5. Architecture Diagram with Request Flow
+
+```text
+Developer
+   |
+   v
+Build Docker image
+   |
+   v
+Amazon ECR (image registry)
+   |
+   v
+ECS Task Definition
+   |
+   v
+ECS Service on Fargate
+   |
+   v
+Node.js container :3000
+
+Client -> Application Load Balancer -> ECS task
+```
+
+ECR stores the image; the task definition describes how to run it; the ECS service maintains the desired number of tasks. For public HTTP access, a common production setup uses an Application Load Balancer, suitable subnets, security groups, and a health-check path.
+
+#### 6. Practical Commands / Configuration
+
+Replace the placeholders below with your AWS account ID, region, repository, and cluster names. These commands illustrate the image publishing stage; ECS networking and service resources must also be configured.
+
+**Step 1: Create an ECR repository**
+
+```bash
+aws ecr create-repository \
+  --repository-name node-api \
+  --region ap-south-1
+```
+
+**Step 2: Authenticate Docker to ECR**
+
+```bash
+aws ecr get-login-password --region ap-south-1 | \
+  docker login --username AWS --password-stdin \
+  <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com
+```
+
+**Step 3: Build, tag, and push the image**
+
+Run these commands from the folder containing the Dockerfile:
+
+```bash
+docker build -t node-api .
+docker tag node-api:latest <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:latest
+docker push <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:latest
+```
+
+**Step 4: Create the ECS task definition**
+
+Example core settings for a Fargate task definition:
+
+```json
+{
+  "family": "node-api",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "<TASK_EXECUTION_ROLE_ARN>",
+  "containerDefinitions": [
+    {
+      "name": "node-api",
+      "image": "<ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:latest",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 3000, "protocol": "tcp" }
+      ]
+    }
+  ]
+}
+```
+
+Save this as `task-definition.json`, then register it:
+
+```bash
+aws ecs register-task-definition \
+  --cli-input-json file://task-definition.json \
+  --region ap-south-1
+```
+
+**Step 5: Create and verify the ECS service**
+
+Create an ECS cluster first if needed, then create the service using the registered task definition. For Fargate, configure subnets, security groups, and `awsvpc` networking; choose whether tasks are behind an Application Load Balancer. Ensure the task execution role can pull from ECR and write logs, and grant the application task role only the AWS permissions the application needs.
+
+Useful verification commands:
+
+```bash
+aws ecs list-clusters --region ap-south-1
+aws ecs list-services --cluster <CLUSTER_NAME> --region ap-south-1
+aws ecs list-tasks --cluster <CLUSTER_NAME> --service-name <SERVICE_NAME> --region ap-south-1
+aws ecs describe-services --cluster <CLUSTER_NAME> --services <SERVICE_NAME> --region ap-south-1
+```
+
+After deployment, check ECS service events, task status, CloudWatch logs, load balancer health checks, and the application URL. For repeatable production deployments, use immutable image tags rather than relying only on `latest`.
+
+#### 7. Summary Table
+
+| Step | AWS service / tool | Purpose |
+|---|---|---|
+| 1 | Docker | Package the Node.js app into an image |
+| 2 | Amazon ECR | Store the image |
+| 3 | ECS task definition | Define image, resources, ports, roles, and logs |
+| 4 | ECS cluster | Logical grouping for ECS workloads |
+| 5 | ECS service + Fargate | Run tasks and maintain desired count |
+| 6 | ALB, VPC, security groups | Route and secure incoming traffic |
+| 7 | CloudWatch Logs | Diagnose application and container issues |
+
+**Interview-ready answer:** First, I containerize the Node.js application using a Dockerfile. Then I create an ECR repository, build and push the image, and define the container configuration in an ECS task definition. I create an ECS service on Fargate, configure networking and IAM permissions, and optionally attach an Application Load Balancer for HTTP traffic. Finally, I verify task health, service events, and CloudWatch logs.
+
+---
