@@ -5219,3 +5219,57 @@ Actual traffic distribution configured algorithm, target health aur application 
 - Configure the backend Security Group to accept application traffic from the Load Balancer's Security Group rather than opening the backend port to everyone.
 
 ---
+
+### Q78. What is ELB?
+
+#### 1. English Definition
+
+**Elastic Load Balancing (ELB) is an AWS service that automatically distributes incoming traffic across registered targets, such as EC2 instances, containers, or IP addresses, according to the load balancer type and configuration.**
+
+#### 2. Hindi Definition
+
+ELB AWS ki ek service hai jo incoming traffic ko configured targets—jaise EC2 instances, containers ya IP addresses—ke beech distribute karti hai, taaki application ki availability aur scalability improve ho.
+
+#### 3. Hinglish Explanation
+
+Bhai, ELB ka full form **Elastic Load Balancing** hai. AWS mein jab hum application ko multiple servers par run karte hain, toh ELB incoming traffic ko un servers tak route karne mein help karta hai.
+
+Example: tumhari Node.js API do EC2 instances par chal rahi hai. Users ELB ke endpoint par requests bhejte hain, aur ELB configured rules aur health checks ke according requests ko available targets tak forward karta hai.
+
+ELB ek AWS service/family ka naam hai, jabki ALB aur NLB uske specific load balancer types hain.
+
+#### 4. Practical Example: MERN Application
+
+```text
+Users
+  |
+  v
+AWS Elastic Load Balancing (ELB)
+  |
+  +------> EC2-1: Node.js / Express
+  |
+  +------> EC2-2: Node.js / Express
+                  |
+                  v
+               Database
+```
+
+Agar ek target unhealthy ho jata hai, toh configured health checks ke basis par load balancer us target ko traffic bhejna rok sakta hai. Healthy targets phir bhi requests handle kar sakte hain, provided the rest of the architecture is available.
+
+#### 5. Types of Elastic Load Balancing
+
+| Type | Typical use |
+|---|---|
+| Application Load Balancer (ALB) | HTTP/HTTPS applications; host-based and path-based routing |
+| Network Load Balancer (NLB) | Layer 4 TCP/UDP/TLS use cases |
+| Gateway Load Balancer (GWLB) | Deploying and scaling virtual network appliances |
+| Classic Load Balancer (CLB) | Older/legacy load-balancing configurations |
+
+#### 6. Important Points
+
+- ELB distributes traffic; it does not automatically create extra EC2 instances. Auto Scaling can be configured separately to add or remove capacity.
+- Health checks help the load balancer determine which targets are healthy.
+- For a typical HTTP/HTTPS MERN application, an Application Load Balancer is often appropriate.
+- ELB improves availability, but high availability also depends on deploying healthy targets across Availability Zones and designing application dependencies appropriately.
+
+---
