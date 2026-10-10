@@ -232,3 +232,69 @@ Maan lo tum apni MERN e-commerce website AWS par deploy kar rahe ho:
 **Yaad rakhne ki trick:** Compute = EC2, Storage = S3, Database = RDS, Network = VPC, Security = IAM, Monitoring = CloudWatch.
 
 ---
+
+---
+
+### Q4. What is an AWS Region?
+
+#### 1. English Definition
+
+**An AWS Region is a separate geographic area around the world where AWS operates its cloud infrastructure. Each Region contains multiple Availability Zones.**
+
+#### 2. Hindi Definition
+
+AWS Region duniya ka ek alag geographical area hota hai jahan AWS apna cloud infrastructure operate karta hai. Har Region mein multiple Availability Zones hoti hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, simple example se samjho: AWS ke data centers duniya ke different locations par hain. AWS in locations ko Regions mein organize karta hai.
+
+Maan lo tumhari MERN application India ke users ke liye hai. Tum Mumbai Region (`ap-south-1`) select kar sakte ho. Agar tumhe US users ke liye application deploy karni hai, toh requirement ke according US ka Region choose kar sakte ho.
+
+Region choose karte waqt in baaton ka dhyan rakhte hain:
+
+- **Latency:** Users ke paas wala suitable Region aksar response time kam karne mein help karta hai.
+- **Availability:** Required AWS services us Region mein available honi chahiye.
+- **Compliance:** Data ko kis country ya geographic area mein rakhna hai, ye requirements ke according check karna hota hai.
+- **Cost:** Different Regions mein service prices alag ho sakti hain.
+
+#### 4. Region vs Availability Zone
+
+- **Region:** Ek geographic area, jaise Asia Pacific (Mumbai).
+- **Availability Zone (AZ):** Region ke andar ek ya more data centers ka logically distinct group, designed to provide isolation from other AZs.
+
+Example:
+
+```text
+AWS Region: Asia Pacific (Mumbai) — ap-south-1
+                 |
+       +---------+---------+
+       |         |         |
+      AZ-a      AZ-b      AZ-c
+```
+
+Agar application ko high availability deni hai, toh architecture ko multiple Availability Zones mein deploy kiya ja sakta hai. Sirf ek Region choose karne ka matlab automatically multi-AZ deployment nahi hota.
+
+#### 5. Practical MERN Example
+
+Maan lo tum apni MERN application Mumbai Region mein deploy karte ho:
+
+1. AWS Console mein Region **Asia Pacific (Mumbai)** select karte ho.
+2. Us Region mein EC2 instance create karke Node.js backend deploy karte ho.
+3. High availability ke liye, requirement ke according, multiple AZs mein EC2 instances aur Load Balancer configure kar sakte ho.
+4. S3 bucket, database aur doosri services ko configure karte waqt unki Region-specific availability aur settings verify karte ho.
+
+**Important:** AWS Region choose karna aur Availability Zones mein application distribute karna do alag decisions hain.
+
+#### 6. Summary Table
+
+| Term | Meaning | Example |
+|---|---|---|
+| AWS Region | Geographic area containing AWS infrastructure | Asia Pacific (Mumbai) |
+| Region code | Region ka unique identifier | `ap-south-1` |
+| Availability Zone | Region ke andar isolated infrastructure location/group | Mumbai Region ki AZs |
+| Multi-AZ deployment | Multiple AZs mein resources deploy karna | Better availability and resilience |
+
+**Yaad rakhne ki trick:** Region = Geographic area; Availability Zone = Region ke andar isolated location.
+
+---
