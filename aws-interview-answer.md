@@ -15908,3 +15908,104 @@ Check `stoppedReason`, container `reason`, ECS service events, and CloudWatch lo
 **Interview-ready answer:** ECS reads the image URI from the task definition and uses the task execution role to obtain the permissions needed to authenticate to ECR and pull the image. The container runtime then starts the container from that image. I ensure the execution role has the required ECR permissions, the image URI and tag are correct, and the task has network access to ECR. The task role is separate and is used by the application to access AWS services.
 
 ---
+
+### Q206. What is EKS?
+
+#### 1. English Definition
+
+**Amazon Elastic Kubernetes Service (EKS)** is AWS's managed Kubernetes service that helps you run Kubernetes applications without having to install and manage the Kubernetes control plane yourself.
+
+#### 2. Hindi Definition
+
+Amazon EKS AWS ki managed Kubernetes service hai. AWS Kubernetes control plane manage karta hai, jisse hum Kubernetes ke through applications ko deploy, scale aur manage kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application Docker containers mein hai aur tum Kubernetes use karke usko AWS par deploy karna chahte ho.
+
+Kubernetes containers ko Pods mein run karta hai aur Deployments, Services aur doosre resources se unhe manage karta hai. EKS tumhe AWS par Kubernetes cluster provide karta hai, aur AWS managed control plane ke availability aur maintenance ki responsibility leta hai.
+
+Yaad rakho:
+
+- **Kubernetes:** Container orchestration platform.
+- **EKS:** AWS par managed Kubernetes service.
+- **ECR:** Container images store karta hai.
+- **ECS:** AWS ka alag, AWS-native container orchestration service hai.
+
+EKS use karne par worker compute, networking, IAM permissions, add-ons aur cluster upgrades ki kuch responsibilities tumhari configuration aur setup par depend karti hain.
+
+#### 4. Practical Architecture
+
+```text
+Developer builds Docker image
+          |
+          v
+Amazon ECR (container image registry)
+          |
+          v
+Amazon EKS Cluster
+   |                  |
+   v                  v
+Kubernetes        Worker compute
+Control Plane     (EC2 nodes or supported Fargate workloads)
+                      |
+                      v
+                 Kubernetes Pods
+                      |
+                      v
+              Node.js / MERN services
+```
+
+Example: Tum apni Node.js API ka image ECR mein push karte ho, phir Kubernetes Deployment manifest mein image URI aur replica count define karte ho. EKS cluster ke configured compute par Pods run hote hain.
+
+#### 5. Practical Configuration
+
+Example Kubernetes Deployment manifest:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: node-api
+  template:
+    metadata:
+      labels:
+        app: node-api
+    spec:
+      containers:
+        - name: node-api
+          image: <ECR_IMAGE_URI>
+          ports:
+            - containerPort: 3000
+```
+
+To access a configured EKS cluster, install and configure AWS CLI and `kubectl`, then use a command such as:
+
+```bash
+aws eks update-kubeconfig --region ap-south-1 --name <CLUSTER_NAME>
+kubectl get nodes
+kubectl apply -f deployment.yaml
+kubectl get pods
+```
+
+These commands assume the EKS cluster already exists, the caller has AWS and Kubernetes permissions, and the cluster has suitable worker compute and network access to pull the image.
+
+#### 6. Summary Table
+
+| Term | Meaning |
+|---|---|
+| EKS | AWS managed Kubernetes service |
+| Kubernetes | Container orchestration platform |
+| Control plane | Coordinates and manages the Kubernetes cluster |
+| Worker nodes / compute | Runs application Pods |
+| Pod | Smallest deployable unit in Kubernetes |
+| ECR | Stores container images |
+
+**Interview-ready answer:** Amazon EKS is AWS's managed Kubernetes service. AWS manages the Kubernetes control plane, while I deploy and manage workloads using Kubernetes resources such as Pods, Deployments, and Services. EKS can run workloads on EC2 worker nodes or supported Fargate configurations, and it integrates with AWS services such as ECR, IAM, and load balancing.
+
+---
