@@ -10591,3 +10591,102 @@ CLI commands ke liye AWS credentials aur required IAM permissions configured hon
 **Remember:** Route 53 DNS queries ko configured destinations tak resolve karta hai. CloudFront content deliver karta hai; Route 53 domain name ko CloudFront ya kisi aur endpoint se map kar sakta hai.
 
 ---
+
+### Q155. What is DNS?
+
+#### 1. English Definition
+
+**The Domain Name System (DNS) is a distributed naming system that translates human-readable domain names, such as `example.com`, into IP addresses or other records that help clients locate internet services.**
+
+#### 2. Hindi Definition
+
+DNS ka full form Domain Name System hai. Yeh human-readable domain name, jaise `example.com`, ko IP address ya doosre DNS records se resolve karta hai, taaki browser sahi server tak pahunch sake.
+
+#### 3. Hinglish Explanation
+
+Computers network par services ko IP addresses se locate karte hain, lekin humans ke liye domain names yaad rakhna easy hota hai.
+
+Maan lo tum browser mein `myapp.com` type karte ho. Browser ya operating system DNS resolver se poochta hai ki is domain ka destination kya hai. DNS record ke basis par resolver IP address ya doosri relevant information return karta hai.
+
+**Simple words mein:** DNS internet ki phonebook ki tarah kaam karta hai—domain name se uske destination ki information dhoondhne mein help karta hai.
+
+DNS sirf IPv4 address (A record) tak limited nahi hai. Ismein IPv6 ke liye AAAA, mail routing ke liye MX, aur doosre purposes ke liye CNAME, TXT jaise records bhi hote hain.
+
+#### 4. Practical Example
+
+Maan lo tumhari MERN application ka domain `myapp.com` hai aur frontend CloudFront par hosted hai.
+
+DNS mein domain ke liye record configure hota hai jo CloudFront distribution ko point karta hai. Jab user `myapp.com` open karta hai, DNS resolution browser ko destination discover karne mein help karta hai; uske baad browser CloudFront se HTTPS connection bana kar website request karta hai.
+
+#### 5. Architecture Diagram — DNS Request Flow
+
+```text
+User enters myapp.com
+         |
+         v
+Browser / OS checks local DNS cache
+         |
+         v
+DNS Resolver
+         |
+         v
+DNS hierarchy / authoritative DNS
+         |
+         v
+Returns DNS answer
+(e.g. IP address or alias resolution)
+         |
+         v
+Browser connects to the resolved destination
+         |
+         v
+Website / application response
+```
+
+**Flow:** User domain enter karta hai → resolver DNS records lookup karta hai → DNS answer return hota hai → browser resolved destination se connection banata hai → website load hoti hai.
+
+Agar answer cache mein available aur valid hai, toh resolver ko har baar full DNS lookup repeat karna zaroori nahi hota.
+
+#### 6. Practical Command / Configuration
+
+**Domain ka DNS answer check karne ke liye:**
+
+Windows Command Prompt:
+
+```cmd
+nslookup example.com
+```
+
+Linux/macOS par, agar `dig` installed hai:
+
+```bash
+dig example.com
+```
+
+**Common DNS record types:**
+
+- **A:** Domain ko IPv4 address se map karta hai.
+- **AAAA:** Domain ko IPv6 address se map karta hai.
+- **CNAME:** Ek domain name ko doosre canonical domain name ka alias banata hai.
+- **MX:** Email receiving servers identify karta hai.
+- **TXT:** Text information publish karta hai, often verification and email-security policies ke liye.
+- **NS:** Domain ke authoritative name servers identify karta hai.
+
+AWS Route 53 mein records manage karne ke liye hosted zone use hoti hai. DNS changes ke baad caching aur TTL ki wajah se updated records har resolver par turant visible hona guaranteed nahi hai.
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| DNS | Domain names ko internet resources se resolve karne wala system |
+| Domain name | Human-readable name, jaise `example.com` |
+| IP address | Network par destination ko identify karne wala address |
+| DNS resolver | DNS query ka answer find karne wala service |
+| A record | IPv4 address |
+| AAAA record | IPv6 address |
+| CNAME record | Another domain name ka alias |
+| TTL | DNS answer kitni der cache ho sakta hai |
+
+**Remember:** DNS domain name ko resolve karta hai; Route 53 AWS ki DNS service hai. DNS resolution ke baad browser actual website/API endpoint se connect karta hai.
+
+---
