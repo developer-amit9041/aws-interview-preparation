@@ -8980,3 +8980,121 @@ React / Browser / Mobile App
 | 6 | API Gateway sends the HTTP response to the client |
 
 ---
+
+### Q138. What is REST API?
+
+#### 1. English Definition
+
+**A REST API is an API designed around the constraints of Representational State Transfer (REST). It commonly uses HTTP methods such as GET, POST, PUT, PATCH, and DELETE to operate on resources identified by URLs, often exchanging JSON data.**
+
+#### 2. Hindi Definition
+
+REST API ek aisa API design hai jo REST principles follow karta hai. Ismein HTTP methods ka use karke URL ke through resources par operations kiye jaate hain, aur data aksar JSON format mein exchange hota hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tum MERN application mein users manage kar rahe ho. Frontend ko users ki list chahiye, toh woh `GET /users` request bhejega. Naya user create karna ho, toh `POST /users` use kar sakte ho.
+
+REST API mein URL resource ko represent karta hai aur HTTP method batata hai ki us resource par kya action karna hai.
+
+Common methods:
+
+- **GET** — data read karna.
+- **POST** — naya resource create karna ya operation trigger karna.
+- **PUT** — resource ko replace/update karna.
+- **PATCH** — resource ka kuch hissa update karna.
+- **DELETE** — resource delete karna.
+
+REST ka important principle **statelessness** hai: har request mein usko process karne ke liye required context hona chahiye; server client ki session state ko requests ke beech REST interaction ke liye maintain karne par depend nahi karta.
+
+#### 4. Practical Example — Express.js
+
+```javascript
+const express = require("express");
+const app = express();
+
+app.use(express.json());
+
+const users = [{ id: 1, name: "Amit" }];
+
+// Read users
+app.get("/users", (req, res) => {
+  res.json(users);
+});
+
+// Create a user (illustrative in-memory example)
+app.post("/users", (req, res) => {
+  const user = {
+    id: users.length + 1,
+    name: req.body.name
+  };
+
+  users.push(user);
+  res.status(201).json(user);
+});
+
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});
+```
+
+Example requests:
+
+```http
+GET http://localhost:3000/users
+```
+
+```http
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "name": "Rahul"
+}
+```
+
+This is a simple illustrative example using in-memory data; a production application would usually validate input and persist records in a database.
+
+#### 5. REST API Architecture
+
+```text
+React Frontend
+      |
+      | HTTP request (GET /users)
+      v
+Express.js REST API
+      |
+      | Business logic / database query
+      v
+MongoDB
+      |
+      | Data result
+      v
+Express.js sends JSON response
+      |
+      v
+React displays the data
+```
+
+#### 6. Important REST Principles
+
+- **Client-server separation:** Frontend and backend have separate responsibilities.
+- **Stateless requests:** Each request carries the information needed to process it.
+- **Uniform interface:** Resources are accessed through consistent URLs and HTTP semantics.
+- **Cacheability:** Responses can indicate whether they may be cached.
+- **Layered system:** Clients may interact through intermediaries such as gateways or proxies.
+- **Resource-based URLs:** Prefer `/users/123` over action-heavy URLs such as `/getUserById/123` for typical resource retrieval.
+
+A REST-style API should use HTTP methods and status codes appropriately. Not every HTTP API is automatically RESTful; the design should follow the relevant REST constraints.
+
+#### 7. Summary Table
+
+| Method | Example | Purpose |
+|---|---|---|
+| GET | `GET /users` | Retrieve users |
+| POST | `POST /users` | Create a user |
+| PUT | `PUT /users/1` | Replace a user resource |
+| PATCH | `PATCH /users/1` | Partially update a user |
+| DELETE | `DELETE /users/1` | Delete a user |
+
+---
