@@ -10282,3 +10282,117 @@ Commands ke liye AWS CLI credentials aur required IAM permissions configured hon
 **Remember:** CloudFront cache repeated requests par content ko origin se dobara fetch karne ki zaroorat kam karta hai. Correct cache policy aur TTL performance ke saath content freshness aur privacy ke liye bhi important hain.
 
 ---
+
+### Q152. How do you invalidate CloudFront cache?
+
+#### 1. English Definition
+
+**CloudFront invalidation is the process of requesting Amazon CloudFront to remove specified objects from its edge caches before their normal expiration, so subsequent requests can retrieve the updated content from the origin.**
+
+#### 2. Hindi Definition
+
+CloudFront cache invalidation ka matlab selected cached files ko unki normal expiry se pehle cache se remove karne ki request dena hai, taaki next request par updated content origin se fetch ho sake.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumne S3 par `logo.png` update kar diya, lekin CloudFront abhi bhi purana cached logo serve kar raha hai.
+
+Tum CloudFront invalidation create karke us path ki cached copy remove karne ki request de sakte ho. Iske baad next request par CloudFront updated file origin se fetch kar sakta hai.
+
+Invalidation ke liye paths specify kiye jaate hain:
+- `/logo.png` — ek specific file.
+- `/images/*` — images directory ke matching paths.
+- `/*` — distribution ke saare paths; isse carefully use karo.
+
+Invalidation cache refresh karne ka ek option hai. Frequently updated assets ke liye versioned filenames, jaise `logo.v2.png`, aksar better approach hote hain. Invalidation ko complete hone mein time lag sakta hai; request create hote hi har edge par update instant hone ki guarantee nahi hoti.
+
+#### 4. Practical Example
+
+MERN application mein React frontend S3 par host hai aur CloudFront usse deliver karta hai. Tumne `index.html` update kiya, lekin users ko old version mil raha hai.
+
+Targeted invalidation create karo:
+
+```bash
+aws cloudfront create-invalidation \
+  --distribution-id YOUR_DISTRIBUTION_ID \
+  --paths "/index.html"
+```
+
+Agar specific static assets folder invalidate karna ho:
+
+```bash
+aws cloudfront create-invalidation \
+  --distribution-id YOUR_DISTRIBUTION_ID \
+  --paths "/assets/*"
+```
+
+#### 5. Architecture Diagram — Request Flow
+
+```text
+Developer updates file in S3 origin
+              |
+              v
+Create CloudFront invalidation
+              |
+              v
+CloudFront processes invalidation
+and removes matching cached objects
+              |
+              v
+User requests the file again
+              |
+              v
+CloudFront fetches updated content
+from origin when needed
+              |
+              v
+Updated response delivered to user
+```
+
+**Flow:** Origin par file update hoti hai → invalidation request submit hoti hai → CloudFront matching cached objects invalidate karta hai → next request updated content fetch kar sakti hai → user ko updated response milta hai.
+
+#### 6. Practical Command / Configuration
+
+**Create an invalidation:**
+
+```bash
+aws cloudfront create-invalidation \
+  --distribution-id YOUR_DISTRIBUTION_ID \
+  --paths "/index.html" "/styles.css"
+```
+
+**Check invalidation status:**
+
+```bash
+aws cloudfront list-invalidations \
+  --distribution-id YOUR_DISTRIBUTION_ID
+```
+
+**Check one invalidation:**
+
+```bash
+aws cloudfront get-invalidation \
+  --distribution-id YOUR_DISTRIBUTION_ID \
+  --id YOUR_INVALIDATION_ID
+```
+
+Configuration notes:
+- Paths ko leading slash ke saath specify karo, jaise `/index.html`.
+- Wildcard `*` use karna ho toh path ke end mein rakho, jaise `/images/*`.
+- `/*` poori distribution ke cached paths invalidate kar sakta hai; unnecessary broad invalidations avoid karo.
+- AWS CLI ke liye credentials aur required CloudFront IAM permissions honi chahiye.
+- Frequently deployed static assets ke liye hashed/versioned filenames use karo; HTML ya manifest files ko separately invalidate karna pad sakta hai depending on caching setup.
+
+#### 7. Summary Table
+
+| Method | Use |
+|---|---|
+| `/index.html` | Specific file invalidate karna |
+| `/assets/*` | Matching assets paths invalidate karna |
+| `/*` | All distribution paths invalidate karna; carefully use karo |
+| Versioned filename | New URL se updated asset serve karna |
+| Invalidation status | Request complete hui ya abhi processing mein hai, check karna |
+
+**Remember:** CloudFront invalidation selected cached objects ko normal expiry se pehle remove karne ki request hai. Targeted paths use karo, status check karo, aur frequently changing assets ke liye versioned filenames consider karo.
+
+---
