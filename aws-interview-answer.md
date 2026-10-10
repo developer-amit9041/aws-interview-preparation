@@ -2595,3 +2595,66 @@ If you reboot a server running Node.js, PM2 and Nginx, those services restart on
 **Stop temporarily shuts down an EC2 instance and usually preserves its EBS volumes. Terminate permanently deletes the instance, and its root EBS volume may also be deleted depending on its settings. Reboot restarts the operating system while keeping the same instance allocated. Stop generally stops compute charges, whereas reboot does not.**
 
 ---
+
+### Q39. How do you create an AMI from EC2?
+
+#### 1. English Definition
+
+**An Amazon Machine Image (AMI) is a template used to launch EC2 instances. You can create an AMI from an existing EC2 instance to capture its configured operating system, installed software, and root-volume data.**
+
+#### 2. Hindi Definition
+
+AMI ek template ya image hoti hai, jiske through hum naya EC2 instance launch kar sakte hain. Existing EC2 instance se AMI banane par uske configured operating system, installed software aur root volume ka data capture ho sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumne EC2 par apna MERN backend deploy kiya hai aur Node.js, Nginx, PM2 aur application dependencies configure kar li hain. Future mein same base setup wala server create karna ho, toh existing instance se AMI bana sakte ho aur us AMI se naye EC2 instances launch kar sakte ho.
+
+An AMI generally includes the information needed to launch an instance, including root-volume snapshots and launch permissions/configuration metadata. Additional attached EBS volumes are included only if selected as part of the image creation process. Instance-specific details such as public IP addresses are not copied as fixed values into the new instance.
+
+#### 4. Practical Example — Create an AMI in AWS Console
+
+**Step 1: Open EC2 Instances**
+
+1. AWS Management Console mein **EC2 → Instances** open karo.
+2. Woh EC2 instance select karo jiska AMI banana hai.
+
+**Step 2: Create the image**
+
+1. **Actions → Image and templates → Create image** select karo (console labels may vary).
+2. AMI ka name do, for example `mern-api-server-v1`.
+3. Description optional hai; useful details add kar sakte ho.
+4. Root volume aur additional EBS volumes ki settings review karo. Sirf required volumes include karo.
+5. **Create image** par click karo.
+
+**Step 3: AMI status check karo**
+
+1. EC2 → **AMIs** open karo.
+2. Apni image find karo.
+3. Image status `available` hone ka wait karo. AWS image creation ke liye EBS snapshots create karta hai; process ko complete hone mein time lag sakta hai.
+
+**Step 4: Launch a new instance from the AMI**
+
+1. AMI select karo aur **Launch instance from AMI** choose karo, ya launch wizard mein **My AMIs** se image select karo.
+2. Instance type, key pair, network, subnet, security group aur storage settings configure karo.
+3. Launch instance par click karo.
+
+Naya instance captured image ke base setup se launch hoga. Network settings, security groups, IAM roles, public IP aur instance type ko launch ke waqt separately verify/configure karna hota hai.
+
+#### 5. Does creating an AMI stop the instance?
+
+EC2 console mein AMI create karte waqt **Reboot instance** option ho sakta hai. By default, AWS typically reboots the instance to help ensure filesystem consistency. If you disable reboot, the image is created without rebooting, but file-system consistency may be reduced, especially for actively changing data. Plan this carefully for production workloads.
+
+#### 6. AMI vs EBS Snapshot
+
+| AMI | EBS Snapshot |
+|---|---|
+| EC2 instance launch karne ke liye image/template | EBS volume ke point-in-time data ka backup |
+| OS image, root-volume snapshot references aur launch metadata include kar sakta hai | Ek particular EBS volume ke data ko capture karta hai |
+| Directly AMI se EC2 launch kar sakte ho | Snapshot se volume create/restore kar sakte ho; EC2 launch ke liye additional steps chahiye |
+
+#### 7. Interview Summary
+
+**To create an AMI, I select the EC2 instance, choose Actions → Image and templates → Create image, provide a name, review the volume settings, and create it. Once the AMI status becomes available, I can use it to launch new EC2 instances with the same captured base configuration. I also verify whether a reboot is required for data consistency and configure networking and security settings for the new instance.**
+
+---
