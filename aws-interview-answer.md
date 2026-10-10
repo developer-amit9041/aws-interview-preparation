@@ -16112,3 +16112,110 @@ spec:
 **Interview-ready answer:** Amazon ECS is AWS's native container orchestration service and uses tasks, task definitions, and services. Amazon EKS is AWS's managed Kubernetes service and uses Kubernetes resources such as Pods, Deployments, and Services. Both can run containerized applications and integrate with AWS services. I would choose based on the team's Kubernetes expertise, ecosystem and portability needs, AWS integration requirements, and operational complexity.
 
 ---
+
+### Q208. Why use Kubernetes on AWS?
+
+#### 1. English Definition
+
+Kubernetes on AWS is used to deploy, scale, network, and manage containerized applications using Kubernetes while leveraging AWS infrastructure and services. Amazon EKS provides a managed Kubernetes control plane.
+
+#### 2. Hindi Definition
+
+AWS par Kubernetes ka use containerized applications ko deploy, scale aur manage karne ke liye hota hai. Amazon EKS Kubernetes ke control plane ko manage karta hai, jabki application ki configuration aur kuch infrastructure responsibilities customer ke paas rehti hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application ke multiple containers hain: React frontend, Node.js API, background worker, aur doosri services. Jaise-jaise users badhte hain, containers ko scale karna, failed containers ko replace karna aur deployments manage karna important ho jata hai.
+
+Kubernetes in workloads ko manage karne mein help karta hai. AWS par EKS use karne se AWS managed Kubernetes control plane deta hai aur tum AWS networking, IAM, load balancers, monitoring aur container registry jaise services ke saath integrate kar sakte ho.
+
+**Main reasons:**
+
+- **Scaling:** replicas badha kar ya autoscaling configure karke application capacity adjust karna.
+- **Self-healing:** desired state maintain karna; failed Pods ko replace karna where possible.
+- **Rolling deployments:** application ke naye versions controlled manner mein deploy karna.
+- **Service discovery and networking:** workloads ko services ke through communicate karwana.
+- **AWS integration:** IAM, VPC, load balancing, ECR, logging and monitoring integrate karna.
+- **Kubernetes ecosystem:** standard Kubernetes APIs, tools, and deployment workflows use karna.
+
+Note: EKS control plane manage karta hai, lekin tumhe workloads, access policies, cluster configuration, cost, observability, and chosen compute capacity ko appropriately manage karna hota hai.
+
+#### 4. Practical MERN Example
+
+Suppose Node.js API ko two replicas ke saath run karna hai:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: node-api
+  template:
+    metadata:
+      labels:
+        app: node-api
+    spec:
+      containers:
+        - name: node-api
+          image: <ECR_IMAGE_URI>
+          ports:
+            - containerPort: 3000
+```
+
+Kubernetes desired state ko maintain karne ki koshish karega aur Deployment do Pod replicas manage karega. Production mein image URI, resource requests/limits, health probes, secrets, Service, ingress/load balancer, and security configuration bhi set karni chahiye.
+
+#### 5. Architecture Diagram
+
+```text
+Users
+  |
+AWS Load Balancer
+  |
+Kubernetes Service
+  |
+EKS-managed Kubernetes control plane
+  |  schedules and manages desired state
+Worker capacity (EC2 nodes or supported Fargate workloads)
+  |
+Node.js API Pods / other application Pods
+  |
+Amazon ECR stores container images
+```
+
+The control plane coordinates the cluster; application Pods run on the configured compute. The exact networking and load-balancer path depends on the cluster setup.
+
+#### 6. Practical Commands
+
+```bash
+# Configure kubectl access to an existing EKS cluster
+aws eks update-kubeconfig --region ap-south-1 --name <CLUSTER_NAME>
+
+# Inspect cluster nodes
+kubectl get nodes
+
+# Deploy the manifest
+kubectl apply -f deployment.yaml
+
+# Check Pods and rollout status
+kubectl get pods
+kubectl rollout status deployment/node-api
+```
+
+#### 7. Summary Table
+
+| Benefit | What it means on AWS |
+|---|---|
+| Managed control plane | EKS operates the Kubernetes control plane |
+| Scaling | Scale replicas and configure autoscaling |
+| Self-healing | Kubernetes works to maintain the desired workload state |
+| Deployments | Use rolling updates and rollback capabilities |
+| AWS integration | Connect with services such as ECR, IAM, VPC, and load balancers |
+| Portability | Kubernetes APIs and workflows can be reused, though AWS-specific dependencies may limit portability |
+
+**Interview-ready answer:** We use Kubernetes on AWS when an application needs Kubernetes orchestration features such as scaling, self-healing, rolling deployments, service discovery, and a broad ecosystem. Amazon EKS provides a managed Kubernetes control plane and integrates with AWS services such as IAM, VPC, ECR, and load balancers. However, EKS does not eliminate all operational work; teams still manage their workloads, configuration, security, and chosen compute resources.
+
+---
