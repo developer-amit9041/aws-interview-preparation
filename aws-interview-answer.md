@@ -4999,3 +4999,93 @@ Is design mein user directly MongoDB se connect nahi karta. Backend authenticati
 A private subnet reduces exposure, but it does not by itself guarantee database security.
 
 ---
+
+### Q75. How do you design a VPC for a production application?
+
+#### 1. English Definition
+
+**A production VPC should be designed with network segmentation, high availability across multiple Availability Zones, controlled internet access, and least-privilege security rules.**
+
+#### 2. Hindi Definition
+
+Production application ke liye VPC is tarah design karte hain ki application multiple Availability Zones mein available rahe, public aur private resources alag hon, aur network access securely control kiya ja sake.
+
+#### 3. Hinglish Explanation
+
+Bhai, production application ka matlab live application hai jise real users use karte hain. Isliye VPC design karte waqt sirf application chalana enough nahi hai; security, availability, scalability aur recovery bhi plan karni hoti hai.
+
+Typical production design mein:
+
+- Ek VPC choose karo, with a suitable non-overlapping CIDR range, jaise `10.0.0.0/16`.
+- Kam se kam do Availability Zones use karo, taaki ek AZ mein issue aaye toh application doosri AZ mein continue kar sake.
+- Har AZ mein public aur private subnets banao; database ke liye alag private database subnets rakho.
+- Public subnet mein internet-facing Application Load Balancer (ALB) rakho.
+- Backend EC2 instances ya application services ko private application subnets mein rakho.
+- Database ko private database subnets mein rakho; direct public access disable rakho.
+- Public resources ke liye Internet Gateway (IGW) aur private workloads ko outbound internet ki zaroorat ho toh suitable NAT Gateway routing configure karo.
+- Security Groups ko least-privilege rules ke saath configure karo.
+
+#### 4. Practical Architecture Example
+
+```text
+                         Internet
+                            |
+                    Internet Gateway
+                            |
+             +--------------+--------------+
+             |                             |
+        Public Subnet AZ-a            Public Subnet AZ-b
+        ALB / NAT Gateway              ALB / NAT Gateway
+             |                             |
+             +--------------+--------------+
+                            |
+             +--------------+--------------+
+             |                             |
+       Private App Subnet AZ-a      Private App Subnet AZ-b
+       Node.js / Express             Node.js / Express
+             |                             |
+             +--------------+--------------+
+                            |
+             Private Database Subnets (AZ-a and AZ-b)
+                    RDS / database tier
+```
+
+Ye logical example hai. Exact resources application ke scale aur requirements par depend karenge. Production RDS deployments mein DB subnet group ko multiple AZs cover karna chahiye; Multi-AZ configuration database availability improve kar sakti hai.
+
+#### 5. Route Table and Internet Access
+
+| Subnet / Tier | Typical routing approach |
+|---|---|
+| Public subnet | Default route `0.0.0.0/0` to Internet Gateway; resource ko public reachability ke liye appropriate public addressing aur security rules bhi chahiye |
+| Private application subnet | Private resources ke liye local VPC route; required outbound IPv4 internet traffic ke liye NAT Gateway route ho sakta hai |
+| Private database subnet | No direct internet route in a typical design; required database traffic application tier se aata hai |
+
+NAT Gateway ko high availability aur cost ke hisaab se plan karo. AZ-independent resiliency chahiye toh commonly har AZ mein NAT Gateway rakha jata hai aur us AZ ke private subnet ko usi AZ ke NAT Gateway se route kiya jata hai.
+
+#### 6. Security Group Rules Example
+
+- **ALB Security Group:** Inbound HTTPS (`443`) from intended clients; HTTP (`80`) only if needed for redirect.
+- **Backend Security Group:** Inbound application port only from the ALB Security Group.
+- **Database Security Group:** Inbound database port only from the backend Security Group, not from the whole internet.
+
+For example, MongoDB commonly uses TCP `27017`, MySQL uses `3306`, and PostgreSQL uses `5432`; open only the port used by your database.
+
+#### 7. Production Checklist
+
+1. Choose CIDR ranges that do not overlap with connected VPCs or on-premises networks.
+2. Deploy across at least two Availability Zones for resilient application tiers.
+3. Keep backend and database resources private unless a documented requirement says otherwise.
+4. Use IAM roles instead of long-lived AWS access keys on compute resources.
+5. Enable appropriate logging and monitoring, such as VPC Flow Logs and CloudWatch metrics/logs.
+6. Protect secrets using AWS Secrets Manager or Systems Manager Parameter Store, and encrypt data in transit and at rest.
+7. Plan backups, database recovery, patching, incident response, and infrastructure changes through Infrastructure as Code where practical.
+8. Consider VPC endpoints for supported AWS services to reduce the need for NAT-based access and keep traffic on AWS networking where applicable.
+
+#### 8. Important Points
+
+- A public subnet is defined by its route to an Internet Gateway; simply naming a subnet “public” does not make it public.
+- A private subnet does not automatically block every outbound connection; its route table and security rules determine allowed paths.
+- Multi-AZ network design improves resilience, but it does not automatically make every application component highly available. Load balancing, healthy application instances, and suitable database configuration are also required.
+- NAT Gateway enables outbound connections from private subnets; it does not allow unsolicited inbound internet connections to those private instances.
+
+---
