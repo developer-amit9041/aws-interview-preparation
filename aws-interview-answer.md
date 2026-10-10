@@ -14980,3 +14980,85 @@ Register the completed task definition and create an ECS service using the Farga
 **Interview-ready answer:** AWS Fargate is a serverless compute engine for containers that works with ECS and EKS. It removes the need to provision and manage the underlying EC2 servers. With ECS on Fargate, I define the container image, CPU, memory, and networking, while AWS manages the server infrastructure that runs the tasks.
 
 ---
+
+### Q197. ECS Fargate vs EC2 Launch Type?
+
+#### 1. English Definition
+
+**ECS Fargate launch type** runs ECS tasks on serverless compute managed by AWS, so you do not manage the underlying EC2 instances. **ECS EC2 launch type** runs ECS tasks on EC2 instances in your account, so you manage the container-instance fleet and its capacity.
+
+#### 2. Hindi Definition
+
+Fargate mein AWS containers chalane wale underlying servers ko manage karta hai. EC2 launch type mein containers tumhare EC2 instances par chalte hain, aur instances ki capacity aur maintenance tumhe manage karni hoti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, dono options mein ECS hi containers ko schedule aur manage karta hai. Difference ye hai ki containers run kahan hote hain aur servers ko kaun manage karta hai.
+
+- **Fargate:** Task definition mein CPU, memory, image aur networking specify karo. Underlying server manage karne ki zaroorat nahi.
+- **EC2 launch type:** ECS cluster ke liye EC2 instances provision aur maintain karo. Tasks un instances ki available capacity par run hote hain.
+
+Example: Agar tumhe MERN application's Node.js API ko containers mein run karna hai aur server management kam rakhna hai, toh Fargate convenient hai. Agar host-level control chahiye, special instance configuration chahiye, ya existing EC2 capacity use karni hai, toh EC2 launch type useful ho sakta hai.
+
+#### 4. Practical Architecture
+
+```text
+Option A: ECS + Fargate
+Docker image (ECR) -> ECS Service -> Fargate tasks
+                                      |
+                              AWS manages servers
+
+Option B: ECS + EC2
+Docker image (ECR) -> ECS Service -> ECS cluster
+                                      |
+                               EC2 instances
+                                      |
+                              Container tasks
+                         You manage instance capacity
+```
+
+#### 5. Practical Configuration
+
+Fargate task definition ka example:
+
+```json
+{
+  "family": "node-api",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "node-api",
+      "image": "<ECR_IMAGE_URI>",
+      "essential": true
+    }
+  ]
+}
+```
+
+EC2 launch type ke liye task definition mein `requiresCompatibilities` ko `["EC2"]` set kiya ja sakta hai, aur ECS cluster mein registered EC2 container instances aur sufficient capacity honi chahiye. Networking mode aur resource configuration task requirements ke hisaab se select karo.
+
+#### 6. Fargate vs EC2 Launch Type
+
+| Feature | Fargate | EC2 launch type |
+|---|---|---|
+| Server management | AWS manages underlying servers | You manage EC2 instances |
+| Capacity planning | Specify task CPU and memory | Plan both instance and task capacity |
+| Host access/control | Limited host-level control | Greater host-level control |
+| Scaling | Scale tasks; AWS manages underlying compute | Scale tasks and manage/scale EC2 capacity |
+| Operational effort | Usually lower | Usually higher |
+| Cost considerations | Pay for configured task resources and runtime, subject to pricing | Pay for EC2 instances and related resources; utilization affects cost |
+| Best fit | Simpler operations and variable workloads | Host customization, specialized needs, or existing EC2 capacity |
+
+#### 7. Important Interview Points
+
+- ECS is the orchestration service in both cases; Fargate and EC2 are compute options.
+- Fargate does not mean there are no servers; it means AWS manages the underlying server infrastructure for you.
+- With EC2 launch type, unused instance capacity can still cost money, so capacity planning and utilization matter.
+- ECS services can maintain a desired number of tasks in either model. With EC2, the cluster must also have enough instance capacity.
+
+**Interview-ready answer:** ECS Fargate and EC2 launch type both run containers managed by ECS. Fargate is serverless from the user's infrastructure-management perspective: I specify task resources and AWS manages the underlying servers. With EC2 launch type, I manage the EC2 instances, capacity, patching, and scaling. I would choose Fargate to reduce operational overhead, and EC2 when I need more host-level control or want to manage my own compute capacity.
+
+---
