@@ -1554,3 +1554,60 @@ with another supported resource
 **Yaad rakhne ki trick:** Elastic IP = AWS ka fixed public IPv4 address.
 
 ---\n
+
+### Q26. Public IP vs Private IP?
+
+#### 1. English Definition
+
+**A public IP address is used for communication over public networks such as the internet, while a private IP address is used for communication within private networks, such as an AWS VPC.**
+
+#### 2. Hindi Definition
+
+Public IP internet jaise public networks par communication ke liye use hota hai. Private IP private network, jaise AWS VPC ke andar resources ke beech communication ke liye use hota hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhare paas AWS mein ek EC2 instance hai:
+
+- **Public IP:** Internet se instance tak pahunchne ke liye use ho sakta hai, agar routing aur security rules allow karte hon.
+- **Private IP:** VPC ke andar resources ke beech communication ke liye use hota hai, jaise frontend EC2 se backend EC2 ya app server se internal database tak.
+
+Sirf public IP hone se server automatically reachable nahi ho jata. Subnet routing, Internet Gateway, Security Group, NACL aur instance configuration bhi sahi honi chahiye. Private IP generally internet se directly routable nahi hota.
+
+#### 4. Practical MERN Example
+
+```text
+Internet / Users
+       |
+       v
+Public IP on public-facing EC2 / Load Balancer
+       |
+       v
+Private VPC network
+       |
+       v
+Backend EC2 private IP (e.g. 10.0.2.15)
+       |
+       v
+Database private endpoint / private IP, where applicable
+```
+
+Example private address `10.0.2.15` hai. Ye RFC 1918 private IPv4 range mein aata hai. Public IP example ke roop mein `3.110.20.30` ho sakta hai; actual address AWS allocate karta hai.
+
+#### 5. Difference Table
+
+| Feature | Public IP | Private IP |
+|---|---|---|
+| Reachability | Public network se reachable ho sakta hai, if routing/security permit | Private network ke andar routing ke liye |
+| Typical use | Public website/API entry point | Internal server-to-server communication |
+| Internet Gateway | Internet access ke liye appropriate routing required | Private IP ko directly internet-routable nahi banata |
+| Example | Public-facing load balancer address | EC2 private IPv4 such as `10.0.2.15` |
+| Security | Security rules phir bhi required hain | Private hone ka matlab automatically secure hona nahi |
+
+#### 6. Interview Summary
+
+**Public IP is for public-network communication; private IP is for communication within private networks such as a VPC. Actual connectivity depends on routing and security configuration.**
+
+**Yaad rakhne ki trick:** Public IP = public network; Private IP = private network.
+
+---
