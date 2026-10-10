@@ -5652,3 +5652,56 @@ ALB listener port `443` aur backend target port `3000` alag ho sakte hain. HTTPS
 - For production, use repeatable deployments and avoid manually configuring each instance differently.
 
 ---
+
+### Q85. What is Sticky Session?
+
+#### 1. English Definition
+
+**Sticky sessions, also called session affinity, are a load-balancing feature that attempts to send a user's requests to the same target for the duration of a configured session.**
+
+#### 2. Hindi Definition
+
+Sticky Session ek feature hai jisme Load Balancer ek user ki requests ko configured session duration tak aam taur par usi backend server par bhejne ki koshish karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhare paas do Node.js EC2 instances hain aur ALB traffic distribute kar raha hai. User ki pehli request EC2-1 par jaati hai. Agar Sticky Sessions enabled hain, toh ALB cookie ka use karke us user ki next requests ko bhi EC2-1 par bhejne ki koshish karega.
+
+Ye tab useful ho sakta hai jab application ka session data ek specific server par stored ho. Lekin isse traffic uneven ho sakta hai aur server fail hone par session continuity guarantee nahi hoti. Generally better design ye hai ki session state ko Redis jaise shared session store mein rakho, taaki koi bhi healthy instance request handle kar sake.
+
+#### 4. Practical Example
+
+```text
+User A -> ALB -> EC2-1
+User A -> ALB -> EC2-1  (sticky routing via cookie)
+User B -> ALB -> EC2-2
+User B -> ALB -> EC2-2  (sticky routing via cookie)
+```
+
+Ye illustrative example hai; actual routing depends on the load balancer configuration, cookie validity, target health, and availability.
+
+#### 5. How Sticky Sessions Work in AWS ALB
+
+1. Enable stickiness on the Target Group or supported load-balancer configuration.
+2. ALB uses a cookie to associate a client with a target.
+3. While stickiness is valid and the target is available, subsequent requests are directed to that target when possible.
+4. Stickiness duration and behavior depend on the configured stickiness type and duration.
+
+For Application Load Balancer, AWS supports load-balancer-generated cookies and application-based stickiness cookies in supported configurations.
+
+#### 6. Advantages and Disadvantages
+
+| Advantages | Disadvantages |
+|---|---|
+| Can help legacy apps that keep session state locally | Can create uneven load across targets |
+| May reduce repeated session lookup for some designs | A failed or unavailable target can disrupt the user's server-local session |
+| Can simplify some session-dependent applications | Makes it harder to treat backend instances as fully interchangeable |
+
+#### 7. Important Points
+
+- Sticky sessions are also called session affinity.
+- Stickiness does not mean a user is guaranteed to remain on the same server if that target becomes unavailable.
+- For scalable Node.js applications, prefer shared session storage such as Redis or a suitable database when appropriate.
+- Authentication tokens such as JWT do not automatically require sticky sessions if the application is designed to be stateless.
+
+---
