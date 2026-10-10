@@ -7010,3 +7010,107 @@ For example, PostgreSQL RDS ke inbound rule mein TCP port `5432` ka source Node.
 - RDS ko internet se outbound access ki usually zaroorat nahi hoti; required updates and integrations should follow the chosen AWS service design.
 
 ---
+
+### Q108. How does an application connect to RDS?
+
+#### 1. English Definition
+
+**An application connects to Amazon RDS using the database endpoint, port, database name, and valid credentials or supported authentication method, provided network rules allow the connection.**
+
+#### 2. Hindi Definition
+
+Application Amazon RDS se connect karne ke liye database endpoint, port, database name aur valid credentials ya supported authentication method use karti hai. Connection tabhi kaam karega jab network rules bhi access allow karte hon.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js application EC2 par chal rahi hai aur tumhara PostgreSQL database Amazon RDS par hai. Application ko connect karne ke liye ye cheezein chahiye:
+
+1. **RDS endpoint:** Database ka DNS hostname, jo RDS console mein milta hai.
+2. **Port:** PostgreSQL ka default port `5432`, MySQL ka `3306`.
+3. **Database name:** Jis database ko use karna hai.
+4. **Credentials:** Database username/password, ya supported alternative authentication.
+5. **Network access:** RDS Security Group inbound rule mein application server ka Security Group allowed hona chahiye; subnet routing aur network ACLs bhi connection ko permit karein.
+
+Production mein credentials ko source code ya GitHub mein hardcode mat karo. AWS Secrets Manager jaise service se securely retrieve karo. RDS ko private subnet mein rakhkar backend ko authorized access do.
+
+#### 4. Practical Node.js Example (PostgreSQL)
+
+Install the PostgreSQL client library:
+
+```bash
+npm install pg
+```
+
+Example using environment variables:
+
+```js
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  host: process.env.DB_HOST,       // RDS endpoint
+  port: Number(process.env.DB_PORT || 5432),
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  ssl: { rejectUnauthorized: true }, // Configure CA trust as required by your RDS setup
+});
+
+async function testConnection() {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    console.log('Connected to RDS:', result.rows[0]);
+  } catch (error) {
+    console.error('RDS connection failed:', error.message);
+  }
+}
+
+testConnection();
+```
+
+Example `.env` values (use placeholders; never commit real secrets):
+
+```env
+DB_HOST=your-rds-endpoint.amazonaws.com
+DB_PORT=5432
+DB_NAME=your_database
+DB_USER=your_app_user
+DB_PASSWORD=use_a_secure_secret
+```
+
+For production, configure TLS with the correct RDS CA certificate/trust settings for your engine and client; do not disable certificate validation to make a connection work. Keep `.env` out of Git with `.gitignore`, and prefer a managed secrets store for deployed applications.
+
+#### 5. Connection Flow
+
+```text
+Node.js application (EC2)
+          |
+          | Endpoint + port + credentials/TLS
+          v
+VPC networking + Security Group rules
+          |
+          v
+Amazon RDS endpoint
+          |
+          v
+Database connection established
+```
+
+#### 6. Common Connection Problems
+
+| Problem | What to check |
+|---|---|
+| Connection timeout | RDS Security Group, source Security Group, subnet routes, NACLs, correct port |
+| Authentication failed | Username, password/secret, database permissions |
+| Hostname not resolved | Correct RDS endpoint and VPC DNS/network configuration |
+| TLS/SSL error | Client TLS settings and current RDS CA trust configuration |
+| App works locally but not on EC2 | EC2-to-RDS network path and Security Group rules |
+
+#### 7. Important Points
+
+- Use the RDS endpoint rather than a hardcoded database IP; the endpoint can resolve to different addresses over time.
+- For private RDS, the application normally needs network connectivity to the VPC, such as running in the VPC or using approved private connectivity.
+- Do not expose database ports to the entire internet.
+- Use connection pooling and close the pool gracefully when the application shuts down.
+- The exact connection code and TLS settings depend on the database engine and client library.
+
+---
