@@ -14568,3 +14568,70 @@ Users -> Load Balancer -> ECS Service -> Fargate Tasks
 EC2 is a virtual server service, whereas ECS is a container orchestration service. With EC2 alone, I manage the server and how my application or containers run. With ECS, I define container tasks and services, and ECS schedules and manages them. ECS can run on EC2 instances that I manage or on Fargate, where AWS manages the underlying compute infrastructure.
 
 ---
+
+### Q192. ECS vs Lambda?
+
+#### 1. English Definition
+
+**Amazon ECS** is a container orchestration service for running and managing containerized applications over time. **AWS Lambda** is a serverless compute service that runs code in response to events without requiring you to manage servers.
+
+#### 2. Hindi Definition
+
+ECS Docker containers ko deploy aur manage karta hai, jabki Lambda events ya requests aane par code execute karta hai bina servers manage karwaye.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application mein Node.js backend hai.
+
+- **ECS:** Tum apni Node.js API ko Docker image mein package karke container ke andar continuously run kar sakte ho. Long-running APIs, background workers aur microservices ke liye useful hai.
+- **Lambda:** Tum function likhte ho, jaise image upload hone par thumbnail banana ya API request handle karna. Event aane par Lambda function execute hota hai; tum underlying servers manage nahi karte.
+
+Lambda bhi API Gateway ke through HTTP API serve kar sakta hai, aur ECS application bhi event-driven workflows ka part ho sakta hai. Difference use case aur execution model ka hai, sirf language ya API type ka nahi.
+
+#### 4. Practical Example / Architecture
+
+```text
+ECS:
+Users -> Load Balancer -> ECS Service -> Long-running Node.js containers
+
+Lambda:
+User / Event -> API Gateway or S3 Event -> Lambda Function -> Result
+```
+
+**MERN examples:**
+- ECS: Express REST API, WebSocket server, or a continuously running queue worker.
+- Lambda: S3 image-upload processing, scheduled cleanup task, or a short event-triggered function.
+
+#### 5. Summary Table
+
+| Feature | ECS | Lambda |
+|---|---|---|
+| Execution model | Containers/tasks | Functions |
+| Infrastructure | Fargate can hide servers; EC2 launch type uses instances you manage | AWS manages underlying servers |
+| Runtime duration | Suitable for long-running services and workers | Each invocation has a maximum execution time (currently up to 15 minutes) |
+| Trigger | Services can run continuously; tasks can also be started on demand | Events, API Gateway, schedules, queues and other supported triggers |
+| Scaling | Scale task count and, when applicable, compute capacity | Automatically scales concurrent invocations within configured limits |
+| Packaging | Container image and task definition | Function code or supported deployment package/container image |
+| Operational control | More control over container/runtime environment | Less server control; function-oriented model |
+| Cost model | Pay for allocated compute resources (details depend on Fargate/EC2) | Pay mainly per request and execution duration, subject to pricing and free tier |
+| Common use | APIs, long-running workers, microservices | Event-driven tasks, automation, short-lived processing |
+
+#### 6. When to Use Which?
+
+**Use ECS when:**
+- You need a continuously running Node.js API, WebSocket server, or worker.
+- The workload needs custom container dependencies or longer-running processing.
+- You want to manage a containerized service and its desired task count.
+
+**Use Lambda when:**
+- The task is event-driven and short-lived.
+- Traffic is intermittent and you prefer not to manage container servers.
+- You want to connect events such as S3 uploads, EventBridge schedules, API Gateway requests, or SQS messages to code.
+
+**Interview point:** Lambda can run from a container image, but that does not make it equivalent to ECS. Lambda still uses function invocation semantics and its execution limits; ECS manages container tasks and services.
+
+#### 7. Interview-Ready Answer
+
+ECS runs and orchestrates containerized applications, making it suitable for long-running APIs, workers, and microservices. Lambda runs code in response to events without server management and is well suited to short-lived, event-driven tasks. I would choose ECS when I need a continuously running container service or more control over the runtime, and Lambda for event-triggered work with execution that fits Lambda's limits.
+
+---
