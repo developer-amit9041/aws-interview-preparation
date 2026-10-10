@@ -7576,3 +7576,53 @@ LSI example:
 - Use an LSI when you need another sort order for the same partition-key value; use a GSI when you need a different partition-key access pattern.
 
 ---
+
+### Q117. What is DynamoDB Provisioned Capacity?
+
+#### 1. English Definition
+
+**Provisioned capacity in Amazon DynamoDB is a billing and throughput mode where you specify the number of read capacity units (RCUs) and write capacity units (WCUs) your table and indexes need per second.**
+
+#### 2. Hindi Definition
+
+DynamoDB Provisioned Capacity mein hum pehle se decide karte hain ki table ko per second kitni read aur write capacity chahiye. Is capacity ko Read Capacity Units (RCUs) aur Write Capacity Units (WCUs) mein set kiya jata hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application mein DynamoDB table hai. Tum estimate karte ho ki application ko normal traffic mein har second kitni reads aur writes chahiye, phir utni capacity provision kar dete ho.
+
+- **RCU (Read Capacity Unit):** reads ke liye capacity. Eventually consistent read mein 4 KB tak ke item ke liye 1 RCU se 2 reads/second mil sakti hain; strongly consistent read mein 1 read/second. Transactional reads ko double capacity chahiye.
+- **WCU (Write Capacity Unit):** writes ke liye capacity. 1 WCU per second 1 KB tak ke item ki 1 standard write support karta hai. Transactional writes ko double capacity chahiye.
+- Agar actual traffic provisioned capacity se zyada ho jaye, requests throttle ho sakti hain.
+- Capacity ko manually change kar sakte ho ya auto scaling configure kar sakte ho, jo traffic ke hisaab se provisioned capacity adjust karta hai.
+
+#### 4. Practical Example
+
+Maan lo tum configure karte ho:
+
+```text
+Read capacity  = 10 RCUs
+Write capacity = 5 WCUs
+```
+
+Iska matlab table ko configured throughput limits ke andar read aur write requests handle karne ki capacity di gayi hai. Actual supported request rate item size, read consistency, aur transactional/non-transactional operation par depend karega. Agar traffic capacity se upar chala gaya aur scaling/extra capacity available nahi hui, toh throttling ho sakti hai.
+
+#### 5. Provisioned vs On-Demand Capacity
+
+| Basis | Provisioned Capacity | On-Demand Capacity |
+|---|---|---|
+| Capacity | RCUs/WCUs specify karte ho | DynamoDB request traffic ke hisaab se scale karta hai |
+| Best for | Predictable or steady workloads | Variable or unpredictable workloads |
+| Cost model | Provisioned throughput ke basis par billing | Requests ke basis par billing |
+| Scaling | Manual adjustment ya auto scaling | Automatic scaling; no RCU/WCU provisioning |
+| Risk | Capacity kam hui toh throttling ho sakti hai | Sudden traffic changes ke liye service limits aur scaling behavior phir bhi matter karte hain |
+
+#### 6. Important Points
+
+- Provisioned mode mein read aur write capacity alag-alag configure hoti hai.
+- Item size aur consistency model determine karte hain ki ek request kitni capacity consume karegi.
+- CloudWatch metrics aur throttling indicators monitor karo, aur workload ke according capacity tune karo.
+- Auto Scaling provisioned capacity ko configured minimum/maximum limits ke andar adjust kar sakta hai.
+- Predictable traffic ke liye provisioned mode cost-effective ho sakta hai; unpredictable traffic ke liye on-demand mode simpler ho sakta hai.
+
+---
