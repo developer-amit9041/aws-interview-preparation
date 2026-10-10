@@ -16353,3 +16353,51 @@ kubectl get nodes
 **Interview-ready answer:** An EKS Node Group is a group of worker nodes, typically EC2 instances, that provide compute capacity for Kubernetes Pods in an EKS cluster. With a managed node group, Amazon EKS helps manage node provisioning, updates, and lifecycle operations. Node groups are useful when we want control over EC2 instance types and node capacity; Fargate is an alternative for supported workloads that do not require managing EC2 worker nodes.
 
 ---
+
+### Q211. EKS vs Self-Managed Kubernetes?
+
+#### 1. English Definition
+
+Amazon EKS is AWS's managed Kubernetes service, where AWS operates the Kubernetes control plane. With self-managed Kubernetes, the team is responsible for setting up, operating, securing, and upgrading the control plane and worker infrastructure, unless other management tools or providers are used.
+
+#### 2. Hindi Definition
+
+EKS mein AWS Kubernetes ke control plane ko manage karta hai. Self-managed Kubernetes mein team ko cluster setup karne, control plane aur nodes maintain karne, upgrades, security aur monitoring ki zyada responsibility khud leni padti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, dono options mein tum Kubernetes use karke containers run kar sakte ho. Main difference ye hai ki Kubernetes cluster ke management ka kitna kaam AWS karega aur kitna tumhari team karegi.
+
+- **EKS:** AWS control plane ko operate karta hai. Tum workloads deploy karte ho aur node capacity, networking, access, security, monitoring aur costs ko configure/manage karte ho.
+- **Self-managed Kubernetes:** Tumhari team control plane components, cluster availability, certificates, upgrades, etcd backups, networking, worker nodes aur recovery jaise operational tasks ki responsibility leti hai.
+
+#### 4. Comparison Table
+
+| Feature | Amazon EKS | Self-Managed Kubernetes |
+|---|---|---|
+| Control plane | AWS operates the control plane | Team operates the control plane |
+| Initial setup | AWS service simplifies control-plane setup | More manual setup and configuration |
+| Upgrades | AWS manages EKS control-plane upgrade process; customer schedules and prepares upgrades | Team plans and executes control-plane upgrades |
+| Worker nodes | Can use EKS managed node groups, self-managed nodes, or supported Fargate workloads | Team chooses and operates worker infrastructure |
+| Availability and recovery | AWS is responsible for managed control-plane infrastructure; customer still designs workload resilience | Team plans and operates control-plane availability and recovery |
+| Customization | Managed-service boundaries apply | More control over cluster components and configuration |
+| Operational effort | Less control-plane operational work | Generally more control-plane maintenance work |
+| Cost | EKS service charges plus compute and related AWS costs | Infrastructure and operational costs depend on where and how it is run |
+
+#### 5. Practical Example
+
+Suppose you deploy a MERN application with Kubernetes.
+
+- With **EKS**, AWS operates the Kubernetes control plane. You configure the cluster access and networking, deploy your Node.js API, and choose compute such as EC2 managed node groups or supported Fargate workloads.
+- With **self-managed Kubernetes on EC2**, your team must also install and maintain the Kubernetes control plane, arrange its availability, handle upgrades, and maintain components such as etcd, in addition to managing application workloads.
+
+#### 6. When to Use Each
+
+- Use **EKS** when you want Kubernetes on AWS with less control-plane operational burden and AWS service integration.
+- Consider **self-managed Kubernetes** when you need deeper control over cluster internals and have the expertise and operational capacity to maintain them.
+
+#### 7. Summary
+
+**Interview-ready answer:** Amazon EKS is a managed Kubernetes service in which AWS operates the control plane, reducing the amount of control-plane maintenance the team must perform. With self-managed Kubernetes, the team is responsible for installing, securing, upgrading, and maintaining the control plane and supporting infrastructure. EKS generally reduces operational overhead, while self-managed Kubernetes offers more direct control but requires more expertise and ongoing maintenance.
+
+---
