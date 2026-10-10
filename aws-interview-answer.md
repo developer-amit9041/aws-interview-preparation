@@ -6186,3 +6186,57 @@ MERN production example: ALB incoming requests ko multiple Node.js EC2 instances
 - Dono approaches ek architecture mein saath bhi use ho sakti hain.
 
 ---
+
+### Q94. What is Horizontal Scaling?
+
+#### 1. English Definition
+
+**Horizontal scaling is the process of adding or removing multiple servers or instances to handle changes in application workload, rather than increasing the capacity of a single server.**
+
+#### 2. Hindi Definition
+
+Horizontal Scaling ka matlab application ka load handle karne ke liye multiple servers ya EC2 instances add karna, aur demand kam hone par unhe reduce karna hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js application ek EC2 instance par chal rahi hai. Jab traffic badhta hai, ek server par saara load aa sakta hai.
+
+Horizontal Scaling mein tum application ko multiple EC2 instances par run karte ho. Application Load Balancer incoming requests ko available healthy instances mein distribute karta hai, aur Auto Scaling Group demand ke according instances add ya remove kar sakta hai.
+
+Is tarah workload multiple servers share karte hain. Lekin application ko multi-instance environment ke liye ready hona chahiye, especially sessions, uploaded files aur shared state ke liye.
+
+#### 4. Practical Example: MERN Application
+
+```text
+                 Users
+                   |
+                   v
+        Application Load Balancer
+                   |
+          +--------+--------+
+          |        |        |
+          v        v        v
+       EC2 #1   EC2 #2   EC2 #3
+       Node.js  Node.js  Node.js
+
+       Auto Scaling Group can add/remove instances
+```
+
+Example: Normal traffic par 2 EC2 instances chal rahe hain. Traffic increase hone par Auto Scaling Group third instance launch kar sakta hai, provided scaling policies and capacity limits allow it. ALB new healthy target ko traffic route kar sakta hai after it is registered and passes health checks.
+
+#### 5. Benefits of Horizontal Scaling
+
+- More requests ko multiple instances par distribute karne mein help karta hai.
+- Properly designed architecture mein availability improve ho sakti hai, kyunki ek instance fail hone par doosre healthy instances serve kar sakte hain.
+- Auto Scaling ke through demand ke according capacity adjust ki ja sakti hai.
+- Large workloads ke liye capacity ko multiple instances ke across expand kar sakte ho.
+
+#### 6. Important Points
+
+- Horizontal Scaling = **more servers/instances**; Vertical Scaling = **a more powerful server**.
+- AWS mein EC2 Auto Scaling Group horizontal scaling ka common approach hai.
+- ALB ya another load-balancing mechanism requests distribute karne mein help karta hai.
+- Session state, local file storage, background jobs, and database capacity ko carefully design karna zaroori hai; extra EC2 instances alone do not guarantee that every component scales.
+- Scaling behavior policies, health checks, quotas, and application startup time par depend karta hai.
+
+---
