@@ -10178,3 +10178,107 @@ Returned configuration mein `DistributionConfig.Origins` ke andar origin definit
 **Remember:** Origin content ka source hai; CloudFront distribution us source ko use karke content ko cache aur users tak deliver karne ke rules define karti hai.
 
 ---
+
+### Q151. What is CloudFront Cache?
+
+#### 1. English Definition
+
+**CloudFront caching is the process of temporarily storing copies of origin content at CloudFront edge locations so that subsequent eligible requests can be served without fetching the content from the origin every time.**
+
+#### 2. Hindi Definition
+
+CloudFront Cache ka matlab origin se aaye content ki copy ko kuch samay ke liye edge location par store karna hai, taaki agali eligible request par content ko har baar original server se fetch na karna pade.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN website par ek product image S3 bucket mein hai.
+
+Pehli baar user image request karta hai aur CloudFront ke paas valid cached copy nahi hoti, toh CloudFront image ko S3 origin se fetch kar sakta hai. Cache settings allow karein toh CloudFront uski copy store kar sakta hai.
+
+Jab doosra user ya same user image dobara request karta hai, toh valid cached copy available hone par CloudFront us image ko edge se serve kar sakta hai.
+
+Isse:
+- Response time kam ho sakta hai.
+- Repeated origin requests reduce ho sakti hain.
+- Origin server ka workload kam ho sakta hai.
+
+Caching har response ke liye automatic ya appropriate nahi hoti. Cache policy, TTL, origin headers aur request ke cache key par behavior depend karta hai.
+
+#### 4. Practical Example
+
+E-commerce application mein product image ka URL hai `/products/shoe.jpg`.
+
+1. User image request karta hai.
+2. CloudFront cache check karta hai.
+3. Cache miss par image S3 origin se fetch hoti hai.
+4. Configuration ke according response cache ho sakta hai.
+5. Agli eligible request par cached image serve ho sakti hai jab tak cache entry valid hai.
+
+Personalized ya sensitive API response ko shared cache mein store karne se pehle cache key aur policy carefully design karni chahiye.
+
+#### 5. Architecture Diagram — Request Flow
+
+```text
+User requests /products/shoe.jpg
+               |
+               v
+       CloudFront Edge
+               |
+               v
+          Cache check
+           /       \
+          /         \
+     Cache hit    Cache miss
+         |             |
+         v             v
+   Serve cached     Fetch from
+      image         S3 origin
+         |             |
+         |        May store copy
+         |        according to policy
+         |             |
+         +------<------+
+               |
+               v
+        Response to user
+```
+
+**Flow:** Request → cache lookup → valid cache hit par edge se response; cache miss par origin fetch → cache policy ke according response store ho sakta hai → response user ko milta hai.
+
+#### 6. Practical Command / Configuration
+
+CloudFront distribution ki configuration check karo:
+
+```bash
+aws cloudfront get-distribution-config --id YOUR_DISTRIBUTION_ID
+```
+
+Cache policy ki details dekhne ke liye, agar policy ID pata ho:
+
+```bash
+aws cloudfront get-cache-policy --id YOUR_CACHE_POLICY_ID
+```
+
+**Cache configuration mein important points:**
+- **TTL:** Minimum, default aur maximum time-to-live settings set karo.
+- **Cache key:** Sirf required query strings, headers aur cookies include karo.
+- **Origin Cache-Control headers:** Origin se aane wale cache directives ko samjho aur policy ke saath configure karo.
+- **Invalidation/versioning:** Updated content jaldi serve karna ho toh invalidation ya versioned filenames use karo.
+- **Dynamic responses:** User-specific data ko galti se shared cache mein serve mat hone do.
+
+Commands ke liye AWS CLI credentials aur required IAM permissions configured honi chahiye.
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| CloudFront cache | Edge par stored content ki temporary copy |
+| Cache hit | Valid content cache se serve hota hai |
+| Cache miss | CloudFront origin se content fetch kar sakta hai |
+| TTL | Cache entry kitni der tak fresh reh sakti hai |
+| Cache key | Request values jo cached variants ko identify karti hain |
+| Invalidation | Selected cached objects ko remove karne ki request |
+
+**Remember:** CloudFront cache repeated requests par content ko origin se dobara fetch karne ki zaroorat kam karta hai. Correct cache policy aur TTL performance ke saath content freshness aur privacy ke liye bhi important hain.
+
+---
