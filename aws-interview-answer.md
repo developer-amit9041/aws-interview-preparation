@@ -8367,3 +8367,68 @@ Agar `APP_ENV` ki value `production` set hai, toh response mein environment `pro
 - **Passwords, API keys, aur database credentials ko plain environment variables mein rakhne ke bajaye AWS Secrets Manager ya Systems Manager Parameter Store jaise services use karna consider karo.** Lambda environment variables encryption support karte hain, lekin secrets ke liye dedicated secret-management controls behtar hote hain.
 - Environment variables mein sensitive data log mat karo.
 
+### Q130. How do you give Lambda access to S3?
+
+#### 1. English Definition
+
+You give an AWS Lambda function access to Amazon S3 by assigning an **IAM execution role** to the function and attaching a policy that grants only the required S3 permissions.
+
+#### 2. Hindi Definition
+
+Lambda ko S3 access dene ke liye uske saath IAM execution role attach karte hain, aur us role ki policy mein required S3 permissions dete hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo Lambda function ko S3 bucket se file read karni hai. Sirf bucket ka naam code mein dene se permission nahi milti. Lambda ki execution role ko `s3:GetObject` permission deni hogi. Agar file upload karni hai, toh required bucket par `s3:PutObject` permission do.
+
+**Steps:**
+
+1. AWS IAM mein Lambda ke liye execution role create karo, ya existing role open karo.
+2. Role ki permissions mein required bucket aur actions allow karo.
+3. Lambda console mein **Configuration → Permissions** se verify karo ki function wahi execution role use kar raha hai.
+4. Node.js code mein AWS SDK for JavaScript use karke S3 operation perform karo.
+
+#### 4. Practical Example: Read an Object from S3 (Node.js)
+
+IAM policy ka example—bucket aur object path ko apne actual resource ke hisaab se replace karo:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::my-example-bucket/*"
+    }
+  ]
+}
+```
+
+Node.js Lambda code:
+
+```js
+const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const s3 = new S3Client({});
+
+exports.handler = async () => {
+  const result = await s3.send(new GetObjectCommand({
+    Bucket: "my-example-bucket",
+    Key: "reports/report.json"
+  }));
+
+  const body = await result.Body.transformToString();
+  return { statusCode: 200, body };
+};
+```
+
+Ensure the AWS SDK v3 package is included in your deployment package or otherwise available in your runtime. This example reads an object; large files may need streaming rather than loading the entire body into memory.
+
+#### 5. Important Points
+
+- **Use IAM execution roles**, not hardcoded AWS access keys in the function.
+- Grant least privilege: only the required actions and specific bucket/object ARN.
+- Reading objects usually needs `s3:GetObject`; uploading needs `s3:PutObject`; listing a bucket generally needs `s3:ListBucket` on the bucket ARN itself.
+- If the bucket uses SSE-KMS encryption, the role may also need appropriate KMS permissions.
+- If access still fails, check the bucket policy, KMS key policy, and any organization-level restrictions as well as the IAM role.
+
