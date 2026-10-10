@@ -8664,3 +8664,97 @@ aws lambda put-provisioned-concurrency-config \
 | Limitation | Provisioned capacity se zyada traffic par additional requests ko cold starts face karne pad sakte hain |
 
 ---
+
+## 10. API Gateway
+
+### Q135. What is API Gateway?
+
+#### 1. English Definition
+
+**Amazon API Gateway is a fully managed AWS service that allows developers to create, publish, secure, monitor, and manage APIs at any scale. It can route client requests to backend services such as AWS Lambda functions or HTTP endpoints.**
+
+#### 2. Hindi Definition
+
+Amazon API Gateway AWS ki fully managed service hai, jiska use APIs ko create, publish, secure, monitor aur manage karne ke liye hota hai. Yeh client ki request ko backend service, jaise AWS Lambda ya HTTP endpoint, tak pahunchata hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumne React frontend aur Node.js backend banaya hai. Frontend se jab user login, registration ya payment request bhejta hai, toh us request ko backend tak pahunchane ke liye API endpoint chahiye.
+
+Agar backend AWS Lambda par hai, toh **API Gateway frontend aur Lambda ke beech entry point** ki tarah kaam kar sakta hai. Yeh HTTP requests receive karta hai, configured route ke according backend ko request forward karta hai, aur backend ka response client ko return karta hai.
+
+API Gateway ke useful features mein authentication/authorization integration, throttling, request/response handling, monitoring aur API management shamil hain.
+
+#### 4. Practical Example — MERN Application
+
+Suppose tumhari application mein login API AWS Lambda par deploy hai:
+
+- **Frontend:** React.js
+- **API entry point:** Amazon API Gateway
+- **Backend:** AWS Lambda with Node.js
+- **Database:** MongoDB Atlas ya koi suitable database
+
+React frontend request bhejta hai:
+
+```http
+POST https://your-api-id.execute-api.region.amazonaws.com/prod/login
+Content-Type: application/json
+
+{
+  "email": "amit@example.com",
+  "password": "example-password"
+}
+```
+
+API Gateway configured `POST /login` route ke through request ko Lambda function tak bhej sakta hai. Lambda credentials validate karke response return karta hai, aur API Gateway woh response frontend ko de deta hai.
+
+**Note:** Yeh illustrative request hai. Real application mein HTTPS use karo, passwords ko securely hash karo, aur secrets ko source code mein hardcode mat karo.
+
+#### 5. Architecture Diagram
+
+```text
+       React.js Frontend
+              |
+              | HTTPS API request
+              v
+      Amazon API Gateway
+       (route / security)
+              |
+              v
+       AWS Lambda (Node.js)
+              |
+              v
+     Database / Other Services
+              |
+              v
+       Lambda response
+              |
+              v
+      API Gateway response
+              |
+              v
+       React.js Frontend
+```
+
+#### 6. Important Points
+
+- API Gateway ek managed API entry point provide karta hai; backend business logic normally Lambda ya kisi backend service mein hoti hai.
+- It supports API styles such as **HTTP APIs** and **REST APIs**; WebSocket APIs are also available for bidirectional communication.
+- It can integrate with Lambda and other supported AWS or HTTP backends.
+- Authentication and authorization can be configured using supported mechanisms such as IAM, Lambda authorizers, or Amazon Cognito, depending on the API type and design.
+- Throttling and quotas help control request rates, but they do not replace application-level security.
+- API Gateway usage and configuration may incur charges, depending on the API type and usage.
+
+#### 7. Summary Table
+
+| Topic | Easy Meaning |
+|---|---|
+| API Gateway | APIs ke liye managed entry point |
+| Main purpose | Client requests ko configured backend tak route karna |
+| Backend integration | AWS Lambda, HTTP endpoints, and supported AWS services |
+| Security | Authentication/authorization integrations and resource policies |
+| Traffic control | Throttling and quotas |
+| Monitoring | Metrics and logging integrations |
+| Example | React login request → API Gateway → Lambda → response |
+
+---
