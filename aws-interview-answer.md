@@ -8316,3 +8316,54 @@ Agar is function ka timeout **5 seconds** hai, toh 7-second delay complete hone 
 - Database/API calls ke liye suitable client-side timeout bhi configure karo.
 - Timeout ke baad external side effect already ho chuka ho sakta hai; retries ke case mein duplicate processing se bachne ke liye idempotency consider karo.
 
+### Q129. What are Lambda Environment Variables?
+
+#### 1. English Definition
+
+**Lambda environment variables** are key-value pairs that store configuration values for an AWS Lambda function, allowing code to access settings without hardcoding them.
+
+#### 2. Hindi Definition
+
+Lambda environment variables key-value pairs hote hain jinmein hum function ki configuration store karte hain, jaise API URL, environment name, ya database configuration.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhare MERN project ki Lambda function ko kisi API ko call karna hai. API URL ko code mein hardcode karne ke bajaye environment variable mein rakh sakte ho.
+
+Example variables:
+
+- `NODE_ENV = production`
+- `API_BASE_URL = https://api.example.com`
+- `LOG_LEVEL = info`
+
+Node.js Lambda mein in values ko `process.env` se read karte hain. Isse configuration code se alag rehti hai, aur dev/staging/production ke liye different values set kar sakte ho.
+
+#### 4. Practical Node.js Example
+
+AWS Lambda console mein **Configuration → Environment variables → Edit** par jaakar `APP_ENV` naam ka variable aur `production` value add karo.
+
+```js
+exports.handler = async () => {
+  const environment = process.env.APP_ENV || "development";
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: "Lambda executed",
+      environment
+    })
+  };
+};
+```
+
+Agar `APP_ENV` ki value `production` set hai, toh response mein environment `production` aayega.
+
+#### 5. Important Points
+
+- Environment variables configuration ko code se separate rakhte hain.
+- Node.js mein inhe `process.env.VARIABLE_NAME` se access karte hain.
+- Values strings hoti hain; numbers ya booleans chahiye hon toh convert/parse karo.
+- Environment variables ko update karne se Lambda function ka configuration update hota hai, aur function ko naye configuration ke saath invoke kiya jaata hai.
+- **Passwords, API keys, aur database credentials ko plain environment variables mein rakhne ke bajaye AWS Secrets Manager ya Systems Manager Parameter Store jaise services use karna consider karo.** Lambda environment variables encryption support karte hain, lekin secrets ke liye dedicated secret-management controls behtar hote hain.
+- Environment variables mein sensitive data log mat karo.
+
