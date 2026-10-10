@@ -2293,3 +2293,104 @@ Request Nginx par aayegi aur Nginx use `127.0.0.1:5000` par chal rahi Express ap
 **To configure Nginx with EC2, I install and start Nginx, allow HTTP/HTTPS in the EC2 Security Group, configure Nginx as a reverse proxy to my Node.js application's local port, test the configuration with `nginx -t`, and reload Nginx. This lets users access the application through the public IP or domain without exposing the Node.js port directly.**
 
 ---
+
+### Q35. How do you attach an EBS volume?
+
+#### 1. English Definition
+
+**An Amazon EBS volume is a block storage device that you can attach to an EC2 instance to provide persistent storage for application files, databases, and other data.**
+
+#### 2. Hindi Definition
+
+EBS volume AWS ka virtual hard disk jaisa storage hota hai, jise EC2 instance ke saath attach karke application ka data store kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application AWS EC2 par chal rahi hai aur tumhe uploads, logs ya database files store karne ke liye extra storage chahiye. Tum ek EBS volume create karke EC2 se attach kar sakte ho.
+
+**Important:** AWS Console se volume attach karna aur Linux ke andar us volume ko usable banana do alag steps hain. Naye blank volume ko aam taur par format (filesystem create) aur mount karna padta hai.
+
+#### 4. Practical Example — Attach an EBS Volume to EC2
+
+**Step 1: Create an EBS volume**
+
+1. AWS Console mein **EC2 → Volumes** open karo.
+2. **Create volume** select karo.
+3. Size aur volume type choose karo.
+4. Volume ko usi Availability Zone mein create karo jahan target EC2 instance hai.
+5. Create volume par click karo.
+
+**Step 2: Attach the volume**
+
+1. Volume select karo.
+2. **Actions → Attach volume** choose karo.
+3. Target EC2 instance select karo.
+4. Device name choose/confirm karo, jaise `/dev/sdf` (device naming instance type aur OS ke hisaab se differ kar sakti hai).
+5. Attach volume par click karo.
+
+**Step 3: SSH into the EC2 instance and identify the device**
+
+```bash
+lsblk
+```
+
+Device ka naam `/dev/sdf` se alag dikh sakta hai; Nitro-based instances par aksar NVMe device, jaise `/dev/nvme1n1`, dikhai deta hai. `lsblk` output se correct new disk identify karo.
+
+**Step 4: Format the volume only if it is new and blank**
+
+Pehle filesystem check karo. Neeche `/dev/nvme1n1` sirf example hai—apne actual device name se replace karo.
+
+```bash
+sudo file -s /dev/nvme1n1
+```
+
+Agar volume naya aur blank hai, filesystem create kar sakte ho:
+
+```bash
+sudo mkfs -t ext4 /dev/nvme1n1
+```
+
+**Warning:** `mkfs` existing filesystem/data ko destroy kar sakta hai. Existing ya restored volume par bina verify kiye ise kabhi run mat karo.
+
+**Step 5: Create a mount point and mount the volume**
+
+```bash
+sudo mkdir -p /data
+sudo mount /dev/nvme1n1 /data
+df -h
+```
+
+Ab volume `/data` directory par accessible hoga. Application ko access dene ke liye zaroorat ke mutabik ownership/permissions configure karo; permissions ko unnecessarily broad mat rakho.
+
+**Step 6: Configure mounting after reboot (optional)**
+
+Agar reboot ke baad bhi mount chahiye, toh filesystem UUID nikaalo:
+
+```bash
+sudo blkid /dev/nvme1n1
+```
+
+UUID ko `/etc/fstab` mein use karo, for example:
+
+```text
+UUID=YOUR-FILESYSTEM-UUID  /data  ext4  defaults,nofail  0  2
+```
+
+Actual UUID aur filesystem type use karo. `/etc/fstab` edit karne ke baad reboot se pehle configuration test karo:
+
+```bash
+sudo mount -a
+```
+
+#### 5. Important Points
+
+- EBS volume aur EC2 instance same Availability Zone mein hone chahiye for a normal attachment.
+- EBS volume ek time par generally ek instance se attach hota hai, except supported Multi-Attach configurations for eligible volume types and instances.
+- Existing volume ko format mat karo; pehle uska filesystem aur data verify karo.
+- Detach karne se pehle data flush karo aur volume ko unmount karna generally recommended hai.
+
+#### 6. Interview Summary
+
+**I create an EBS volume in the same Availability Zone as the EC2 instance, attach it through the EC2 console, identify the device inside the operating system, and—if it is a new blank volume—create a filesystem and mount it. For persistent mounting after reboot, I configure `/etc/fstab` using the filesystem UUID and test it with `mount -a`.**
+
+---
