@@ -14280,3 +14280,144 @@ Each subscribed queue receives the SNS notification, typically as an SNS envelop
 **Interview-ready answer:** SNS and SQS work together to implement fan-out. A producer publishes one event to an SNS topic, which delivers a copy to each subscribed SQS queue. Each queue buffers the message for its own consumer, enabling independent, scalable processing. Correct queue policies, retry/DLQ configuration, and idempotent consumers are important for reliability.
 
 ---
+
+### Q189. How would you process background jobs using SQS?
+
+#### 1. English Definition
+
+Background jobs can be processed using Amazon SQS by sending tasks to a queue and running one or more worker processes that poll the queue, execute each task, and delete the message only after successful processing.
+
+#### 2. Hindi Definition
+
+SQS ke through background jobs process karne ke liye application task ko queue mein bhejti hai. Worker queue se message receive karta hai, task perform karta hai, aur success ke baad message delete karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo MERN application mein user signup karta hai aur tumhe welcome email bhi bhejni hai. Email bhejne ke liye user ki API request ko wait karwana zaroori nahi hai.
+
+1. Express API user create karti hai.
+2. API email job ko SQS queue mein bhej deti hai.
+3. API user ko response return kar deti hai.
+4. Background worker SQS se job receive karta hai aur email bhejta hai.
+5. Email successfully send hone par worker SQS message delete karta hai.
+
+Isse API fast rehti hai aur worker ko independently scale kiya ja sakta hai. Agar worker fail ho aur message delete na kare, toh visibility timeout ke baad message dobara available ho sakta hai. Repeated failures ke liye DLQ configure karo.
+
+#### 4. Practical Architecture
+
+```text
+Client
+  |
+  v
+Express / Node.js API ---> SQS Queue
+  |                          |
+  v                          v
+Fast API response        Background Worker
+                             |
+                             v
+                     Send email / generate PDF
+                             |
+                             v
+                    Delete message on success
+```
+
+#### 5. Practical Node.js Example
+
+Install AWS SDK v3:
+
+```bash
+npm install @aws-sdk/client-sqs
+```
+
+**Producer: send a job from the API**
+
+```javascript
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
+
+const sqs = new SQSClient({ region: "ap-south-1" });
+
+export async function enqueueWelcomeEmail(user) {
+  await sqs.send(new SendMessageCommand({
+    QueueUrl: process.env.EMAIL_QUEUE_URL,
+    MessageBody: JSON.stringify({
+      type: "WELCOME_EMAIL",
+      userId: user.id,
+      email: user.email,
+    }),
+  }));
+}
+```
+
+**Worker: receive, process, then delete**
+
+```javascript
+import {
+  SQSClient,
+  ReceiveMessageCommand,
+  DeleteMessageCommand,
+} from "@aws-sdk/client-sqs";
+
+const sqs = new SQSClient({ region: "ap-south-1" });
+const queueUrl = process.env.EMAIL_QUEUE_URL;
+
+async function processMessages() {
+  const result = await sqs.send(new ReceiveMessageCommand({
+    QueueUrl: queueUrl,
+    MaxNumberOfMessages: 10,
+    WaitTimeSeconds: 20, // long polling
+    VisibilityTimeout: 60,
+  }));
+
+  for (const message of result.Messages ?? []) {
+    try {
+      const job = JSON.parse(message.Body ?? "{}");
+      await sendWelcomeEmail(job.email);
+
+      await sqs.send(new DeleteMessageCommand({
+        QueueUrl: queueUrl,
+        ReceiptHandle: message.ReceiptHandle,
+      }));
+    } catch (error) {
+      console.error("Job failed; message will be retried:", error);
+      // Do not delete failed messages. Configure a DLQ/redrive policy.
+    }
+  }
+}
+
+// Run repeatedly in a managed worker process.
+```
+
+`sendWelcomeEmail()` is an application function you implement. Run the worker as a separate process/container or managed service; add controlled concurrency, graceful shutdown, logging, and monitoring for production. Give the worker's IAM role only the required SQS permissions.
+
+#### 6. Practical Configuration and Best Practices
+
+- **Long polling:** Use `WaitTimeSeconds` (up to 20 seconds) to reduce empty receives and API calls.
+- **Visibility timeout:** Set it longer than normal job processing time; extend it if a job may take longer. A message not deleted before it becomes visible can be processed again.
+- **Retries and DLQ:** Configure a redrive policy and suitable `maxReceiveCount` for repeatedly failing jobs.
+- **Idempotency:** SQS Standard queues can deliver duplicates, so make job handlers safe to run more than once (for example, track completed job IDs).
+- **Scaling:** Scale worker count based on queue depth and processing latency; keep concurrency within downstream service limits.
+- **Job payload:** Store only necessary data in the message. For large payloads, store the data in S3 and put its reference in SQS.
+- **Security:** Use IAM roles and environment variables for configuration; do not embed AWS access keys in code.
+
+Create a queue:
+
+```bash
+aws sqs create-queue \
+  --queue-name email-jobs \
+  --region ap-south-1
+```
+
+#### 7. Summary Table
+
+| Component | Responsibility |
+|---|---|
+| API / producer | Adds background task to SQS |
+| SQS queue | Buffers jobs until they are processed or expire |
+| Worker | Receives messages and performs tasks |
+| DeleteMessage | Acknowledges successful processing by removing the message |
+| Visibility timeout | Temporarily hides a received message from other consumers |
+| DLQ | Isolates jobs that repeatedly fail |
+
+**Interview-ready answer:** I would enqueue a job from my Node.js API into SQS and process it using a separate worker service. The worker polls with long polling, processes the task, and deletes the message only after success. I would configure visibility timeout, retries and a DLQ, make handlers idempotent to handle duplicate deliveries, and scale workers based on queue depth.
+
+---
