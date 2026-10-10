@@ -18132,3 +18132,56 @@ The command returns key metadata, including a key ID and ARN. Creating a key doe
 **Interview-ready answer:** AWS Key Management Service (KMS) is a managed service for creating and controlling cryptographic keys used to encrypt and decrypt data. It integrates with services such as S3, EBS, and Secrets Manager, supports access control through key policies and IAM, and provides audit visibility through CloudTrail. KMS is commonly used with envelope encryption, where data is encrypted using a data key and that data key is protected by a KMS key.
 
 ---
+
+### Q233. What is Encryption at Rest?
+
+#### 1. English Definition
+
+Encryption at Rest is a security measure that encrypts data while it is stored on a device or storage system, so that the stored data is unreadable without the appropriate decryption key or authorization.
+
+#### 2. Hindi Definition
+
+Encryption at Rest ka matlab hai stored data ko encrypt karke rakhna, taaki agar koi unauthorized person storage tak pahunch bhi jaye, toh woh key ya permission ke bina data ko aasani se read na kar sake.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application ka database, files, ya backups AWS par stored hain. Agar storage device ya backup kisi unauthorized person ke haath lag jaye, toh encryption at rest stored data ko protect karne mein help karta hai.
+
+Simple example:
+- Without encryption: stored data directly readable ho sakta hai, agar attacker ko storage access mil jaye.
+- With encryption: data encrypted form mein hota hai aur use readable banane ke liye appropriate decryption key aur access permissions chahiye hoti hain.
+
+Encryption at rest data ko storage par protect karta hai. Data jab network par travel kar raha ho, uske liye **encryption in transit** (jaise TLS/HTTPS) use hoti hai. Dono alag security layers hain.
+
+#### 4. Practical AWS Examples
+
+- **Amazon S3:** Enable server-side encryption for stored objects.
+- **Amazon EBS:** Encrypt EC2-attached volumes and snapshots.
+- **Amazon RDS:** Enable encryption for supported database storage and backups.
+- **AWS Secrets Manager:** Secret values are encrypted at rest using AWS KMS.
+
+Many AWS services support encryption at rest, but the exact setup and defaults depend on the service and resource configuration. Confirm that encryption is enabled for the resources your application uses.
+
+#### 5. AWS KMS Connection
+
+AWS Key Management Service (KMS) helps create and manage encryption keys used by supported AWS services. In many service integrations, the service encrypts data using a data key and KMS protects or manages the key-encryption process.
+
+Best practices:
+- Enable encryption for databases, disks, object storage, and backups that contain sensitive data.
+- Restrict key usage with IAM and key policies; follow least privilege.
+- Protect and monitor key access, and plan key rotation according to the service and key type.
+- Remember that encryption does not replace IAM permissions, network security, backups, or application-level access controls.
+
+#### 6. Summary Table
+
+| Term | Meaning |
+|---|---|
+| Encryption at Rest | Protects data while stored |
+| Encryption in Transit | Protects data while moving over a network |
+| AWS KMS | Helps manage encryption keys |
+| Example services | S3, EBS, RDS, Secrets Manager |
+| Main benefit | Reduces exposure if stored data is accessed without authorization |
+
+**Interview-ready answer:** Encryption at Rest protects stored data by encrypting it on storage systems, databases, disks, and backups. The data generally requires the appropriate key and authorization to be decrypted. In AWS, services such as S3, EBS, RDS, and Secrets Manager support encryption at rest, often using AWS KMS. It should be combined with encryption in transit and proper access controls.
+
+---
