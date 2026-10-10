@@ -6592,3 +6592,68 @@ For many production applications that need a supported relational engine, RDS is
 - Amazon RDS is for supported relational engines; MongoDB is not an RDS engine. MongoDB Atlas, self-managed MongoDB, and Amazon DocumentDB are separate options with different compatibility and operational trade-offs.
 
 ---
+
+### Q101. What is Multi-AZ?
+
+#### 1. English Definition
+
+**Multi-AZ is an AWS deployment option that places or maintains database resources across multiple Availability Zones to improve availability and support failover if an Availability Zone or primary database becomes unavailable.**
+
+#### 2. Hindi Definition
+
+Multi-AZ AWS ka deployment option hai jisme database ko multiple Availability Zones ke across configure kiya jaata hai, taaki primary database ya uski Availability Zone fail hone par availability improve ho aur supported setup mein failover ho sake.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari application Amazon RDS par PostgreSQL database use kar rahi hai. Agar database sirf ek Availability Zone mein hai aur us zone mein problem aa jaati hai, toh application ka database access interrupt ho sakta hai.
+
+RDS Multi-AZ deployment mein AWS supported configuration ke according database ki standby ya redundant copy ko doosri Availability Zone mein maintain karta hai. Primary database unavailable hone par RDS failover kar sakta hai, jisse standby database primary role le leta hai.
+
+Isse availability improve hoti hai aur manual recovery ki zaroorat kam ho sakti hai. Failover ke dauran short interruption ho sakta hai, isliye Multi-AZ ka matlab zero downtime guarantee nahi hai.
+
+#### 4. Practical Example
+
+```text
+             Node.js Application
+                     |
+                     v
+              Amazon RDS endpoint
+                     |
+            +--------+--------+
+            |                 |
+            v                 v
+      Availability Zone A  Availability Zone B
+        Primary DB          Standby DB
+            |                 ^
+            +--- replication --+
+
+If primary becomes unavailable, supported Multi-AZ setup can fail over.
+```
+
+The diagram shows a common Multi-AZ DB instance deployment pattern. Exact architecture and replication behavior depend on the RDS engine and deployment type.
+
+#### 5. Benefits of Multi-AZ
+
+- **High availability:** Database redundancy across Availability Zones can reduce the impact of an AZ-level failure.
+- **Failover support:** RDS can promote a standby in supported deployments when the primary is unavailable.
+- **Reduced manual recovery:** AWS manages much of the failover process.
+- **Improved resilience:** Helps production applications recover from certain infrastructure failures.
+
+#### 6. Multi-AZ vs Read Replica
+
+| Basis | Multi-AZ | Read Replica |
+|---|---|---|
+| Main purpose | High availability and failover | Read scaling and, in some engines/configurations, disaster recovery options |
+| Typical use | Keep a standby ready for failover | Offload read queries or serve read-heavy workloads |
+| Read traffic | Traditional standby DB instance deployments are not used for normal read traffic | Read replicas can serve read queries |
+| Replication | Commonly synchronous for supported Multi-AZ DB instance deployments | Commonly asynchronous, depending on engine and setup |
+
+#### 7. Important Points
+
+- Multi-AZ and Read Replicas solve different primary problems: availability/failover versus read scaling.
+- Multi-AZ availability options and architecture differ by database engine and RDS deployment type; some Multi-AZ configurations use multiple readable standbys.
+- Multi-AZ is not a substitute for backups. Keep backups and test recovery procedures.
+- Failover can cause a brief connection interruption; applications should reconnect safely and retry transient failures.
+- Multi-AZ typically costs more than a single-AZ deployment because additional resources are provisioned.
+
+---
