@@ -17307,3 +17307,103 @@ Application running
 **Interview-ready answer:** I would connect GitHub to AWS CodePipeline, use CodeBuild to install dependencies, run tests, and build a Docker image, then push that image to Amazon ECR with a unique commit-based tag. The deployment stage would update an ECS task definition or an EKS Kubernetes Deployment to use that exact image. I would secure the pipeline with least-privilege IAM roles, protect secrets, scan images, verify health, and configure rollback.
 
 ---
+
+### Q221. How do you deploy a Node.js application automatically?
+
+#### 1. English Definition
+
+Automatic deployment uses a CI/CD pipeline to test, package, and release a Node.js application to a target environment whenever configured conditions are met, reducing manual deployment steps.
+
+#### 2. Hindi Definition
+
+Automatic deployment mein CI/CD pipeline code ko automatically test karti hai, package ya Docker image banati hai, aur configured conditions pass hone par Node.js application ko server ya AWS service par deploy karti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js application GitHub par hai. Tum chahte ho ki `main` branch par code push karte hi application automatically deploy ho jaye.
+
+Typical flow:
+
+1. Developer GitHub par code push karta hai.
+2. CI workflow dependencies install karke tests run karti hai.
+3. Docker image build hoti hai aur Amazon ECR mein push hoti hai.
+4. Deployment step ECS service ya EKS Deployment ko new image version par update karta hai.
+5. Health checks aur logs se verify karte hain ki deployment successful hai.
+
+GitHub Actions + AWS use kar sakte ho, ya GitHub ko AWS CodePipeline ke source stage se connect karke CodeBuild aur deployment actions configure kar sakte ho.
+
+#### 4. Practical Example: GitHub Actions to Amazon ECR
+
+Below workflow tests the Node.js application and pushes a Docker image to ECR when code is pushed to `main`. It does not perform the final ECS/EKS deployment yet; that requires a separate deployment job or action.
+
+```yaml
+name: Node.js CI and ECR
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install and test
+        run: |
+          npm ci
+          npm test --if-present
+
+      - name: Configure AWS credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/<GITHUB_ACTIONS_ROLE>
+          aws-region: ap-south-1
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          REPOSITORY: node-api
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+```
+
+Replace the account ID and role placeholders, create the ECR repository, and configure the IAM OIDC trust policy to allow only the intended GitHub repository/branch or environment. The role needs only the required ECR permissions. Pin third-party actions to reviewed commit SHAs for stronger supply-chain security.
+
+#### 5. Complete Deployment Stage
+
+- **For ECS:** Update the ECS task definition to use the exact ECR image tag (such as the commit SHA), then deploy the new task definition to the ECS service.
+- **For EKS:** Update the Kubernetes Deployment or Helm values to use that image tag, then apply the configuration using a securely authorized deployment step.
+- **For EC2:** A suitable deployment workflow can copy or release application artifacts and restart the service, or use a deployment tool such as CodeDeploy.
+
+Use health checks, logs, deployment status checks, and a rollback strategy. Store credentials in a secret manager or use short-lived OIDC-based AWS credentials; never hardcode credentials in source code or Docker images.
+
+#### 6. Summary Table
+
+| Step | Tool | Purpose |
+|---|---|---|
+| Source trigger | GitHub | Starts the workflow on a code change |
+| CI | GitHub Actions / CodeBuild | Installs dependencies and runs tests |
+| Packaging | Docker | Builds the application image |
+| Registry | Amazon ECR | Stores the versioned image |
+| Deployment | ECS / EKS tooling / CodeDeploy | Releases the application to the target |
+| Verification | Health checks and logs | Confirms deployment status |
+
+**Interview-ready answer:** I would set up a CI/CD workflow triggered by changes to the main branch. It would install dependencies, run tests, build a Docker image, push it to Amazon ECR with a unique commit-based tag, and then deploy that exact image to ECS or EKS. I would use short-lived AWS credentials through OIDC, least-privilege permissions, health checks, monitoring, and rollback controls to make deployments secure and reliable.
+
+---
