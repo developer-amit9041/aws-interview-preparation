@@ -7737,3 +7737,73 @@ Example: order item insert hone par Lambda stream record receive karti hai aur o
 - Stream processing ko duplicate delivery/retries handle karne ke liye idempotent design karna chahiye.
 
 ---
+
+### Q120. When would you choose DynamoDB over MongoDB?
+
+#### 1. English Definition
+
+**Choose DynamoDB over MongoDB when you need a fully managed, serverless NoSQL database tightly integrated with AWS, predictable low-latency access at scale, and your application’s access patterns can be designed around keys and indexes.**
+
+#### 2. Hindi Definition
+
+Jab application ko AWS ke saath deeply integrated, fully managed NoSQL database chahiye, jo large scale par low-latency reads/writes handle kare, aur data ko predefined keys aur indexes ke through access kiya ja sake, tab DynamoDB ko MongoDB ke upar choose kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, DynamoDB aur MongoDB dono NoSQL databases hain, lekin unki strengths alag hain.
+
+**DynamoDB choose karo jab:**
+- Application AWS par chal rahi ho aur tum AWS-native integration chahte ho.
+- Traffic bahut high ya variable ho aur managed/serverless scaling chahiye.
+- Tumhe predictable, low-latency access patterns chahiye, jaise `userId` se profile ya `orderId` se order fetch karna.
+- Tum data model ko partition keys, sort keys, aur indexes ke around design kar sakte ho.
+- Tum servers, database patching aur infrastructure management ko minimize karna chahte ho.
+
+**MongoDB choose karna better ho sakta hai jab:**
+- Tumhe flexible document model aur changing/nested JSON-like structures chahiye.
+- Queries aur filtering ka pattern frequently change hota ho ya ad-hoc queries important hon.
+- Tum aggregation pipeline aur MongoDB ecosystem/tools ko use karna chahte ho.
+- Tum existing MERN application mein MongoDB/Mongoose already use kar rahe ho.
+
+DynamoDB har case mein MongoDB se better nahi hai. DynamoDB mein access patterns ko pehle plan karna important hai; MongoDB flexible querying aur document-oriented development mein convenient ho sakta hai. MongoDB bhi managed service (MongoDB Atlas) ke through operate kiya ja sakta hai.
+
+#### 4. Practical Example
+
+```text
+Use case: AWS-based shopping app
+
+DynamoDB:
+- Fetch user profile by userId
+- Fetch order by orderId
+- Track session/cart data at high scale
+- Trigger workflows through DynamoDB Streams + Lambda
+
+MongoDB:
+- Product catalog with varied attributes
+- Search/filter combinations that change often
+- Flexible document queries and aggregations
+```
+
+These are examples, not strict rules: either database can support many of these workloads if modeled and operated appropriately.
+
+#### 5. DynamoDB vs MongoDB
+
+| Basis | DynamoDB | MongoDB |
+|---|---|---|
+| Service model | AWS-native, fully managed/serverless options | Self-managed or managed through MongoDB Atlas and other offerings |
+| Data model | Key-value and document database | Document database |
+| Scaling | AWS-managed scaling options; access patterns and partition design matter | Scaling options including sharding; deployment and configuration depend on offering |
+| Querying | Key-based access and secondary indexes; query design is important | Flexible queries, filters, and aggregation pipeline |
+| AWS integration | Native integration with Lambda, IAM, Streams, and other AWS services | Integrates with AWS applications too, but not as an AWS-native database service |
+| Best fit | AWS-centric workloads with well-defined access patterns | Flexible document workloads and diverse query patterns |
+| Operations | Less infrastructure management for the database service | Atlas reduces operations; self-managed deployments require more work |
+
+#### 6. Important Points
+
+- Choose based on access patterns, latency, scale, cost, query flexibility, and team expertise—not simply because one database is newer or faster.
+- DynamoDB is a strong choice for AWS-native, high-scale workloads with known query patterns.
+- MongoDB is often convenient for flexible document schemas, ad-hoc queries, and aggregation-heavy workloads.
+- Both can scale; actual performance and cost depend on schema, indexes, workload, and configuration.
+- For a MERN app already built around MongoDB/Mongoose, switching to DynamoDB is not automatically beneficial; it may require redesigning data access patterns and application code.
+
+---
