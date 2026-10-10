@@ -1795,3 +1795,77 @@ For application-consistent backups, especially databases, plan the snapshot proc
 **An EBS Snapshot is a point-in-time backup of an EBS volume that helps recover data or create a new volume from the saved state.**
 
 ---
+
+### Q30. How do you connect to an EC2 instance?
+
+#### 1. English Definition
+
+**You can connect to an EC2 instance using methods such as SSH for Linux, Remote Desktop Protocol (RDP) for Windows, EC2 Instance Connect where supported, or AWS Systems Manager Session Manager when the instance is configured for it.**
+
+#### 2. Hindi Definition
+
+EC2 instance se connect karne ke liye Linux par aam taur par SSH, Windows par RDP, aur supported setup mein EC2 Instance Connect ya AWS Systems Manager Session Manager use kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, EC2 ek cloud server hai. Us par login karke software install karna, commands chalana ya application deploy karna ho, toh tumhe remote connection banana hota hai. Connection ka method operating system aur instance ki networking/configuration par depend karta hai.
+
+- **Linux EC2:** SSH use karte hain, usually port 22.
+- **Windows EC2:** Remote Desktop (RDP) use karte hain, usually port 3389.
+- **EC2 Instance Connect:** Supported instances ke liye browser-based ya SSH-based connection option.
+- **Systems Manager Session Manager:** IAM permissions, SSM Agent, connectivity and instance prerequisites sahi hon toh SSH inbound port khole bina session start kar sakte ho.
+
+#### 4. Practical Example — Connect to Linux EC2 using SSH
+
+Prerequisites:
+- EC2 instance running ho.
+- Correct username aur private key file available ho, unless using another supported connection method.
+- Network route and security settings connection allow karte hon. Direct public SSH ke liye instance ko suitable public network path chahiye; private instances ke liye bastion/VPN/SSM jaise options use ho sakte hain.
+- Security Group mein TCP port 22 sirf trusted source IP se allow ho, if using direct SSH.
+
+Commands on macOS/Linux or Windows OpenSSH terminal:
+
+```bash
+chmod 400 my-key.pem
+ssh -i my-key.pem ec2-user@<EC2-PUBLIC-IP>
+```
+
+`ec2-user` Amazon Linux ke liye common username hai. Ubuntu AMI ke liye commonly `ubuntu` use hota hai. Actual username image par depend karta hai. Windows PowerShell mein `chmod` command available na ho toh file permissions Windows ke supported tools se secure karo; SSH command phir bhi OpenSSH ke saath use ho sakti hai.
+
+#### 5. Connection Flow
+
+```text
+Your Computer / AWS Console
+          |
+          | SSH (Linux) / RDP (Windows) / SSM
+          v
+Network route + security controls
+          |
+          v
+EC2 Instance
+          |
+          v
+Run commands / deploy application
+```
+
+#### 6. Common Connection Problems
+
+| Problem | What to check |
+|---|---|
+| Connection timeout | Instance state, route table, public IP/path, Security Group, NACL, firewall |
+| Permission denied (publickey) | Correct private key, login username, and instance's configured public key |
+| RDP cannot connect | Windows instance status, RDP settings, routing, and TCP 3389 rules limited to trusted IP |
+| SSM session unavailable | SSM Agent, IAM instance role, service connectivity, and SSM prerequisites |
+
+#### 7. Security Best Practices
+
+- SSH/RDP ko `0.0.0.0/0` se open karne se bacho; trusted IP ranges restrict karo.
+- Private keys ko secret rakho aur GitHub par upload mat karo.
+- Private instances ke liye Session Manager, VPN, or bastion architecture consider karo.
+- Sirf required ports allow karo.
+
+#### 8. Interview Summary
+
+**Linux EC2 instances are commonly accessed using SSH, Windows EC2 instances using RDP, and supported instances can also be accessed using EC2 Instance Connect or Systems Manager Session Manager. The required network and IAM configuration must be in place.**
+
+---
