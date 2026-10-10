@@ -3733,3 +3733,74 @@ If a report must be available immediately, choose an appropriate class such as G
 - Use S3 Standard for frequent, low-latency access; use Glacier classes for suitable archive workloads.
 
 ---
+
+### Q55. How do you secure an S3 bucket?
+
+#### 1. English Definition
+
+**You secure an S3 bucket by blocking unintended public access, applying least-privilege IAM and bucket policies, encrypting data, enabling appropriate monitoring and logging, and managing data recovery and retention.**
+
+#### 2. Hindi Definition
+
+S3 bucket ko secure karne ke liye unwanted public access block karte hain, limited permissions dete hain, data encrypt karte hain, activity monitor karte hain aur zaroorat ke according versioning aur retention configure karte hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein users ki invoices, profile images aur documents S3 bucket mein store hote hain. Agar bucket galti se public ho gayi ya kisi user/role ko extra permissions mil gayi, toh sensitive files expose ho sakti hain.
+
+Bucket ko secure karne ke important steps:
+
+1. **Block Public Access:** Jab tak public access ki genuine need na ho, S3 Block Public Access settings enabled rakho at account and bucket levels.
+2. **Least privilege:** IAM policies mein sirf required actions aur bucket/object ARNs allow karo. Application ke liye IAM role prefer karo; access keys code mein hardcode mat karo.
+3. **Bucket policy:** Unnecessary `Principal: "*"` grants avoid karo. HTTPS enforce karne aur access ko required principals tak limit karne par consider karo.
+4. **Encryption:** Server-side encryption use karo. Sensitive workloads ke liye SSE-KMS aur key access permissions ki requirements evaluate karo.
+5. **Versioning and recovery:** Accidental overwrite/delete se recovery ke liye versioning enable karo; critical data ke liye separate backup and recovery plan rakho.
+6. **Logging and monitoring:** CloudTrail data events, S3 server access logging, and alerts such as AWS Config or monitoring rules use cases ke according configure karo.
+7. **Data protection:** Sensitive data ko public prefixes se separate rakho; retention, lifecycle, and access reviews implement karo.
+
+#### 4. Practical Example — Secure Bucket Policy
+
+Example policy jo HTTPS ke bina aane wali requests deny karti hai. `my-secure-bucket` ko apne bucket name se replace karo:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyInsecureTransport",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::my-secure-bucket",
+        "arn:aws:s3:::my-secure-bucket/*"
+      ],
+      "Condition": {
+        "Bool": {
+          "aws:SecureTransport": "false"
+        }
+      }
+    }
+  ]
+}
+```
+
+This policy denies requests that use insecure transport (HTTP). Test policies carefully to avoid disrupting legitimate workloads. HTTPS enforcement does not replace correct IAM permissions or Block Public Access.
+
+#### 5. Recommended Console Checklist
+
+- **S3 → Bucket → Permissions:** Keep Block Public Access enabled unless there is a reviewed, specific public-access requirement.
+- **Bucket policy / ACLs:** Review who can read, write, or delete objects; keep ACLs disabled using Bucket owner enforced Object Ownership where compatible with the workload.
+- **Properties → Default encryption:** Ensure default encryption is configured and evaluate SSE-KMS if you need key-level control and auditability.
+- **Properties → Versioning:** Enable where recovery from overwrites/deletes is required.
+- **Monitoring:** Enable suitable CloudTrail S3 data events, access logging, and alerts based on your security requirements and cost considerations.
+
+#### 6. Important Points
+
+- Never store AWS credentials in React/frontend code or commit them to GitHub.
+- A private bucket can still be accessed by principals with authorized IAM or bucket-policy permissions; private does not mean no access at all.
+- Use pre-signed URLs for time-limited access to private objects instead of making the bucket public.
+- Apply least privilege and periodically review permissions.
+- Encryption protects data at rest, but it does not replace access control, TLS, monitoring, or backups.
+
+---
