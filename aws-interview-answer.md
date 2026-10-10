@@ -5456,3 +5456,64 @@ Jab user `https://example.com/api/users` request karta hai, ALB ka HTTPS listene
 - Listener rules can route traffic to different target groups based on supported conditions, such as host or path.
 
 ---
+
+### Q82. What is a Health Check?
+
+#### 1. English Definition
+
+**A health check is a periodic test used by a load balancer to determine whether a registered target is healthy and able to receive traffic.**
+
+#### 2. Hindi Definition
+
+Health Check ek periodic test hai jo check karta hai ki backend server ya target healthy hai aur requests handle kar sakta hai ya nahi.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js application do EC2 instances par chal rahi hai. ALB ko pata hona chahiye ki kaunsa instance properly kaam kar raha hai aur kaunsa fail ho gaya hai. Iske liye Health Checks use hote hain.
+
+ALB configured protocol, port aur path par target ko check karta hai. HTTP health check ke liye, example ke taur par, app mein `/health` endpoint ho sakta hai jo successful response return kare jab application required checks pass kar rahi ho.
+
+- Health check pass ho: target healthy maana ja sakta hai.
+- Health check fail ho: configured thresholds ke according target unhealthy ho sakta hai aur load balancer us par naya traffic bhejna rok sakta hai.
+
+#### 4. Practical Example: Node.js / Express
+
+```js
+const express = require('express');
+const app = express();
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});
+```
+
+AWS Target Group mein health check path `/health` configure kar sakte ho, provided the app is reachable on the configured target port and the health-check success codes include the response status.
+
+Production mein health endpoint ko sirf server process alive hone se zyada meaningful banana useful ho sakta hai. For example, readiness check required dependencies ki availability verify kar sakta hai, lekin checks ko carefully design karo taaki temporary dependency issues se unnecessary flapping na ho.
+
+#### 5. Health Check Settings
+
+| Setting | Meaning |
+|---|---|
+| Protocol | Health check HTTP, HTTPS, ya supported protocol par hoga |
+| Path | HTTP health check ka endpoint, jaise `/health` |
+| Port | Target par health check kis port se hoga |
+| Interval | Checks ke beech ka time |
+| Timeout | Ek check ke response ke liye maximum wait time |
+| Healthy / unhealthy thresholds | Kitne consecutive successes ya failures ke baad state change ho |
+| Success codes | Kaunse HTTP status codes successful response maane jayenge |
+
+Exact options load balancer type aur target group configuration par depend karte hain.
+
+#### 6. Important Points
+
+- Health checks are configured for a Target Group; the load balancer uses target health when deciding where to route traffic.
+- Security Groups and network rules must allow the health-check traffic from the load balancer to the target.
+- A process returning HTTP 200 does not always prove that every dependency works. Choose liveness/readiness checks according to the application architecture.
+- Health checks help with traffic routing, but they do not automatically repair a failed instance. Auto Scaling or another recovery mechanism may be needed.
+
+---
