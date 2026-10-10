@@ -5273,3 +5273,61 @@ Agar ek target unhealthy ho jata hai, toh configured health checks ke basis par 
 - ELB improves availability, but high availability also depends on deploying healthy targets across Availability Zones and designing application dependencies appropriately.
 
 ---
+
+### Q79. ALB vs NLB?
+
+#### 1. English Definition
+
+**An Application Load Balancer (ALB) operates at Layer 7 and routes HTTP/HTTPS requests using application-level information, while a Network Load Balancer (NLB) operates at Layer 4 and routes connections using network and transport-layer information such as IP addresses and ports.**
+
+#### 2. Hindi Definition
+
+ALB HTTP/HTTPS requests ko application-level details, jaise URL path aur hostname, ke basis par route karta hai. NLB TCP/UDP jaise network transport traffic ko IP address aur port ke basis par route karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, dono AWS load balancers hain, lekin inka use case alag hai.
+
+- **ALB:** Jab tumhari web application HTTP/HTTPS use karti hai aur tumhe path-based ya host-based routing chahiye, tab ALB useful hota hai. Example: `/api/users` ko ek target group aur `/api/orders` ko doosre target group par bhejna.
+- **NLB:** Jab tumhe Layer 4 par TCP, UDP ya TLS traffic handle karna ho, low-latency/high-performance networking chahiye, ya client IP preservation jaise network-level behavior important ho, tab NLB suitable ho sakta hai.
+
+#### 4. Difference Table
+
+| Feature | ALB | NLB |
+|---|---|---|
+| Full form | Application Load Balancer | Network Load Balancer |
+| OSI layer | Layer 7 (Application) | Layer 4 (Transport) |
+| Common protocols | HTTP, HTTPS | TCP, UDP, TLS |
+| Routing | Host-based, path-based, and other HTTP-aware rules | IP address/port and supported Layer 4 listener behavior |
+| Typical use | Websites, REST APIs, web applications | TCP/UDP services, high-performance network workloads |
+| HTTP awareness | Understands HTTP request details | Does not perform ALB-style HTTP path/host routing |
+| Client IP | Commonly conveyed through HTTP headers such as `X-Forwarded-For` | Can preserve source IP in supported configurations and target types |
+| TLS handling | Can terminate HTTPS and inspect HTTP after termination | Supports TLS listeners; exact behavior depends on listener and target configuration |
+
+#### 5. Practical Example
+
+**MERN application:** Suppose React calls a Node.js API over HTTPS. You want `/api/users` and `/api/orders` to reach different target groups. Use an **ALB**, because it understands HTTP paths.
+
+**TCP service:** Suppose you run a custom TCP service that needs Layer 4 load balancing. An **NLB** may be a better fit.
+
+```text
+HTTP/HTTPS web app:
+Users -> ALB -> Node.js target group(s)
+
+TCP/UDP service:
+Clients -> NLB -> TCP/UDP target(s)
+```
+
+#### 6. Which One Should You Choose?
+
+- Choose **ALB** for most conventional web applications and HTTP/HTTPS APIs that need application-aware routing.
+- Choose **NLB** for Layer 4 workloads, TCP/UDP traffic, or specific network-performance and source-IP requirements.
+- Compare requirements such as protocol, routing rules, target type, TLS setup, client IP behavior, latency, and cost before choosing.
+
+#### 7. Important Points
+
+- ALB is Layer 7; NLB is Layer 4.
+- NLB is not simply a universally faster or better ALB; they solve different problems.
+- Both can support highly available architectures, but target health, Availability Zone configuration, and application resilience still matter.
+
+---
