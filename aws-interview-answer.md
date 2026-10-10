@@ -12059,3 +12059,120 @@ EC2 setup mein:
 **Interview answer:** CloudWatch Logs collects and stores log data from applications, operating systems, and AWS services. Developers use log groups, log streams, and Logs Insights to search errors, troubleshoot failures, and investigate application behavior.
 
 ---
+
+### Q169. What is CloudWatch Alarm?
+
+#### 1. English Definition
+
+**A CloudWatch alarm monitors a metric or expression and changes state when configured conditions are met, optionally triggering notifications or automated actions.**
+
+#### 2. Hindi Definition
+
+CloudWatch Alarm ek monitoring rule hai jo metric ki value ko check karta hai. Jab configured condition meet hoti hai, alarm state change ho sakti hai aur notification ya automated action trigger kiya ja sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari Node.js application EC2 par chal rahi hai. Tum chahte ho ki CPU utilization 80% se zyada hone par tumhe alert mile.
+
+CloudWatch Alarm mein tum configure karoge:
+- **Metric:** EC2 CPUUtilization
+- **Threshold:** 80% se zyada
+- **Evaluation period:** Example ke liye 5-minute periods
+- **Action:** Amazon SNS ke through email notification
+
+CloudWatch metric ko evaluate karta hai. Condition meet hone par alarm **ALARM** state mein ja sakta hai.
+
+CloudWatch Alarm ki common states:
+- **OK:** Condition currently alarm threshold meet nahi kar rahi.
+- **ALARM:** Configured alarm condition meet ho gayi.
+- **INSUFFICIENT_DATA:** Evaluation ke liye sufficient metric data available nahi hai.
+
+Alarm khud necessarily server ko fix nahi karta. Notification bhejna ya automatic action lena configured actions aur supported resource par depend karta hai.
+
+#### 4. Practical Example
+
+Maan lo EC2 CPU usage 5-minute evaluation periods mein 80% se upar rehne par email alert chahiye.
+
+| Setting | Example |
+|---|---|
+| Metric | `AWS/EC2 → CPUUtilization` |
+| Condition | Greater than 80% |
+| Evaluation | 1 period of 5 minutes (example) |
+| Alarm action | SNS notification |
+| Result | Configured SNS subscribers ko alert |
+
+Production environment mein threshold, period, aur evaluation periods workload ke hisaab se choose karo, taaki short spikes unnecessary alerts na create karein.
+
+#### 5. Architecture Diagram — Alarm to Notification
+
+```text
+EC2 Instance
+     |
+     | CPUUtilization metric
+     v
+CloudWatch Metrics
+     |
+     v
+CloudWatch Alarm
+     |
+     | Threshold condition met
+     v
+  ALARM State
+     |
+     v
+Amazon SNS Topic
+     |
+     v
+Email / Notification
+```
+
+**Flow:** EC2 metric publish karta hai → CloudWatch Alarm metric evaluate karta hai → condition meet hone par alarm ALARM state mein jaata hai → configured SNS action notification bhej sakta hai.
+
+#### 6. Practical Command / Configuration
+
+CloudWatch alarm create karne ka AWS CLI example:
+
+```bash
+aws cloudwatch put-metric-alarm \
+  --alarm-name "High-EC2-CPU" \
+  --namespace AWS/EC2 \
+  --metric-name CPUUtilization \
+  --dimensions Name=InstanceId,Value=i-0123456789abcdef0 \
+  --statistic Average \
+  --period 300 \
+  --threshold 80 \
+  --comparison-operator GreaterThanThreshold \
+  --evaluation-periods 1 \
+  --alarm-actions arn:aws:sns:REGION:ACCOUNT_ID:YOUR_SNS_TOPIC
+```
+
+Example mein instance ID, region, account ID aur SNS topic ARN ko apne environment ke values se replace karo. SNS topic aur subscription pehle configure hone chahiye.
+
+Alarm state check karne ke liye:
+
+```bash
+aws cloudwatch describe-alarms \
+  --alarm-names "High-EC2-CPU"
+```
+
+Console mein **CloudWatch → Alarms → Create alarm** se metric, threshold, evaluation periods aur notification action configure kar sakte ho.
+
+#### 7. Summary Table
+
+| Alarm state | Meaning |
+|---|---|
+| OK | Alarm condition meet nahi ho rahi |
+| ALARM | Configured condition meet ho gayi |
+| INSUFFICIENT_DATA | Evaluation ke liye data insufficient hai |
+
+| Component | Purpose |
+|---|---|
+| Metric | Value being monitored |
+| Threshold | Condition limit |
+| Evaluation period | Data evaluate karne ka time interval |
+| SNS action | Notification bhejna |
+| Automation action | Supported resources par configured response |
+
+**Interview answer:** A CloudWatch alarm evaluates a metric against configured conditions and changes state to OK, ALARM, or INSUFFICIENT_DATA. It can send notifications through SNS or trigger supported configured actions when a threshold is breached.
+
+---
