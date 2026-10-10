@@ -18074,3 +18074,61 @@ For local development, prefer AWS IAM Identity Center/SSO or another approved sh
 **Interview-ready answer:** AWS access keys should never be hardcoded because they can be exposed through source code, Git history, logs, or client-side bundles. A leaked key can allow unauthorized AWS API calls according to its permissions, causing data loss or unexpected costs. For AWS workloads, I prefer IAM roles and temporary credentials, follow least privilege, and use monitoring. If a key leaks, I revoke it promptly and investigate the activity.
 
 ---
+
+### Q232. What is KMS?
+
+#### 1. English Definition
+
+AWS Key Management Service (AWS KMS) is a managed service that lets you create and control cryptographic keys used to encrypt and decrypt data. It integrates with many AWS services and provides access control and auditing for key usage.
+
+#### 2. Hindi Definition
+
+AWS KMS ek managed service hai jo data ko encrypt aur decrypt karne ke liye cryptographic keys create aur manage karne mein help karti hai. Isse hum decide kar sakte hain ki kaun key use kar sakta hai, aur key usage ko audit bhi kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, encryption mein data ko unreadable form mein convert kiya jata hai. Us data ko decrypt karne ke liye key ki zaroorat hoti hai.
+
+AWS KMS ka main kaam encryption keys ko manage karna hai. Example ke liye:
+- S3 mein sensitive files encrypt karna.
+- EBS volumes ko encrypt karna.
+- AWS Secrets Manager mein stored secrets ko encrypt karna.
+- Application ke data ko AWS KMS APIs ke through encrypt/decrypt karna, jab use case aur permissions support karein.
+
+KMS khud har situation mein tumhara poora application data store nahi karta. Aksar AWS service KMS key ka use karke data encryption keys protect karti hai; is pattern ko envelope encryption kehte hain.
+
+#### 4. Practical AWS Example
+
+Suppose your Node.js application stores private documents in Amazon S3. You can configure S3 server-side encryption with an AWS KMS key (SSE-KMS). S3 encrypts the object and uses KMS to protect the data key. Access to decrypt is controlled by the relevant IAM permissions and KMS key policy.
+
+Example AWS CLI command to create a customer-managed KMS key:
+
+```bash
+aws kms create-key --description "Key for application data"
+```
+
+The command returns key metadata, including a key ID and ARN. Creating a key does not automatically encrypt your application data; configure the target AWS service or application to use the key, and grant only the required permissions.
+
+#### 5. Important KMS Concepts
+
+| Concept | Meaning |
+|---|---|
+| KMS key | Key resource used to protect data keys or perform supported cryptographic operations |
+| AWS managed key | Key created and managed by AWS for an AWS service |
+| Customer managed key | Key the customer manages, including its policy and configuration |
+| Key policy / IAM | Controls who can use or administer the key; effective permissions depend on policy setup |
+| Rotation | Changes key material according to the supported key type and rotation settings; it does not mean every old ciphertext is immediately re-encrypted |
+| CloudTrail | Records supported KMS API activity for auditing |
+| Envelope encryption | Data is encrypted with a data key, and that data key is protected by a KMS key |
+
+#### 6. Security Best Practices
+
+- Follow least privilege for key administration and cryptographic use.
+- Protect key policies and avoid broad permissions such as unrestricted decrypt access.
+- Monitor key usage and administrative activity with CloudTrail.
+- Choose the key type and rotation settings appropriate for the workload.
+- Remember that deleting or scheduling deletion of a key can make encrypted data unrecoverable; follow a controlled key lifecycle process.
+
+**Interview-ready answer:** AWS Key Management Service (KMS) is a managed service for creating and controlling cryptographic keys used to encrypt and decrypt data. It integrates with services such as S3, EBS, and Secrets Manager, supports access control through key policies and IAM, and provides audit visibility through CloudTrail. KMS is commonly used with envelope encryption, where data is encrypted using a data key and that data key is protected by a KMS key.
+
+---
