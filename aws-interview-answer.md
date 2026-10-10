@@ -4152,3 +4152,56 @@ Is design mein public entry point internet traffic receive karta hai, backend ko
 - VPC ke resources ko internet se access karwana ho toh routing, public IP/endpoint, security rules, aur resource configuration sab compatible hone chahiye.
 
 ---
+
+### Q60. Why do we need VPC?
+
+#### 1. English Definition
+
+**We need an Amazon VPC to create an isolated and controllable network in AWS, so we can organize resources, manage connectivity, and apply network security rules according to our application’s requirements.**
+
+#### 2. Hindi Definition
+
+AWS mein VPC ki zaroorat apna logically isolated network banane ke liye hoti hai, jahan hum resources ko organize kar sakein aur unki connectivity, IP addressing aur network security control kar sakein.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tum apni MERN application AWS par deploy kar rahe ho. Tumhare paas frontend, Node.js backend aur database hai. Tum nahi chahoge ki har resource bina control ke internet se accessible ho.
+
+VPC se tum apna network design kar sakte ho aur decide kar sakte ho ki kaunsa resource public hoga aur kaunsa private. Iske main benefits hain:
+
+1. **Network isolation:** Apne AWS resources ke liye logically isolated network environment define kar sakte ho.
+2. **Security control:** Security Groups aur Network ACLs ke through inbound/outbound traffic restrict kar sakte ho.
+3. **Public/private network design:** Internet-facing load balancer ko public subnet mein aur backend/database resources ko private subnets mein rakh sakte ho, jab architecture ko iski zaroorat ho.
+4. **IP address management:** VPC ka CIDR block aur subnet IP ranges plan kar sakte ho.
+5. **Traffic routing:** Route tables, Internet Gateway aur NAT Gateway se traffic paths configure kar sakte ho.
+6. **Hybrid connectivity:** Supported setups mein VPN ya AWS Direct Connect ke through on-premises network ko VPC se connect kar sakte ho.
+
+#### 4. Practical MERN Example
+
+```text
+                    Internet Users
+                          |
+                          v
+                 Public Load Balancer
+                          |
+                          v
+                Private Node.js (EC2)
+                          |
+                          v
+                    Private Database
+```
+
+Is setup mein users public entry point tak pahunchte hain. Load balancer backend ko requests forward karta hai, aur database ko sirf required backend traffic allow kiya jata hai. Ye restrictions route tables aur security rules ko correctly configure karke implement hoti hain.
+
+#### 5. What if We Do Not Configure a VPC?
+
+AWS kai services ke liye default VPC provide kar sakta hai, isliye iska matlab yeh nahi ki AWS resources VPC ke bina hamesha launch nahi ho sakte. Lekin agar tum apni networking explicitly design nahi karte, toh IP ranges, subnet placement, routing aur access controls par tumhara intended level ka control nahi hoga. Production applications mein custom VPC design aksar better control deta hai.
+
+#### 6. Important Points
+
+- VPC network boundary aur networking configuration provide karta hai; yeh akela complete security solution nahi hai.
+- Private subnet mein resource rakhne se bhi security groups, routes aur required access ko properly configure karna zaroori hai.
+- VPC ko multiple Availability Zones mein subnets ke saath design karke availability improve ki ja sakti hai.
+- VPC ka purpose sirf internet access dena nahi, balki network ko organize, isolate aur control karna bhi hai.
+
+---
