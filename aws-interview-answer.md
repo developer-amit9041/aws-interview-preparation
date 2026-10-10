@@ -6657,3 +6657,63 @@ The diagram shows a common Multi-AZ DB instance deployment pattern. Exact archit
 - Multi-AZ typically costs more than a single-AZ deployment because additional resources are provisioned.
 
 ---
+
+### Q102. What is Read Replica?
+
+#### 1. English Definition
+
+**A Read Replica is a copy of a source database that can serve read-only queries, helping distribute read traffic and improve read scalability.**
+
+#### 2. Hindi Definition
+
+Read Replica source database ki ek copy hoti hai jo read-only queries serve kar sakti hai. Isse database par read traffic divide hota hai aur read performance ko scale karne mein madad milti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application mein users products, profiles aur orders bahut zyada dekh rahe hain. Saari read queries agar ek hi primary database par jaayengi, toh primary par load badh sakta hai.
+
+Amazon RDS mein tum Read Replica create kar sakte ho. Application write operations—jaise insert, update, delete—primary database par bhejti hai, aur supported read queries Read Replica par bhej sakti hai.
+
+Replica par data replication ke through primary se aata hai. Replication delay ho sakta hai, isliye replica ka data hamesha latest hona guaranteed nahi hai. Read Replica ka exact behavior database engine aur configuration par depend karta hai.
+
+#### 4. Practical Example
+
+```text
+                Node.js Application
+                  /             \\
+          Write requests       Read requests
+                |                   |
+                v                   v
+          Primary RDS          Read Replica
+          INSERT / UPDATE      SELECT queries
+                |
+                +---- replication ---->
+```
+
+Example: E-commerce app mein product listing aur product details ki bahut saari read requests Read Replica par bheji ja sakti hain, jabki product updates primary database par jaati hain.
+
+#### 5. Benefits of Read Replica
+
+- **Read scaling:** Read queries ko primary database se distribute kar sakte hain.
+- **Lower primary load:** Heavy read traffic primary database ka load kam kar sakta hai.
+- **Reporting workloads:** Supported setup mein analytics ya reporting queries ko replica par run kar sakte hain.
+- **Cross-Region reads:** Supported engines/configurations mein another Region mein replica rakhkar nearby users ke reads serve kiye ja sakte hain.
+
+#### 6. Multi-AZ vs Read Replica
+
+| Basis | Multi-AZ | Read Replica |
+|---|---|---|
+| Main purpose | High availability and failover | Read scaling |
+| Common use | Recover when primary becomes unavailable | Distribute read queries |
+| Read traffic | Traditional standby isn't used for normal reads | Replica can serve read queries |
+| Data freshness | Depends on Multi-AZ deployment and failover behavior | Replication lag can mean stale reads |
+
+#### 7. Important Points
+
+- Read Replica is mainly for scaling read workloads, not a replacement for backups.
+- Replication is commonly asynchronous, so **replication lag** may occur.
+- Applications should send writes to the primary unless the engine and chosen architecture explicitly support a different write pattern.
+- Some RDS engines and configurations support promoting a Read Replica to a standalone database, but this is not the same as automatic Multi-AZ failover.
+- Read Replica availability, promotion, and cross-Region capabilities depend on the database engine and configuration.
+
+---
