@@ -2394,3 +2394,106 @@ sudo mount -a
 **I create an EBS volume in the same Availability Zone as the EC2 instance, attach it through the EC2 console, identify the device inside the operating system, and—if it is a new blank volume—create a filesystem and mount it. For persistent mounting after reboot, I configure `/etc/fstab` using the filesystem UUID and test it with `mount -a`.**
 
 ---
+
+### Q36. How do you increase EC2 storage?
+
+#### 1. English Definition
+
+**You can increase EC2 storage by modifying the size of an attached EBS volume and then extending the partition and filesystem inside the operating system, or by attaching an additional EBS volume.**
+
+#### 2. Hindi Definition
+
+EC2 ki storage badhane ke liye hum existing EBS volume ka size increase kar sakte hain, ya extra EBS volume attach kar sakte hain. Size increase karne ke baad Linux mein partition aur filesystem ko bhi expand karna pad sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhara MERN project AWS EC2 par deploy hai aur root disk `8 GB` ki hai. Application logs, uploads aur packages ki wajah se disk full hone lagi. Tum existing EBS volume ko `8 GB` se `20 GB` kar sakte ho.
+
+AWS side par volume size badhana aur Linux side par filesystem ko expand karna alag steps hain.
+
+#### 4. Practical Example — Increase an EBS Volume from 8 GB to 20 GB
+
+**Step 1: Check current disk usage**
+
+```bash
+df -h
+lsblk
+```
+
+`df -h` mounted filesystems ka used/free space dikhata hai; `lsblk` disks aur partitions dikhata hai.
+
+**Step 2: Modify the EBS volume in AWS Console**
+
+1. AWS Console mein **EC2 → Volumes** open karo.
+2. Apne EC2 instance ke attached root EBS volume ko select karo.
+3. **Actions → Modify volume** par click karo.
+4. Size `8 GiB` se `20 GiB` set karo.
+5. **Modify** confirm karo aur modification state complete/usable hone ka wait karo.
+
+EBS size generally online modify kiya ja sakta hai for supported volumes, lekin filesystem/OS support aur workload ko verify karo. Important production changes se pehle backup/snapshot aur maintenance requirements consider karo.
+
+**Step 3: Identify the disk and partition**
+
+```bash
+lsblk
+```
+
+Example output mein disk `/dev/nvme0n1` aur root partition `/dev/nvme0n1p1` ho sakti hai. Device names instance/OS ke hisaab se different ho sakte hain. Apne output se actual disk aur root partition identify karo; blindly example commands mat run karo.
+
+**Step 4: Extend the partition if needed**
+
+Ubuntu par `growpart` available ho toh, example ke liye disk `/dev/nvme0n1` aur partition number `1`:
+
+```bash
+sudo growpart /dev/nvme0n1 1
+```
+
+`growpart` command mein disk aur partition number alag arguments hote hain. Agar partition already expanded hai ya layout alag hai, command ko accordingly adjust karo.
+
+**Step 5: Expand the filesystem**
+
+Pehle filesystem type check karo:
+
+```bash
+df -Th /
+```
+
+For an ext4 root filesystem on `/dev/nvme0n1p1`:
+
+```bash
+sudo resize2fs /dev/nvme0n1p1
+```
+
+For XFS mounted at `/`:
+
+```bash
+sudo xfs_growfs /
+```
+
+Ye commands filesystem type ke mutabik hain—ext4 ke liye `resize2fs`, XFS ke liye `xfs_growfs`. Actual device/mount point confirm karke hi run karo.
+
+**Step 6: Verify the new size**
+
+```bash
+df -h
+lsblk
+```
+
+Ab root filesystem mein increased capacity visible honi chahiye.
+
+#### 5. Alternative — Attach a Separate EBS Volume
+
+Agar root disk ko modify karne ke bajaye separate storage chahiye, toh naya EBS volume create karke same Availability Zone ke EC2 instance se attach karo. Phir new blank volume ko filesystem create karke mount karo, jaise `/data`. Existing data wale volume ko format mat karo.
+
+#### 6. Important Points
+
+- Increasing EBS volume size does not always automatically expand the partition/filesystem inside Linux.
+- Confirm the actual device name, partition layout, and filesystem type before running commands.
+- Take a snapshot/backup before making production storage changes.
+- EBS volume size increase karne ke baad us size ko normally in-place reduce nahi kar sakte; shrinking requires a separate migration approach.
+
+#### 7. Interview Summary
+
+**I first check disk usage with `df -h`, modify the attached EBS volume size in the EC2 console, then inspect the disk layout with `lsblk`. If necessary, I extend the partition using `growpart` and expand the filesystem using `resize2fs` for ext4 or `xfs_growfs` for XFS. Finally, I verify the new capacity with `df -h`.**
+
+---
