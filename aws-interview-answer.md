@@ -16287,3 +16287,69 @@ kubectl get pods --all-namespaces
 **Interview-ready answer:** An EKS cluster is a Kubernetes environment provided by Amazon EKS. AWS manages the Kubernetes control plane, while application Pods run on configured compute such as EC2 worker nodes or supported Fargate workloads. We use the cluster to deploy, scale, and manage containerized applications using Kubernetes.
 
 ---
+
+### Q210. What is a Node Group?
+
+#### 1. English Definition
+
+An Amazon EKS node group is a group of worker nodes used to run Kubernetes Pods in an EKS cluster. A managed node group lets AWS EKS provision and manage the lifecycle of its EC2 instances on your behalf.
+
+#### 2. Hindi Definition
+
+EKS Node Group EC2 worker machines ka ek group hota hai jo Kubernetes cluster mein application ke Pods run karta hai. Managed Node Group mein AWS EKS in EC2 instances ko create aur update karne jaise kaamon ko manage karne mein help karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, EKS Cluster ko ek Kubernetes environment samjho. Application ke Pods ko run karne ke liye compute capacity chahiye hoti hai. Agar tum EC2 use kar rahe ho, toh in EC2 worker machines ko Node Group ke through organize kar sakte ho.
+
+Example: Tumhare Node.js API ke 3 Pods run karne hain. EKS ka managed node group EC2 instances provide karta hai; Kubernetes scheduler available resources ke basis par Pods ko un nodes par place karta hai.
+
+Managed Node Group mein AWS EKS EC2 Auto Scaling group aur node lifecycle ke kai operational tasks manage karta hai. Phir bhi tumhe instance type, desired capacity, scaling settings, permissions, networking aur workload resource requirements sahi configure karne hote hain.
+
+**Important:** Node Group specifically node-based compute (typically EC2) ke liye hota hai. Fargate par chalne wale Pods ko EC2 managed node group ki zaroorat nahi hoti.
+
+#### 4. Practical Example
+
+```text
+Amazon EKS Cluster
+  |
+  +-- Managed Node Group
+        |
+        +-- EC2 Node 1 --> Node.js API Pod
+        +-- EC2 Node 2 --> Worker Pod
+        +-- EC2 Node 3 --> Additional application Pods
+```
+
+Node group mein nodes ki capacity badhane se cluster ko additional Pods run karne ke resources mil sakte hain, provided scaling configuration and workload constraints allow it.
+
+#### 5. Practical Commands
+
+```bash
+# List node groups in an EKS cluster
+aws eks list-nodegroups \
+  --cluster-name <CLUSTER_NAME> \
+  --region ap-south-1
+
+# Describe a particular node group
+aws eks describe-nodegroup \
+  --cluster-name <CLUSTER_NAME> \
+  --nodegroup-name <NODE_GROUP_NAME> \
+  --region ap-south-1
+
+# View Kubernetes worker nodes
+kubectl get nodes
+```
+
+#### 6. Summary Table
+
+| Term | Meaning |
+|---|---|
+| EKS Cluster | Kubernetes environment on AWS |
+| Node Group | Group of worker nodes, commonly EC2 instances |
+| Managed Node Group | EKS helps manage EC2 node provisioning and lifecycle |
+| Kubernetes Pod | Runs one or more containers |
+| Fargate | Alternative compute option for supported Pods without managing EC2 worker nodes |
+
+**Interview-ready answer:** An EKS Node Group is a group of worker nodes, typically EC2 instances, that provide compute capacity for Kubernetes Pods in an EKS cluster. With a managed node group, Amazon EKS helps manage node provisioning, updates, and lifecycle operations. Node groups are useful when we want control over EC2 instance types and node capacity; Fargate is an alternative for supported workloads that do not require managing EC2 worker nodes.
+
+---
