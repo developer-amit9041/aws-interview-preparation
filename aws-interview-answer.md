@@ -4827,3 +4827,57 @@ Is example mein Node.js backend database ke private IP `10.0.3.20` par connect k
 - Private IPs IPv4 aur IPv6 ke broader private/local addressing concepts se related hain; above ranges specifically RFC 1918 IPv4 ranges hain.
 
 ---
+
+### Q72. What is a Public IP?
+
+#### 1. English Definition
+
+**A public IP address is a globally unique, internet-routable IP address that can be used to communicate across the public internet, subject to routing and security configuration.**
+
+#### 2. Hindi Definition
+
+Public IP ek aisa IP address hota hai jo public internet par routable hota hai aur internet ke through communication ke liye use kiya ja sakta hai, agar networking aur security configuration allow kare.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tum AWS par ek website host kar rahe ho aur chahte ho ki users internet se usko access kar saken. Internet-facing resource ko public IPv4 address ya public endpoint diya ja sakta hai, with correct routing and security rules.
+
+Example public IPv4 address: `54.210.10.20` (illustrative example).
+
+Public IP se internet par resource ko address kiya ja sakta hai, lekin **sirf public IP hone se resource automatically accessible nahi hota**. Subnet routing, Internet Gateway, Security Group, Network ACL aur service configuration bhi sahi hone chahiye.
+
+#### 4. Practical AWS Example
+
+```text
+Internet User
+      |
+      v
+Public IP / Public Endpoint
+      |
+      v
+Internet Gateway
+      |
+      v
+Public Subnet Resource
+(Load Balancer or EC2)
+```
+
+Is example mein user public endpoint ko request bhejta hai. VPC ki routing aur resource ke security rules traffic ko allow karte hain toh connection establish ho sakta hai. Production web applications mein users ko aksar domain name aur load balancer ke through route kiya jata hai.
+
+#### 5. Public IP vs Private IP
+
+| Feature | Public IP | Private IP |
+|---|---|---|
+| Routing | Public internet par routable | Public internet par directly routable nahi |
+| Typical use | Internet-facing endpoint | VPC ke andar internal communication |
+| Example | `54.210.10.20` (illustrative) | `10.0.2.10` |
+| Direct reachability | Routes, endpoint/IP assignment, and security rules required | Private network connectivity and appropriate routes/security rules required |
+
+#### 6. Important AWS Points
+
+- EC2 public IPv4 addresses can change when an instance is stopped and started; an Elastic IP is a static public IPv4 address that can be associated with supported resources.
+- A public IP does not bypass Security Groups, Network ACLs, or routing requirements.
+- Avoid exposing SSH, database ports, or internal services to all internet sources unless there is a carefully justified need.
+- IPv4 public addresses and IPv6 addressing have different allocation and routing details; a public IPv4 address is not required for every possible IPv6 internet configuration.
+
+---
