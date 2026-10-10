@@ -2922,3 +2922,70 @@ Bucket ko private rakhna aur AWS secret keys frontend code mein expose na karna 
 - Object access IAM, bucket policies, access settings aur temporary presigned URLs se control kiya ja sakta hai.
 
 ---
+
+### Q45. What is an S3 Bucket Policy?
+
+#### 1. English Definition
+
+**An S3 bucket policy is a resource-based JSON policy attached to an S3 bucket that defines which principals can or cannot perform specified actions on the bucket and its objects.**
+
+#### 2. Hindi Definition
+
+S3 Bucket Policy ek JSON-based permission policy hoti hai jo batati hai ki kaun S3 bucket ya uske objects par kaunse actions perform kar sakta hai ya nahi kar sakta.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application ki S3 bucket mein users ki profile images aur documents hain. Tum decide karna chahte ho ki backend ko files upload karne ki permission mile, lekin public users ko private documents access karne ki permission na mile.
+
+Iske liye S3 Bucket Policy use kar sakte ho. Ye bucket par attach hoti hai aur JSON format mein permissions define karti hai.
+
+Policy ke important fields:
+
+- **Effect:** `Allow` ya `Deny` — action allow ya block karna.
+- **Principal:** Kaun identity/purpose policy mein covered hai, jaise AWS account, IAM role, ya `*`.
+- **Action:** Kaunsa S3 action, jaise `s3:GetObject` ya `s3:PutObject`.
+- **Resource:** Kaunse bucket ya objects policy ke scope mein hain.
+- **Condition:** Optional conditions, jaise specific network, TLS, ya request properties.
+
+#### 4. Practical Example — Allow a Specific IAM Role to Read Objects
+
+Example bucket name: `my-mern-app-uploads`. Replace the example account ID and role name with your own values before using this policy.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowAppRoleToReadObjects",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::123456789012:role/MernAppRole"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::my-mern-app-uploads/*"
+    }
+  ]
+}
+```
+
+Is example mein specified IAM role ko bucket ke objects read karne ki permission milti hai. `123456789012` placeholder account ID hai; ise actual AWS account ID se replace karo. Role ko application use kar sake, uske liye role trust relationship aur permissions bhi correctly configure hone chahiye. Explicit denies, SCPs, permissions boundaries, or other applicable controls access ko phir bhi restrict kar sakte hain.
+
+**Security note:** Public access dene ke liye `Principal: "*"` aur broad `s3:GetObject` policy blindly use mat karo. Bucket ko private rakhna default best practice hai. Public access required ho toh use case, S3 Block Public Access settings, and least-privilege scope carefully review karo.
+
+#### 5. Bucket Policy vs IAM Policy
+
+| Bucket Policy | IAM Policy |
+|---|---|
+| S3 bucket par attach hoti hai | IAM user, group, ya role par attach hoti hai |
+| Resource-based policy | Identity-based policy |
+| Define karti hai ki principals bucket/objects par kya kar sakte hain | Define karti hai ki identity kin AWS resources par kya actions kar sakti hai |
+| Cross-account access grant karne mein use ho sakti hai, with correct permissions and controls | Identity ke permissions define karti hai |
+
+#### 6. Important Points
+
+- Bucket policies JSON format mein hoti hain.
+- Least privilege follow karo: sirf required actions aur resources allow karo.
+- S3 Block Public Access settings public policies ko block kar sakti hain.
+- `s3:ListBucket` bucket-level permission hai; `s3:GetObject` object-level permission hai, isliye resources alag hote hain.
+
+---
