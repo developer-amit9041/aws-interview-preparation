@@ -6883,3 +6883,76 @@ Example: Tum 2:00 PM par snapshot lete ho aur 2:30 PM par deployment se database
 - Snapshot and restore behavior can vary by database engine and AWS service configuration.
 
 ---
+
+### Q106. How do you secure RDS?
+
+#### 1. English Definition
+
+**You secure Amazon RDS by restricting network access, enforcing authentication and least-privilege permissions, encrypting data, protecting credentials, enabling backups and monitoring, and keeping the database configuration updated.**
+
+#### 2. Hindi Definition
+
+Amazon RDS ko secure karne ke liye network access restrict karte hain, strong authentication aur least-privilege permissions use karte hain, data encrypt karte hain, credentials protect karte hain, aur backups aur monitoring enable rakhte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application ka production database AWS RDS par hai. Database ko public internet par directly expose nahi karna chahiye. Security ke liye multiple layers use karo:
+
+1. **Private Subnet:** RDS ko VPC ke private subnets mein rakho, jab tak public access ki koi clear requirement na ho.
+2. **Security Group:** RDS ke inbound rules mein sirf application server ya app ke security group se database port allow karo. Example: PostgreSQL ke liye TCP 5432, MySQL ke liye TCP 3306. `0.0.0.0/0` se database access allow mat karo.
+3. **Encryption at rest:** RDS encryption enable karo, using AWS KMS keys where supported, so stored database data and supported backups/snapshots are encrypted.
+4. **Encryption in transit:** Application aur database ke beech TLS/SSL connection enforce/use karo, as supported by the engine.
+5. **Credentials:** Database password ko source code ya GitHub mein hardcode mat karo. AWS Secrets Manager ya Systems Manager Parameter Store jaise services mein securely store karo, with appropriate access controls and rotation where supported.
+6. **Least privilege:** Application ke liye restricted database user banao. Usko sirf required databases, tables, and operations ki permissions do; admin/root credentials application mein use mat karo.
+7. **Backups and recovery:** Automated backups, suitable retention, and restore testing configure karo.
+8. **Monitoring and patching:** CloudWatch metrics/logs and supported RDS events use karo, suspicious access monitor karo, and apply maintenance/engine updates according to your policy.
+
+#### 4. Practical MERN Example
+
+```text
+Internet
+   |
+   v
+Application Load Balancer
+   |
+   v
+Node.js EC2 / application security group
+   |  Only app SG is allowed to connect
+   v
+Private RDS subnet
+   PostgreSQL: TCP 5432
+
+Secrets Manager -> database credentials
+KMS              -> encryption keys
+CloudWatch       -> metrics and monitoring
+```
+
+Security Group rule ka example:
+
+- **Type:** PostgreSQL
+- **Protocol/Port:** TCP 5432
+- **Source:** Node.js application ka security group ID (not `0.0.0.0/0`)
+
+Is tarah database port ko arbitrary internet traffic ke liye open nahi kiya jaata.
+
+#### 5. Important Security Checklist
+
+| Security control | What to do |
+|---|---|
+| Network | Private subnets; public accessibility disabled unless necessary |
+| Firewall | Restrictive Security Groups; only trusted app sources and required ports |
+| Authentication | Strong credentials and least-privilege DB users |
+| Secrets | Store and rotate credentials securely; never commit secrets to Git |
+| Encryption | Enable encryption at rest and use TLS in transit |
+| Recovery | Automated backups, retention, and restore tests |
+| Monitoring | CloudWatch metrics/logs and relevant events/alerts |
+| Maintenance | Apply supported engine updates and security patches |
+
+#### 6. Important Points
+
+- A private subnet alone is not sufficient; combine network controls with authentication and permissions.
+- Avoid public accessibility for production RDS unless there is a well-justified need and strict access restrictions.
+- Encryption does not replace access control, and backups do not replace security monitoring.
+- Exact features vary by RDS engine and configuration; verify TLS enforcement, IAM database authentication, log exports, and encryption options for your engine.
+
+---
