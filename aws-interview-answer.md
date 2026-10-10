@@ -12747,3 +12747,107 @@ Replace the instance ID, SNS topic ARN, and email with your actual values. The c
 **Interview-ready answer:** CloudWatch triggers an alert using an alarm that evaluates a metric against a configured threshold. For example, I can create an alarm when EC2 CPU utilization exceeds 80% for two consecutive five-minute periods and configure its alarm action to publish to an SNS topic. Once the email subscription is confirmed and the condition is met, SNS sends the notification.
 
 ---
+
+## 14. CloudTrail ⭐⭐⭐
+
+### Q175. What is CloudTrail?
+
+#### 1. English Definition
+
+**AWS CloudTrail is an auditing and governance service that records activity in an AWS account, including supported actions performed through the AWS Management Console, SDKs, command-line tools, and AWS services. These records help answer who performed an action, what happened, and when it happened.**
+
+#### 2. Hindi Definition
+
+AWS CloudTrail ek auditing service hai jo AWS account mein hone wali supported activities aur API calls ka record rakhti hai. Isse pata lagane mein help milti hai ki kis user ya role ne kya action kiya aur kab kiya.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari application AWS EC2 par deployed hai. Ek din EC2 instance stop ho jaata hai, ya kisi ne S3 bucket ki configuration change kar di.
+
+Tumhe investigate karna hai:
+- Action kis IAM user ya role ne kiya?
+- Kaunsi API call hui?
+- Action kab hua?
+- Event mein available details, jaise source IP address, kya hain?
+
+In cases mein **CloudTrail events** check karte hain.
+
+CloudTrail ke important concepts:
+- **Event history:** Recent management events ko console ya CLI se inspect kar sakte ho; Event history aam taur par pichhle 90 din ke management events cover karti hai, region-wise.
+- **Trail:** Events ko S3 mein deliver karne ke liye trail configure kar sakte ho; optional CloudWatch Logs integration bhi possible hai.
+- **Management events:** AWS resources ki control-plane activities, jaise EC2 instance start/stop ya security group configuration changes.
+- **Data events:** Supported resources par data-plane actions, jaise S3 object-level activity; inhe explicitly configure karna pad sakta hai aur additional charges apply ho sakte hain.
+- **CloudTrail Lake / event data stores:** Events ko query aur analyze karne ke liye use ho sakte hain, according to configuration and pricing.
+
+CloudTrail ka main purpose auditing hai, live CPU monitoring nahi. CPU usage aur application performance ke liye CloudWatch use karte hain.
+
+#### 4. Practical Example
+
+Suppose production EC2 instance unexpectedly stop ho gaya.
+
+1. CloudTrail Event history open karo.
+2. Relevant time range aur event name, jaise `StopInstances`, filter karo.
+3. Event details mein identity, event time aur available request/source details inspect karo.
+4. Determine karo ki action expected tha ya investigate karna zaroori hai.
+
+Example event fields may include `eventTime`, `eventName`, `userIdentity`, `sourceIPAddress`, and `requestParameters`, depending on the event.
+
+#### 5. Architecture Diagram — CloudTrail Auditing
+
+```text
+     AWS Console / CLI / SDK / Services
+                    |
+                    v
+            AWS API Activity
+                    |
+                    v
+               CloudTrail
+              /          \\
+             v            v
+      Event History      Trail
+                            |
+                 +----------+----------+
+                 |                     |
+                 v                     v
+            Amazon S3          CloudWatch Logs
+          (event records)      (optional integration)
+                 |
+                 v
+        Audit / Investigation
+```
+
+**Flow:** AWS account mein supported action hota hai → CloudTrail event record karta hai → event Event history mein inspect ho sakta hai aur configured trail ke through S3 ya optional CloudWatch Logs tak deliver ho sakta hai.
+
+#### 6. Practical Command / Configuration
+
+**A. View recent CloudTrail events**
+
+```bash
+aws cloudtrail lookup-events --max-results 10
+```
+
+**B. Search for EC2 stop events**
+
+```bash
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=StopInstances \
+  --max-results 10
+```
+
+Commands ke liye appropriate AWS credentials aur permissions chahiye. Event history ki availability aur results selected AWS Region aur supported event scope par depend karte hain.
+
+#### 7. Summary Table
+
+| Feature | CloudTrail |
+|---|---|
+| Main purpose | Auditing and governance |
+| Records | Supported AWS account activity and API events |
+| Helps answer | Who did what, and when? |
+| Event history | Recent management events, typically 90 days per Region |
+| Long-term storage | Trail delivery to S3 |
+| Optional integration | CloudWatch Logs |
+| Performance monitoring | Use CloudWatch metrics and alarms instead |
+
+**Interview-ready answer:** AWS CloudTrail records supported AWS account activities and API calls. It helps identify who performed an action, what action occurred, and when it happened. For example, if an EC2 instance is unexpectedly stopped, I can inspect CloudTrail events such as `StopInstances` to investigate the identity and event details. CloudWatch is used for performance monitoring, whereas CloudTrail is primarily for auditing.
+
+---
