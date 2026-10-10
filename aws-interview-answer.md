@@ -11106,3 +11106,102 @@ aws route53 list-resource-record-sets \
 **Interview answer:** An A record maps a hostname to an IPv4 address, whereas a CNAME record maps one hostname to another hostname. In Route 53, an Alias record is often used to point a root domain to supported AWS resources such as CloudFront.
 
 ---
+
+### Q160. What is an Alias Record?
+
+#### 1. English Definition
+
+**An Alias record is an Amazon Route 53 feature that lets you route DNS queries for a domain name to selected AWS resources, such as CloudFront distributions, Application Load Balancers, or S3 website endpoints.**
+
+#### 2. Hindi Definition
+
+Route 53 ka Alias record ek special DNS record hai jo domain ko supported AWS resource, jaise CloudFront distribution ya Application Load Balancer, par point karne deta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari website CloudFront par host hai aur tum chahte ho ki users `myapp.com` type karke website open karein.
+
+CloudFront ka hostname kuch aisa ho sakta hai:
+
+```text
+d123example.cloudfront.net
+```
+
+Route 53 mein **A-type Alias record** bana kar `myapp.com` ko CloudFront distribution par point kar sakte ho. Isse root/apex domain ke liye standard CNAME ki limitation se bach sakte ho.
+
+Important points:
+- Alias Route 53 ki feature hai; yeh standard DNS record type nahi hai.
+- Supported AWS resources ke liye Alias target select kar sakte ho.
+- Alias record ko query karne wale client ko target ka hostname return karna zaroori nahi; Route 53 target ke hisaab se DNS answer return karta hai.
+- Route 53 Alias queries to supported AWS resources generally have no additional Route 53 query charge.
+- Alias target ke liye har AWS resource supported nahi hota; console mein available target types check karo.
+
+#### 4. Practical Example
+
+MERN application ka frontend CloudFront par host hai. Tum chahte ho ki root domain `myapp.com` frontend open kare.
+
+Route 53 configuration:
+
+| Field | Value |
+|---|---|
+| Record name | `myapp.com` (root domain) |
+| Record type | `A` |
+| Alias | `Yes` |
+| Route traffic to | CloudFront distribution |
+| Target | Tumhari actual CloudFront distribution |
+
+Yeh standard A record mein manually IPv4 address enter karne jaisa nahi hai. Alias record AWS resource ko target karta hai, aur AWS us resource ke current DNS answers ko manage karta hai.
+
+#### 5. Architecture Diagram — Route 53 Alias to CloudFront
+
+```text
+User enters myapp.com
+          |
+          v
+      DNS Resolver
+          |
+          v
+ Route 53 Hosted Zone
+          |
+          | A-type Alias
+          v
+ CloudFront Distribution
+          |
+          v
+    Frontend Website
+```
+
+**Flow:** User domain open karta hai → DNS resolver Route 53 se answer leta hai → Alias record CloudFront distribution ko target karta hai → browser returned DNS address(es) se connect karta hai → CloudFront website deliver karta hai.
+
+#### 6. Practical Command / Configuration
+
+Route 53 console mein:
+1. Apni Hosted Zone open karo.
+2. **Create record** select karo.
+3. Root domain, jaise `myapp.com`, set karo.
+4. Record type `A` select karo.
+5. **Alias** enable karo.
+6. Supported endpoint type, jaise CloudFront distribution, select karo.
+7. Target choose karke record create karo.
+
+Records inspect karne ke liye:
+
+```bash
+aws route53 list-resource-record-sets \
+  --hosted-zone-id YOUR_HOSTED_ZONE_ID
+```
+
+CLI se Alias record create karne ke liye change batch mein `AliasTarget` configure kiya jata hai. Iske liye target resource ka correct hosted-zone ID aur DNS name chahiye; guessed values use mat karo.
+
+#### 7. Summary Table
+
+| Feature | A Record with IPv4 | CNAME | Route 53 Alias |
+|---|---|---|---|
+| Target | IPv4 address | Hostname | Supported AWS resource or DNS target |
+| Root domain use | Yes | Standard CNAME generally not allowed at zone apex | Yes, for supported targets |
+| AWS resource awareness | No | No | Yes, for supported AWS targets |
+| Example | Domain → IPv4 | `www` → another hostname | Root domain → CloudFront |
+
+**Interview answer:** A Route 53 Alias record points a domain to supported AWS resources such as CloudFront or an Application Load Balancer. It is especially useful for root domains because a standard CNAME generally cannot be used at the DNS zone apex.
+
+---
