@@ -5759,3 +5759,68 @@ Is example mein browser-to-ALB traffic encrypted hai, lekin ALB-to-EC2 connectio
 - Do not confuse HTTPS encryption with application authentication or authorization; those controls are still required.
 
 ---
+
+### Q87. What is an Application Load Balancer?
+
+#### 1. English Definition
+
+**An Application Load Balancer (ALB) is an AWS load balancing service that distributes incoming HTTP and HTTPS requests across multiple targets, such as EC2 instances, containers, and IP addresses, at the application layer (Layer 7).**
+
+#### 2. Hindi Definition
+
+Application Load Balancer AWS ki service hai jo incoming HTTP/HTTPS requests ko multiple backend servers ya targets mein distribute karti hai. Yeh application layer, yani OSI Model ke Layer 7 par kaam karti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js application ek hi EC2 instance par chal rahi hai. Agar bahut saare users ek saath request bhejte hain, toh ek server par load zyada ho sakta hai.
+
+ALB ke peeche multiple EC2 instances ya doosre supported targets register kar sakte ho. ALB incoming requests ko listener rules aur target group ke through suitable healthy targets tak route karta hai. Isse traffic distribute hota hai aur healthy targets available hone par application ki availability improve ho sakti hai.
+
+ALB Layer 7 par kaam karta hai, isliye yeh sirf IP/port ke basis par nahi, balki HTTP details jaise hostname, path aur headers ke basis par bhi routing kar sakta hai.
+
+#### 4. Practical Example: MERN Application
+
+```text
+Users / Browser
+       |
+       | HTTP / HTTPS
+       v
+Application Load Balancer
+       |
+       +------ /api/users  ------> Node.js EC2 - 1
+       |
+       +------ /api/orders ------> Node.js EC2 - 2
+       |
+       +------ /admin/* --------> Admin service target group
+```
+
+Example: `/api/users` requests ko ek Target Group aur `/api/orders` requests ko doosre Target Group par route kar sakte ho. Yeh path-based routing ALB listener rules se configure hoti hai.
+
+#### 5. Important Components of ALB
+
+| Component | Purpose |
+|---|---|
+| Listener | Configured port aur protocol par connections accept karta hai, jaise HTTPS `443`. |
+| Listener Rules | Hostname, path, headers aur other supported conditions ke basis par routing decide karte hain. |
+| Target Group | Backend targets ka group hota hai, jaise EC2 instances, IP addresses ya supported container targets. |
+| Health Check | Targets ki health check karta hai, taaki unhealthy targets ko normal routing se exclude kiya ja sake. |
+| TLS Certificate | HTTPS listener par client ke saath encrypted TLS connection establish karne mein use hota hai. |
+
+#### 6. Why Do We Use ALB?
+
+- Incoming traffic ko multiple targets mein distribute karne ke liye.
+- Healthy targets ko requests forward karne aur unhealthy targets se traffic hatane ke liye.
+- Host-based aur path-based routing ke liye.
+- HTTPS termination aur TLS certificate management ke liye.
+- Multiple application services ko ek entry point ke through expose karne ke liye.
+- Auto Scaling ke saath use karke changing traffic ko handle karne mein madad ke liye.
+
+#### 7. Important Points
+
+- ALB OSI Model ke **Layer 7 (Application Layer)** par operate karta hai.
+- ALB aur EC2 instance same cheez nahi hain: ALB traffic route karta hai; EC2 application run kar sakta hai.
+- ALB khud application code execute nahi karta.
+- ALB target group health checks use karta hai, lekin health check endpoint ko application mein correctly configure karna zaroori hai.
+- ALB ko AWS Auto Scaling ke saath integrate kiya ja sakta hai; ALB apne aap application instances ki count increase nahi karta.
+
+---
