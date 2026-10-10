@@ -10097,3 +10097,84 @@ AWS CLI commands ke liye credentials aur required IAM permissions configured hon
 **Remember:** CloudFront distribution define karti hai ki CloudFront content kahan se fetch kare, requests ko kaise route kare aur content ko kaise cache aur securely deliver kare.
 
 ---
+
+### Q150. What is CloudFront Origin?
+
+#### 1. English Definition
+
+**A CloudFront origin is the source from which Amazon CloudFront fetches the content it delivers to viewers, such as an Amazon S3 bucket, an Application Load Balancer, or a custom HTTP server.**
+
+#### 2. Hindi Definition
+
+CloudFront Origin woh original source hota hai jahan se CloudFront content fetch karta hai. Yeh Amazon S3 bucket, Application Load Balancer (ALB), ya kisi supported custom HTTP server ke roop mein ho sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein React ki files S3 bucket mein stored hain aur Node.js backend ALB ke through accessible hai.
+
+CloudFront ko content deliver karne ke liye pata hona chahiye ki original files ya API responses kahan milenge. Isi source ko **Origin** kehte hain.
+
+Common origins:
+- **Amazon S3:** Static files, images, videos.
+- **ALB:** Application/backend traffic ko route karne ke liye.
+- **Custom HTTP origin:** Publicly reachable web server ya supported HTTP endpoint.
+
+Ek CloudFront distribution mein multiple origins ho sakte hain. Cache behaviors decide kar sakte hain ki kaunsa URL path kis origin ko use karega.
+
+#### 4. Practical Example
+
+E-commerce application ke liye:
+- S3 bucket mein product images stored hain.
+- ALB ke peeche Node.js/Express API chal rahi hai.
+
+CloudFront mein S3 aur ALB ko separate origins configure kar sakte ho. `/images/*` requests S3 origin par aur `/api/*` requests ALB origin par route ki ja sakti hain, appropriate cache behaviors ke saath.
+
+#### 5. Architecture Diagram — Request Flow
+
+```text
+User / Browser
+      |
+      v
+CloudFront Distribution
+      |
+      +---- /images/* ----> S3 Origin
+      |                      Product images
+      |
+      +---- /api/* --------> ALB Origin
+                             Node.js / Express API
+      |
+      v
+CloudFront returns the response to the user
+```
+
+**Flow:** User request karta hai → CloudFront matching cache behavior check karta hai → cache miss ya origin fetch ki zaroorat par request selected origin ko jaati hai → origin response return karta hai → CloudFront response user ko deliver karta hai. Valid cache hit par origin request ki zaroorat nahi ho sakti.
+
+#### 6. Practical Command / Configuration
+
+CloudFront distribution ke origins dekhne ke liye:
+
+```bash
+aws cloudfront get-distribution-config --id YOUR_DISTRIBUTION_ID
+```
+
+Returned configuration mein `DistributionConfig.Origins` ke andar origin definitions hoti hain. Exact output ko inspect karne ke liye AWS CLI aur suitable IAM permissions configured honi chahiye.
+
+**Configuration tips:**
+- Correct origin domain name set karo.
+- Private S3 origin ke liye Origin Access Control (OAC) aur appropriate bucket policy use karo.
+- ALB/custom origin ke liye origin protocol policy aur security configuration check karo.
+- Har path ke liye appropriate cache behavior select karo.
+- Origin ko direct public access dena zaroori hai ya nahi, security requirements ke according decide karo.
+
+#### 7. Summary Table
+
+| Origin type | Common use |
+|---|---|
+| Amazon S3 | Static assets, images, downloads |
+| Application Load Balancer (ALB) | Application/backend traffic |
+| Custom HTTP origin | Web server or supported HTTP endpoint |
+| Multiple origins | Different paths ko different content sources par route karna |
+
+**Remember:** Origin content ka source hai; CloudFront distribution us source ko use karke content ko cache aur users tak deliver karne ke rules define karti hai.
+
+---
