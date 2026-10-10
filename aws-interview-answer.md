@@ -1611,3 +1611,68 @@ Example private address `10.0.2.15` hai. Ye RFC 1918 private IPv4 range mein aat
 **Yaad rakhne ki trick:** Public IP = public network; Private IP = private network.
 
 ---
+
+### Q27. What is EBS?
+
+#### 1. English Definition
+
+**Amazon Elastic Block Store (EBS) is a block-level storage service that provides persistent storage volumes for use with EC2 instances.**
+
+#### 2. Hindi Definition
+
+EBS AWS ki storage service hai jo EC2 instance ke saath attach hone wali virtual disk provide karti hai. Is disk par operating system, application files aur doosra data store kiya ja sakta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, EC2 ko ek virtual computer samjho aur EBS ko us computer ki hard disk ya SSD.
+
+EC2 instance par tumhe operating system aur application run karne ke liye storage chahiye. EBS volume ko EC2 ke saath attach karke usmein data store kar sakte ho.
+
+EBS ka important point hai **persistent storage**. Iska matlab volume ka data EC2 instance ke lifecycle se alag manage kiya ja sakta hai. Instance stop hone par EBS volume ka data normally retained rehta hai. Instance terminate hone par data retain hoga ya delete, ye volume ki delete-on-termination setting aur configuration par depend karta hai.
+
+EBS volume aam taur par usi Availability Zone mein EC2 instance ke saath attach hota hai jahan volume create hua hai.
+
+#### 4. Practical Example — MERN Project
+
+Maan lo tumhara Node.js + Express backend EC2 par deploy hai:
+
+```text
+EC2 Instance
+  |-- Ubuntu operating system
+  |-- Node.js + Express application
+  |
+  +---- EBS Volume (virtual disk)
+          |-- Application files
+          |-- Logs / required data
+```
+
+Basic flow:
+1. AWS mein EBS volume create karo.
+2. Volume ko EC2 instance ke same Availability Zone mein rakho.
+3. Volume ko instance ke saath attach karo.
+4. Linux mein volume ko zaroorat ke mutabik format aur mount karo.
+5. Application ko us mounted storage path par files read/write karne ke liye configure karo.
+
+EBS application ke liye block storage hai; ise database ka automatic backup ya managed database service mat samajhna. Backup ke liye EBS snapshots aur appropriate recovery plan configure karna chahiye.
+
+#### 5. EBS vs EC2 Instance Store
+
+| Feature | EBS | EC2 Instance Store |
+|---|---|---|
+| Storage type | Network-attached block storage | Host machine se attached local storage |
+| Persistence | Volume EC2 se separately persist kar sakta hai | Instance lifecycle/host par depend karta hai; ephemeral data ke liye treat karo |
+| Detach / reattach | Supported instance par detach aur reattach kar sakte ho, with constraints | General-purpose persistent disk ki tarah detach/reattach nahi hota |
+| Example use | OS disk, application data, persistent files | Temporary cache, buffers, scratch data where suitable |
+
+#### 6. Important Points
+
+- EBS block storage provide karta hai, object storage nahi; objects ke liye S3 ek alag service hai.
+- EBS volume aur EC2 instance ki Availability Zone compatibility check karni hoti hai.
+- EBS snapshots point-in-time backups create karne mein help karte hain; production data ke liye backup aur restore process test karo.
+- Cost volume type, size, performance configuration, snapshots aur Region par depend kar sakti hai.
+
+#### 7. Interview Summary
+
+**EBS is persistent block storage for EC2. It works like a virtual hard disk that can store an operating system, application files, and other data.**
+
+---
