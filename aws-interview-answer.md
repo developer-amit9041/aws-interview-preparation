@@ -11857,3 +11857,97 @@ CloudWatch console mein:
 **Interview answer:** Amazon CloudWatch is an AWS monitoring and observability service used to collect metrics, logs, and events from AWS resources and applications. It helps teams monitor performance, troubleshoot errors, visualize metrics, and configure alarms for notifications or automated actions.
 
 ---
+
+### Q167. What are CloudWatch Metrics?
+
+#### 1. English Definition
+
+**CloudWatch metrics are time-ordered numerical data points that represent the performance or behavior of AWS resources and applications over time.**
+
+#### 2. Hindi Definition
+
+CloudWatch Metrics numerical measurements hote hain jo time ke saath AWS resources aur applications ki performance ya behavior dikhate hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari Node.js application EC2 instance par chal rahi hai. Tum check karna chahte ho ki server kitna CPU use kar raha hai ya kitni network traffic aa rahi hai.
+
+CloudWatch Metrics ye values time ke saath record karte hain, jisse tum trends dekh sakte ho aur alarms configure kar sakte ho.
+
+Examples:
+- **CPUUtilization:** EC2 CPU kitna busy hai.
+- **NetworkIn / NetworkOut:** Instance par kitna network data aa raha hai ya ja raha hai.
+- **RequestCount:** ALB ne kitni requests receive ki.
+- **Latency:** Supported services ke liye request processing/response time se related measurement.
+
+Metrics usually **namespace**, **metric name**, **dimensions**, **timestamp**, aur **value** ke through identify hote hain. Dimensions metric ko resource ya category ke hisaab se distinguish karne mein help karte hain.
+
+Important: Metrics numerical measurements hote hain; detailed error messages aur log lines CloudWatch Logs mein milte hain. EC2 ka basic CPU metric available hota hai, lekin memory/disk jaise OS-level metrics ke liye CloudWatch Agent ya another collection setup chahiye.
+
+#### 4. Practical Example
+
+Maan lo tumhari EC2 instance par CPU usage monitor karna hai.
+
+| Metric field | Example |
+|---|---|
+| Namespace | `AWS/EC2` |
+| Metric name | `CPUUtilization` |
+| Dimension | `InstanceId=i-0123456789abcdef0` |
+| Statistic | `Average` |
+| Period | `300` seconds (5 minutes) |
+
+Agar tum 5-minute period ke liye Average statistic select karte ho, CloudWatch us period mein available metric data ka average calculate karta hai. Agar CPU consistently high ho, tum alarm create kar sakte ho.
+
+#### 5. Architecture Diagram — Metrics to Alarm
+
+```text
+EC2 / ALB / AWS Resource
+          |
+          | Metric data points
+          v
+    CloudWatch Metrics
+          |
+          +------> Graph / Dashboard
+          |
+          v
+     CloudWatch Alarm
+          |
+          v
+   SNS Notification / Action
+```
+
+**Flow:** AWS resource metric data publish karta hai → CloudWatch data ko time ke saath store aur visualize karta hai → configured threshold meet hone par alarm state change ho sakti hai → configured notification/action execute hota hai.
+
+#### 6. Practical Command / Configuration
+
+EC2 CPU metric query karne ke liye:
+
+```bash
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/EC2 \
+  --metric-name CPUUtilization \
+  --dimensions Name=InstanceId,Value=i-0123456789abcdef0 \
+  --start-time 2026-10-10T00:00:00Z \
+  --end-time 2026-10-10T01:00:00Z \
+  --period 300 \
+  --statistics Average
+```
+
+Apni actual instance ID aur desired time range use karo. Current time window ke hisaab se timestamps update karna.
+
+CloudWatch console mein **Metrics → All metrics → EC2 → Per-Instance Metrics → CPUUtilization** open karke graph dekh sakte ho.
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| Metric | Numerical measurement |
+| Namespace | Related metrics ka group, e.g. `AWS/EC2` |
+| Dimension | Metric ko resource/category se identify karta hai |
+| Period | Data aggregation ka time interval |
+| Statistic | Average, Sum, Minimum, Maximum, etc. |
+| Alarm | Metric condition ke basis par state change/action |
+
+**Interview answer:** CloudWatch metrics are time-series numerical measurements used to monitor AWS resources and applications. Examples include EC2 CPU utilization, network traffic, and ALB request count. Metrics can be graphed on dashboards and used to trigger CloudWatch alarms.
+
+---
