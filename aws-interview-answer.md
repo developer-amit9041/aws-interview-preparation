@@ -2497,3 +2497,42 @@ Agar root disk ko modify karne ke bajaye separate storage chahiye, toh naya EBS 
 **I first check disk usage with `df -h`, modify the attached EBS volume size in the EC2 console, then inspect the disk layout with `lsblk`. If necessary, I extend the partition using `growpart` and expand the filesystem using `resize2fs` for ext4 or `xfs_growfs` for XFS. Finally, I verify the new capacity with `df -h`.**
 
 ---
+
+### Q37. What happens when an EC2 instance is stopped?
+
+#### 1. English Definition
+
+**When an EC2 instance is stopped, the virtual server shuts down and stops processing requests. Its EBS-backed data is retained, but compute usage charges generally stop while the instance is stopped.**
+
+#### 2. Hindi Definition
+
+Jab hum EC2 instance stop karte hain, toh virtual server band ho jata hai aur application requests process nahi karti. EBS volume par stored data generally safe rehta hai, aur stopped instance ke compute charges nahi lagte.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application AWS EC2 par deployed hai aur PM2 se run ho rahi hai. Jab tum EC2 ko **Stop** karte ho:
+
+- **Application band ho jaati hai:** Node.js, PM2 aur Nginx processes stop ho jaate hain.
+- **Server requests handle nahi karta:** Users application access nahi kar paayenge.
+- **EBS data retained rehta hai:** EBS-backed root volume aur attached EBS volumes ka data normally preserve rehta hai.
+- **Compute charges ruk jaate hain:** Stopped instance ke liye EC2 instance compute charges generally nahi lagte, lekin EBS storage aur kuch associated resources ke charges continue ho sakte hain.
+- **Public IPv4 address change ho sakta hai:** Automatically assigned public IPv4 address stop/start ke baad change ho sakta hai. Elastic IP ke rules alag hain.
+
+#### 4. What Happens When You Start It Again?
+
+Jab tum instance dobara start karte ho, EC2 virtual server boot karta hai. Lekin application services ko start hone ke liye configure kiya hona chahiye. Agar PM2 startup integration aur Nginx system service enabled/configured hain, toh woh boot par automatically start ho sakte hain. Public IPv4 address bhi change hua ho sakta hai, isliye address/DNS verify karo.
+
+#### 5. Stop vs Terminate
+
+| Stop | Terminate |
+|---|---|
+| Instance temporarily shut down hota hai | Instance permanently delete kiya jata hai |
+| Baad mein start kar sakte ho | Terminated instance restart nahi hota |
+| EBS-backed data generally retained rehta hai | Root EBS volume default setting ke mutabik delete ho sakta hai; other volumes ke liye settings check karo |
+| Stopped instance par compute charges generally nahi lagte | Instance compute charges stop ho jaate hain; retained storage/resources ke charges ho sakte hain |
+
+#### 6. Interview Summary
+
+**When an EC2 instance is stopped, it shuts down and no longer serves application traffic. EBS-backed data is normally retained, and instance compute charges generally stop, although storage and other associated resources may still incur charges. The instance can be started again, but its auto-assigned public IPv4 address may change.**
+
+---
