@@ -7451,3 +7451,59 @@ Yahan `user-101` ke multiple orders hain. Tum partition key `userId = user-101` 
 - A sort key is not mandatory for every DynamoDB table.
 
 ---
+
+### Q115. What is a Global Secondary Index?
+
+#### 1. English Definition
+
+**A Global Secondary Index (GSI) is a DynamoDB index with its own partition key and optional sort key, allowing items to be queried using key attributes different from the table's primary key.**
+
+#### 2. Hindi Definition
+
+Global Secondary Index (GSI) DynamoDB ka ek index hota hai jiska apna partition key aur optional sort key ho sakta hai. Isse table ko original primary key ke alawa doosre key attributes ke basis par query kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari DynamoDB `Orders` table mein primary key `userId` (partition key) aur `orderId` (sort key) hai. Is design se user ke orders query karna easy hai.
+
+Lekin agar tumhe `status = "PENDING"` wale saare orders find karne hain, toh original primary key is query ke liye suitable nahi ho sakti. Is case mein tum GSI bana sakte ho, jisme `status` partition key aur `createdAt` sort key ho sakti hai.
+
+GSI apni alag key structure provide karta hai, isliye tum data ko ek additional access pattern se query kar sakte ho. GSI ke liye required attributes table items mein available hone chahiye; index mein kaunse attributes project honge, woh bhi configure kiya ja sakta hai.
+
+#### 4. Practical Example
+
+```text
+Base table: Orders
+Partition key: userId
+Sort key:      orderId
+
+GSI: OrdersByStatus
+Partition key: status
+Sort key:      createdAt
+
+Query the GSI to find orders with status = "PENDING",
+optionally ordered/filtered by createdAt.
+```
+
+Example data:
+
+```json
+{
+  "userId": "user-101",
+  "orderId": "order-001",
+  "status": "PENDING",
+  "createdAt": "2026-10-10T12:00:00Z"
+}
+```
+
+A Node.js application can query `OrdersByStatus` using DynamoDB's `Query` operation with the GSI partition key value `PENDING`.
+
+#### 5. Important Points
+
+- A GSI has its own partition key and can have its own sort key, different from the base table's primary key.
+- It supports additional query patterns without scanning the entire base table.
+- GSI updates are maintained asynchronously, so reads can be eventually consistent; strongly consistent reads are not supported on GSIs.
+- GSIs can consume read/write capacity and storage or incur request charges, depending on capacity mode and configuration.
+- Choose GSI keys based on real query patterns and expected traffic; a low-cardinality or very hot partition key may create uneven traffic.
+
+---
