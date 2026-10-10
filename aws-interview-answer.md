@@ -11951,3 +11951,111 @@ CloudWatch console mein **Metrics → All metrics → EC2 → Per-Instance Metri
 **Interview answer:** CloudWatch metrics are time-series numerical measurements used to monitor AWS resources and applications. Examples include EC2 CPU utilization, network traffic, and ALB request count. Metrics can be graphed on dashboards and used to trigger CloudWatch alarms.
 
 ---
+
+### Q168. What are CloudWatch Logs?
+
+#### 1. English Definition
+
+**Amazon CloudWatch Logs is an AWS service feature that collects, stores, and lets you search and analyze log data from applications, operating systems, and AWS services.**
+
+#### 2. Hindi Definition
+
+CloudWatch Logs AWS ki service hai jisme applications, operating systems aur AWS services ke logs collect, store aur search kar sakte hain, taaki errors aur issues troubleshoot kiye ja saken.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari Node.js/Express API EC2 par chal rahi hai. Kabhi API mein error aata hai, jaise database connection fail ho gaya ya request par 500 response aa gaya.
+
+CloudWatch Logs mein application ke log messages bhej sakte ho aur baad mein unhe search karke issue ka reason find kar sakte ho.
+
+Important terms:
+- **Log event:** Ek individual log entry, jaise error message aur timestamp.
+- **Log stream:** Ek source se aane wale log events ki sequence.
+- **Log group:** Related log streams ka collection; ismein retention aur access settings configure ki ja sakti hain.
+- **CloudWatch Agent:** EC2 ke operating-system ya application log files ko CloudWatch Logs tak bhejne ke liye use ho sakta hai.
+- **Logs Insights:** Log data ko query aur analyze karne ka feature.
+
+CloudWatch Logs aur CloudWatch Metrics alag hain: logs detailed text/events rakhte hain, jabki metrics numerical measurements hoti hain.
+
+#### 4. Practical Example
+
+Maan lo Express API mein ye error aata hai:
+
+```text
+2026-10-11T10:20:00Z ERROR MongoDB connection failed
+```
+
+Agar application logs CloudWatch Logs ko forward kiye gaye hain, to tum relevant log group aur stream open karke error search kar sakte ho. Logs Insights mein matching messages filter karke incident troubleshoot karna easy hota hai.
+
+Typical setup:
+- Log group: `/myapp/production`
+- Log stream: EC2 instance ya application process ke liye stream
+- Retention: Requirement ke according configured period
+
+#### 5. Architecture Diagram — Application Logs Flow
+
+```text
+Node.js / Express Application
+             |
+             | Writes log messages
+             v
+       Log file / stdout
+             |
+             | CloudWatch Agent or configured integration
+             v
+      Amazon CloudWatch Logs
+             |
+        +----+----+
+        |         |
+        v         v
+   Log Search  Logs Insights
+        |
+        v
+   Troubleshooting
+```
+
+**Flow:** Application logs generate karti hai → configured agent/integration logs CloudWatch Logs ko bhejta hai → logs log group aur stream mein available hote hain → search ya Logs Insights se errors investigate karte hain.
+
+#### 6. Practical Command / Configuration
+
+CloudWatch Logs ke log groups list karne ke liye:
+
+```bash
+aws logs describe-log-groups
+```
+
+Kisi log group ke streams list karne ke liye:
+
+```bash
+aws logs describe-log-streams \
+  --log-group-name "/myapp/production"
+```
+
+Recent log events read karne ke liye:
+
+```bash
+aws logs tail "/myapp/production" --since 1h
+```
+
+Ye commands chalane ke liye AWS CLI configured hona chahiye aur IAM permissions, jaise relevant `logs:DescribeLogGroups`, `logs:DescribeLogStreams`, aur `logs:GetLogEvents`/tail ke liye required permissions, available honi chahiye.
+
+EC2 setup mein:
+1. CloudWatch Agent install/configure karo.
+2. Required log files aur log group specify karo.
+3. Instance role ko required CloudWatch Logs permissions do.
+4. CloudWatch console mein **Logs → Log groups** se logs verify karo.
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| Log event | Individual log entry |
+| Log stream | Related log events ki sequence |
+| Log group | Related log streams ka collection |
+| CloudWatch Agent | Host/application logs forward kar sakta hai |
+| Logs Insights | Logs ko query aur analyze karta hai |
+| Retention | Logs kitne time tak store honge |
+
+**Interview answer:** CloudWatch Logs collects and stores log data from applications, operating systems, and AWS services. Developers use log groups, log streams, and Logs Insights to search errors, troubleshoot failures, and investigate application behavior.
+
+---
