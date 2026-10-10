@@ -18,7 +18,7 @@ AWS interview questions for MERN / Node.js developers, organized from fundamenta
 - Production architecture scenarios
 
 ## Study approach
-Start with [AWS Interview Questions](QUESTIONS.md). Practice explaining each answer in this order:
+Start with [AWS Interview Questions and Answers](aws-interview-question.md). Practice explaining each answer in this order:
 1. Short definition in English
 2. Explanation in simple Hinglish
 3. Practical example
