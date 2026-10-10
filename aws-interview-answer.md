@@ -11399,3 +11399,102 @@ Actual AWS CLI change batch mein `Weight`, `SetIdentifier`, aur appropriate reco
 **Interview answer:** Simple routing provides a basic DNS response without weight-based distribution. Weighted routing assigns weights to multiple records so Route 53 selects DNS answers in roughly the configured proportions. It does not guarantee the same ratio for actual HTTP requests because DNS caching affects client traffic.
 
 ---
+
+### Q163. What is Failover Routing?
+
+#### 1. English Definition
+
+**Failover routing is an Amazon Route 53 routing policy that uses a primary resource and a secondary resource, returning the secondary resource when the primary is considered unhealthy according to the configured health-check and failover setup.**
+
+#### 2. Hindi Definition
+
+Failover Routing ek DNS routing policy hai jisme primary endpoint normally use hota hai. Agar primary endpoint configured health check ke according unhealthy ho jaye, to Route 53 backup endpoint ka DNS answer return kar sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application ke do API endpoints hain:
+- **Primary:** Mumbai region
+- **Secondary/Backup:** Singapore region
+
+Normally Route 53 primary endpoint return karta hai. Agar primary endpoint fail ho aur Route 53 ki health-check/failover configuration us failure ko detect kar le, to DNS queries ke liye secondary endpoint return kiya ja sakta hai.
+
+Important points:
+- Failover routing ke liye primary aur secondary failover records configure karte hain.
+- Health checks commonly use hote hain, but record type aur configuration ke hisaab se setup carefully karna hota hai.
+- Failover instantaneous ya har existing connection par apply hona guaranteed nahi hai. DNS TTL, resolver caching aur health-check detection time affect karte hain.
+- Failover DNS answers ko switch karta hai; yeh database replication, application state replication, ya backup server setup automatically create nahi karta. Tumhe application/data recovery separately plan karni hoti hai.
+
+#### 4. Practical Example
+
+Maan lo:
+- Primary API: `api-mumbai.myapp.com`
+- Backup API: `api-singapore.myapp.com`
+
+Route 53 mein same public DNS name, jaise `api.myapp.com`, ke liye primary aur secondary failover records configure kar sakte ho.
+
+| Setting | Primary record | Secondary record |
+|---|---|---|
+| Failover role | Primary | Secondary |
+| Endpoint | Mumbai API | Singapore API |
+| Normal operation | Selected | Standby/fallback |
+| If primary is unhealthy | Backup can be returned | Used as fallback |
+
+Dono endpoints ko compatible application behavior, data consistency, certificates, and network access ke saath prepare karna zaroori hai.
+
+#### 5. Architecture Diagram — Failover Flow
+
+```text
+              User
+                |
+                v
+          Route 53 DNS
+                |
+                v
+        Primary health status
+             /       \\
+        Healthy      Unhealthy
+           |             |
+           v             v
+      Primary API    Secondary API
+        Mumbai        Singapore
+```
+
+**Flow:** User DNS query karta hai → Route 53 primary health/failover status evaluate karta hai → primary healthy ho to primary ka answer return hota hai → primary unhealthy ho to secondary ka answer return ho sakta hai.
+
+#### 6. Practical Command / Configuration
+
+Hosted Zone records inspect karne ke liye:
+
+```bash
+aws route53 list-resource-record-sets \
+  --hosted-zone-id YOUR_HOSTED_ZONE_ID
+```
+
+Health checks inspect karne ke liye:
+
+```bash
+aws route53 list-health-checks
+```
+
+Route 53 console mein:
+1. Hosted Zone open karo.
+2. Primary record create karo aur routing policy **Failover** select karo.
+3. Failover role **Primary** set karo.
+4. Suitable health check configure/associate karo, where applicable.
+5. Same DNS name aur record type ke liye secondary record banao aur role **Secondary** set karo.
+6. Dono endpoints ko test karo, including recovery/failback behavior.
+
+#### 7. Summary Table
+
+| Feature | Failover Routing |
+|---|---|
+| Main purpose | High availability / disaster recovery |
+| Records | Primary and secondary |
+| Health checks | Commonly used to detect endpoint health |
+| Normal state | Primary answer |
+| Primary unhealthy | Secondary answer can be returned |
+| Instant failover guaranteed? | No; DNS caching and detection time matter |
+
+**Interview answer:** Route 53 Failover routing uses primary and secondary DNS records. Route 53 normally returns the primary endpoint and can return the secondary endpoint when the primary is unhealthy according to the configured failover and health-check setup. DNS caching means failover may not be immediate for every client.
+
+---
