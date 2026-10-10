@@ -9369,3 +9369,77 @@ API Gateway validates the token according to the authorizer configuration, such 
 Configure an authorizer supported by your API Gateway API type, attach it to protected routes, and validate credentials on every protected request. For many user-facing applications, a trusted identity provider with JWT validation or Amazon Cognito is a practical choice. Keep authorization and resource-level checks in the backend as well.
 
 ---
+
+### Q142. What is API throttling?
+
+#### 1. English Definition
+
+**API throttling is a mechanism that limits the rate at which API requests are accepted or processed over a period of time. In Amazon API Gateway, throttling helps control traffic, protect backend integrations, and reduce the risk of overload.**
+
+#### 2. Hindi Definition
+
+API throttling ek mechanism hai jo ek fixed time period mein API par aane wali requests ki rate ko limit karta hai. Isse backend par excessive traffic ka pressure kam karne mein madad milti hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application ki API normal condition mein 100 requests per second handle kar sakti hai. Agar achanak bahut zyada requests aane lagti hain, toh Lambda ya backend service par load badh sakta hai.
+
+API Gateway par throttling limits configure karke request rate ko control kiya ja sakta hai. Limit exceed hone par API Gateway kuch requests ko **HTTP 429 Too Many Requests** response ke saath reject kar sakta hai.
+
+Throttling overload aur accidental traffic spikes ko control karne mein help karta hai, lekin yeh complete DDoS protection ya authentication ka replacement nahi hai.
+
+#### 4. Practical Example
+
+Suppose tumhari API ke liye illustrative throttle settings hain:
+
+- **Rate limit:** 100 requests per second
+- **Burst limit:** 200 requests
+
+Rate limit sustained request rate ko control karta hai, jabki burst limit short traffic spikes ko accommodate karne ki capacity define karti hai. Exact behavior API type aur configured limits par depend karta hai; limits guaranteed throughput nahi hoti.
+
+Agar client configured limits exceed karta hai, API Gateway request ko throttle kar sakta hai aur response mein `429 Too Many Requests` mil sakta hai.
+
+#### 5. Architecture Diagram
+
+```text
+Clients / React Apps
+        |
+        | High request rate
+        v
+  Amazon API Gateway
+        |
+        | Check throttling limits
+        |
+        +---- Limit exceeded ---> 429 Too Many Requests
+        |
+        v
+  Lambda / Backend API
+        |
+        v
+      Database
+```
+
+#### 6. Important Points
+
+- **Rate limit:** Sustained request rate ko control karta hai.
+- **Burst limit:** Short-duration traffic spikes ko control karne mein help karta hai.
+- **429 response:** Request rate limit exceed hone par commonly return hota hai.
+- **Usage plans and API keys:** REST APIs mein eligible configurations ke liye per-client usage controls provide kar sakte hain; API keys ko authentication ka replacement mat samjho.
+- **Backend capacity:** Throttling settings ko Lambda concurrency, database capacity, downstream APIs, and expected traffic ke saath plan karo.
+- **Retries:** Client ko 429 response par exponential backoff aur jitter use karna chahiye; repeated immediate retries load aur badha sakte hain.
+- **Monitoring:** API Gateway metrics, logs, and throttling/error rates monitor karo.
+- Throttling settings aur available controls HTTP API aur REST API ke beech differ kar sakte hain.
+
+#### 7. Summary Table
+
+| Topic | Easy Meaning |
+|---|---|
+| API throttling | Requests ki rate limit karna |
+| Purpose | Backend ko excessive traffic se protect karne mein help |
+| Rate limit | Sustained request rate |
+| Burst limit | Short traffic spike allowance |
+| Common response | HTTP 429 Too Many Requests |
+| Client retry | Exponential backoff with jitter |
+| Limitation | Authentication ya complete DDoS protection ka replacement nahi |
+
+---
