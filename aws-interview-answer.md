@@ -5824,3 +5824,67 @@ Example: `/api/users` requests ko ek Target Group aur `/api/orders` requests ko 
 - ALB ko AWS Auto Scaling ke saath integrate kiya ja sakta hai; ALB apne aap application instances ki count increase nahi karta.
 
 ---
+
+### Q88. What is Auto Scaling?
+
+#### 1. English Definition
+
+**AWS Auto Scaling automatically adjusts the number of application resources according to configured scaling policies and demand, helping maintain application availability and optimize costs. For EC2 applications, this is commonly implemented using an EC2 Auto Scaling Group (ASG).**
+
+#### 2. Hindi Definition
+
+AWS Auto Scaling demand ke according application ke resources ko automatically increase ya decrease karne mein help karta hai. EC2 applications mein EC2 Auto Scaling Group ka use karke instances ki desired capacity maintain ki ja sakti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application EC2 par chal rahi hai. Normal time par 2 EC2 instances kaafi hain, lekin sale ya festival ke time traffic bahut badh jaata hai.
+
+Agar tum Auto Scaling configure karte ho, toh configured metrics aur policies ke basis par AWS extra EC2 instances launch kar sakta hai. Jab traffic kam ho jaata hai, toh policy ke according instances ki count reduce bhi ho sakti hai. Isse application ko changing traffic handle karne mein help milti hai aur unnecessary running capacity ka cost kam ho sakta hai.
+
+Auto Scaling Group mein tum **minimum capacity**, **desired capacity**, aur **maximum capacity** set karte ho. Scaling policies decide karti hain ki kab aur kitna scale karna hai.
+
+#### 4. Practical Example: MERN Application with ALB
+
+```text
+Users
+  |
+  v
+Application Load Balancer (ALB)
+  |
+  v
+EC2 Auto Scaling Group
+  |
+  +---- EC2 Instance 1
+  +---- EC2 Instance 2
+  +---- EC2 Instance 3  <- launched when scaling policy requires it
+```
+
+Example configuration:
+
+- Minimum capacity: `2` instances
+- Desired capacity: `2` instances
+- Maximum capacity: `6` instances
+- Scaling policy: average CPU utilization ko target, for example `60%`, ke aas-paas maintain karne ki koshish karna.
+
+Agar load badhta hai, toh ASG instances add kar sakta hai, maximum capacity ke andar. Load kam hone par scale-in policy instances reduce kar sakti hai, lekin minimum capacity se neeche nahi.
+
+#### 5. Types of Scaling Policies
+
+| Type | Explanation |
+|---|---|
+| Target Tracking | Metric ko configured target ke aas-paas rakhne ki koshish karta hai, jaise average CPU utilization. |
+| Step Scaling | Metric ke alarm thresholds aur configured step adjustments ke according capacity change karta hai. |
+| Simple Scaling | CloudWatch alarm aur scaling adjustment ke basis par scale karta hai; cooldown behavior bhi relevant hota hai. |
+| Scheduled Scaling | Predictable schedule ke basis par capacity change karta hai, jaise expected peak hours se pehle. |
+| Predictive Scaling | Historical patterns aur forecasts ka use karke future demand ke liye capacity plan karta hai. |
+
+#### 6. Important Points
+
+- **Scaling out** means instances/resources add karna.
+- **Scaling in** means instances/resources reduce karna.
+- **Horizontal scaling** means more instances add ya remove karna; EC2 Auto Scaling commonly isi approach ka use karta hai.
+- ALB traffic ko available healthy targets par route karta hai; Auto Scaling Group instance capacity manage karta hai.
+- ALB ke saath use karte waqt Auto Scaling Group ko target group se associate kiya ja sakta hai, taaki launched instances target group mein register hon aur terminated instances deregister hon.
+- Auto Scaling instantly har traffic spike solve nahi karta; instance launch aur application startup mein time lag sakta hai. Correct health checks, scaling thresholds aur capacity limits configure karna important hai.
+
+---
