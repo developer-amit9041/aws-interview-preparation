@@ -6777,3 +6777,52 @@ This is a conceptual diagram: exact topology and replication behavior depend on 
 - RDS features vary by database engine and deployment type; some Multi-AZ configurations have readable standby instances, so check the specific engine architecture.
 
 ---
+
+### Q104. What is RDS Backup?
+
+#### 1. English Definition
+
+**An Amazon RDS backup is a recoverable copy of a database that helps restore data after accidental deletion, data corruption, or other failures. RDS supports automated backups and manual snapshots.**
+
+#### 2. Hindi Definition
+
+Amazon RDS backup database ki recoverable copy hoti hai, jisse accidental deletion, data corruption ya kisi failure ke baad database ko restore kiya ja sakta hai. RDS automated backups aur manual snapshots support karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application ka production database Amazon RDS par hai. Galti se kisi ne important records delete kar diye ya application ke bug ki wajah se data damage ho gaya. Backup se tum database ko recover karne mein help le sakte ho.
+
+RDS mein commonly do options samjho:
+
+- **Automated Backups:** AWS configured backup retention period ke andar backups aur transaction logs maintain karta hai. Supported engines ke liye point-in-time recovery (PITR) mil sakti hai.
+- **Manual DB Snapshots:** Tum khud snapshot create karte ho, jaise deployment se pehle. Ye delete hone tak retain rehte hain, jab tak tum unhe manually delete na karo ya applicable policy kuch aur na ho.
+
+Automated backup se database ko retention window ke andar kisi supported point in time par restore kiya ja sakta hai. Manual snapshot se database ko snapshot ke time ke data state par restore kiya jaata hai.
+
+#### 4. Practical Example
+
+Suppose tumhare RDS database mein 10:00 AM par correct data tha, lekin 10:30 AM par galti se records delete ho gaye.
+
+- Agar automated backups aur point-in-time recovery configured aur supported hain, toh tum 10:25 AM jaise time par restore karne ki koshish kar sakte ho.
+- Agar tumhare paas 10:00 AM ka manual snapshot hai, toh us snapshot se us waqt ki database state restore kar sakte ho; 10:00 AM ke baad ka data us snapshot mein automatically include nahi hoga.
+
+RDS restore generally ek **new DB instance** create karta hai; restore ke baad application ko correct endpoint par point karna pad sakta hai.
+
+#### 5. Automated Backup vs Manual Snapshot
+
+| Basis | Automated Backup | Manual Snapshot |
+|---|---|---|
+| Creation | RDS automatically manages it when enabled/configured | User creates it manually or through automation |
+| Recovery | Supports point-in-time recovery for supported engines/configurations | Restores to the snapshot's captured state |
+| Retention | Configured retention period ke according | Retained until deleted, subject to applicable policies |
+| Best use | Regular recovery capability | Important milestones, such as before a major release |
+
+#### 6. Important Points
+
+- Configure backup retention according to your recovery requirements and cost considerations.
+- Automated backups and manual snapshots are different from Multi-AZ; Multi-AZ focuses on availability/failover, not historical recovery.
+- Test restores periodically—having a backup alone does not prove recovery will work as expected.
+- Protect snapshots with appropriate IAM permissions and encryption; consider cross-Region copies if your disaster-recovery plan requires them and the engine/configuration supports them.
+- Backup, retention, restore, and point-in-time recovery capabilities vary by RDS engine and configuration.
+
+---
