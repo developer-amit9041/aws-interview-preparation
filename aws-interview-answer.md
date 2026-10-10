@@ -4881,3 +4881,60 @@ Is example mein user public endpoint ko request bhejta hai. VPC ki routing aur r
 - IPv4 public addresses and IPv6 addressing have different allocation and routing details; a public IPv4 address is not required for every possible IPv6 internet configuration.
 
 ---
+
+### Q73. How does an EC2 instance in a private subnet access the internet?
+
+#### 1. English Definition
+
+**An EC2 instance in a private subnet commonly accesses the public IPv4 internet through a NAT Gateway in a public subnet, with appropriate routes and security rules.**
+
+#### 2. Hindi Definition
+
+Private subnet mein EC2 instance aam taur par public subnet mein maujood NAT Gateway ke through public IPv4 internet access karta hai. Iske liye route tables aur security rules sahi configure hone chahiye.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhara Node.js backend private subnet mein hai. Usko `npm install`, operating system updates ya external API calls ke liye internet chahiye, lekin tum nahi chahte ki internet users us EC2 ko directly initiate karke access kar saken.
+
+Iske liye common setup mein **NAT Gateway** use hota hai:
+
+1. NAT Gateway ko public subnet mein create karo aur Elastic IP assign karo.
+2. Public subnet ki route table mein `0.0.0.0/0 -> Internet Gateway` route configure karo.
+3. Private subnet ki route table mein `0.0.0.0/0 -> NAT Gateway` route add karo.
+4. EC2 ke Security Group aur subnet NACL ko required outbound traffic aur return traffic allow karne ke liye configure karo.
+5. EC2 outbound request NAT Gateway se internet tak bhej sakta hai; response existing connection ke through return hota hai.
+
+NAT Gateway unsolicited inbound internet connections ko private EC2 tak initiate karne ka path provide nahi karta. Private EC2 ko generally public IP ki zaroorat nahi hoti is NAT-based outbound IPv4 setup mein.
+
+#### 4. Architecture Diagram
+
+```text
+Private EC2 (Node.js)
+        |
+        | Private subnet route: 0.0.0.0/0 -> NAT Gateway
+        v
+NAT Gateway (Public Subnet, Elastic IP)
+        |
+        | Public subnet route: 0.0.0.0/0 -> Internet Gateway
+        v
+Internet Gateway
+        |
+        v
+Public Internet
+```
+
+#### 5. Other Options
+
+- **VPC endpoints:** For supported AWS services, such as S3 or DynamoDB, gateway/interface endpoints can provide private connectivity without routing that service traffic through a public internet NAT path.
+- **IPv6:** For IPv6 internet egress, AWS supports an egress-only internet gateway for outbound-initiated communication, subject to IPv6 routes and security rules.
+- **No internet needed:** If the instance only communicates with resources inside the VPC or private connected networks, a NAT Gateway may not be needed.
+
+#### 6. Important Points
+
+- A NAT Gateway must be in a public subnet with a route to an Internet Gateway for the common public NAT setup.
+- Private subnet route table points outbound IPv4 traffic to the NAT Gateway.
+- NAT Gateway has hourly and data-processing charges; multi-AZ architectures should consider availability and cost.
+- NAT Gateway provides outbound connectivity, not direct inbound access to the private EC2 instance.
+- Security Groups, NACLs and route tables still need correct configuration.
+
+---
