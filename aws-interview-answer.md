@@ -6534,3 +6534,61 @@ Maan lo tum ek registration API bana rahe ho. Agar project PostgreSQL use karta 
 - Select an engine based on application compatibility, SQL features, licensing, migration needs, operational requirements, and cost.
 
 ---
+
+### Q100. RDS vs EC2 database?
+
+#### 1. English Definition
+
+**Amazon RDS is a managed relational database service where AWS handles much of the underlying database infrastructure and routine administration. An EC2-hosted database is self-managed: you install, configure, secure, back up, and maintain the database software on an EC2 instance.**
+
+#### 2. Hindi Definition
+
+Amazon RDS mein AWS database infrastructure aur kai routine management tasks handle karta hai. EC2 par database mein tum khud EC2 server par database install, configure, secure, backup aur maintain karte ho.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js application ko PostgreSQL ya MySQL database chahiye. AWS par database chalane ke do common options hain:
+
+- **RDS:** AWS managed database service provide karta hai. Tum engine, capacity, networking, backups aur availability settings configure karte ho; AWS kai routine database infrastructure tasks simplify karta hai.
+- **Database on EC2:** Tum EC2 instance launch karke us par database software khud install aur manage karte ho. OS patches, database upgrades, backup jobs, monitoring, recovery aur high availability ki planning bhi tumhari responsibility hoti hai.
+
+#### 4. Practical Architecture
+
+```text
+Option A: Managed database
+Node.js API on EC2  --->  Amazon RDS (MySQL/PostgreSQL)
+
+Option B: Self-managed database
+Node.js API  --->  EC2 instance running MySQL/PostgreSQL
+                         (you manage OS + database)
+```
+
+For many production applications that need a supported relational engine, RDS is a good default because it reduces routine operational work. EC2-hosted databases can make sense when you need operating-system access, unusual database configurations, unsupported software, or complete control over the database environment.
+
+#### 5. Difference Table
+
+| Basis | Amazon RDS | Database on EC2 |
+|---|---|---|
+| Management | AWS manages much of the underlying infrastructure and routine tasks | You manage the OS and database software |
+| Setup | Generally simpler to provision and operate | Requires installation and manual configuration |
+| Backups | Managed backup features are available and must be configured appropriately | You design, schedule, store, and test backups yourself |
+| Patching | AWS provides supported maintenance mechanisms; you manage settings and timing | You manage OS and database patching |
+| High availability | Managed Multi-AZ options are available for supported engines/configurations | You design and operate replication, failover, and recovery |
+| OS access | No general underlying host OS access | You have OS-level control of the EC2 instance |
+| Customization | Limited to supported engine options and service capabilities | Greater control over OS and database configuration |
+| Operational effort | Usually lower | Usually higher |
+| Cost | Service, storage, backups, and selected options are billed; compare workload-specific pricing | EC2, storage, data transfer, and operational effort all contribute to cost |
+
+#### 6. Which One Should You Choose?
+
+- Choose **RDS** when you want a supported relational database with less infrastructure administration, managed backup options, and managed high-availability choices.
+- Choose **EC2-hosted database** when you need OS-level access, unusual customizations, or software that RDS does not support, and you can manage operations reliably.
+
+#### 7. Important Points
+
+- RDS is not completely maintenance-free: configure security, backups, maintenance windows, monitoring, scaling, and recovery testing.
+- EC2 database is not automatically cheaper; include administration time, backups, redundancy, and outage risk in the comparison.
+- In either architecture, restrict database network access, use encryption where appropriate, manage credentials securely, and test restores.
+- Amazon RDS is for supported relational engines; MongoDB is not an RDS engine. MongoDB Atlas, self-managed MongoDB, and Amazon DocumentDB are separate options with different compatibility and operational trade-offs.
+
+---
