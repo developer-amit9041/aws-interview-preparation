@@ -5582,3 +5582,73 @@ ALB chooses healthy registered targets within the selected Target Group accordin
 - Configure backend Security Groups to permit application traffic from the ALB Security Group.
 
 ---
+
+### Q84. How do you deploy multiple Node.js servers behind ALB?
+
+#### 1. English Definition
+
+**Deploy multiple Node.js servers behind an Application Load Balancer (ALB) by running the application on multiple EC2 instances, registering them in a Target Group, configuring listener rules and health checks, and routing client traffic through the ALB.**
+
+#### 2. Hindi Definition
+
+Multiple Node.js servers ko ALB ke peeche deploy karne ke liye application ko multiple EC2 instances par run karte hain, un instances ko Target Group mein register karte hain, aur ALB listener ke through traffic route karte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js/Express application port `3000` par chalti hai. Production mein ek hi EC2 instance rakhne ke bajay tum same application ko multiple EC2 instances par deploy kar sakte ho.
+
+ALB users ki requests receive karta hai. Uska listener traffic ko Target Group tak forward karta hai, aur Target Group mein registered healthy EC2 instances requests handle karte hain.
+
+#### 4. Architecture
+
+```text
+                  Users
+                    |
+                    v
+             Application Load Balancer
+                    |
+              HTTPS Listener : 443
+                    |
+                    v
+          Target Group (HTTP : 3000)
+              /             \\
+             v               v
+       EC2 Instance 1    EC2 Instance 2
+       Node.js : 3000    Node.js : 3000
+              \\             /
+               v           v
+              Shared Database
+```
+
+ALB listener port `443` aur backend target port `3000` alag ho sakte hain. HTTPS certificate ALB par configure kiya ja sakta hai; backend connection protocol ko bhi deliberately configure karo.
+
+#### 5. Step-by-Step Deployment
+
+1. **Create a VPC and subnets:** Use at least two Availability Zones for production resilience. Place the internet-facing ALB in public subnets and backend EC2 instances in private application subnets where appropriate.
+2. **Launch multiple EC2 instances:** Use the same application version and runtime configuration on each instance. Install Node.js and deploy the app, or use a repeatable deployment/image process.
+3. **Run the application:** Configure the Node.js app to listen on port `3000` and bind appropriately so it is reachable through the instance network interface. Use a process manager or service manager to keep it running.
+4. **Create a Target Group:** Choose the suitable target type, register the EC2 instances, and configure the backend protocol and port (for example, HTTP `3000`).
+5. **Configure a health check:** Add a working endpoint such as `/health` and configure the Target Group to check it on the appropriate port and path.
+6. **Create the ALB:** Configure it across the required public subnets and Availability Zones.
+7. **Configure the listener:** Create an HTTPS listener on port `443`, attach a valid TLS certificate, and set its default action to forward to the Node.js Target Group. Optionally redirect HTTP `80` to HTTPS `443`.
+8. **Configure Security Groups:** ALB Security Group permits intended client traffic (usually HTTPS `443`). Backend EC2 Security Group permits port `3000` only from the ALB Security Group. Do not expose the Node.js port directly to the internet.
+9. **Test the ALB DNS name:** Verify the app responds, targets are healthy, and logs show requests arriving at the backend instances.
+10. **Automate scaling and deployments:** For production, consider an Auto Scaling Group attached to the Target Group and a controlled deployment pipeline. Ensure instances use the same application configuration and shared external state.
+
+#### 6. Example Security Group Rules
+
+| Resource | Inbound rule | Source |
+|---|---|---|
+| ALB Security Group | HTTPS `443` | Intended clients / internet, if public |
+| EC2 Security Group | TCP `3000` | ALB Security Group only |
+| Database Security Group | Database-specific port | Backend application Security Group only |
+
+#### 7. Important Production Points
+
+- Keep session state, uploaded files, and other shared application state outside an individual EC2 instance when requests can reach any instance; use an appropriate database, object storage, or shared session store.
+- Store secrets securely, for example in AWS Secrets Manager or Systems Manager Parameter Store; use IAM roles instead of long-lived access keys.
+- Use logs and metrics to monitor the ALB, target health, and Node.js application.
+- A Target Group health check can stop routing to an unhealthy instance, but it does not automatically replace that instance. An Auto Scaling Group or another recovery mechanism can provide replacement capacity.
+- For production, use repeatable deployments and avoid manually configuring each instance differently.
+
+---
