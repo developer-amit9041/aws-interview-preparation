@@ -1,4 +1,4 @@
-# AWS Interview Questions — Most Important
+# 🔥 AWS Most Asked Interview Questions
 
 Target: MERN / Node.js developers (approximately 1–4 years' experience)
 
@@ -275,40 +275,3 @@ Target: MERN / Node.js developers (approximately 1–4 years' experience)
 232. What is AWS KMS?
 233. What is encryption at rest?
 234. What is encryption in transit?
-
-## 21. Production and Scenario-Based Questions
-235. How would you deploy a MERN application to AWS for production?
-236. Explain a production architecture using Route 53, ALB, ECS/EC2, and a database.
-237. How would you securely connect a Node.js backend to a database in a private subnet?
-238. How would you store and serve user-uploaded images using S3 and CloudFront?
-239. How would you handle increased traffic using ALB and Auto Scaling?
-240. How would you troubleshoot a Node.js API returning HTTP 502 or 504 behind an ALB?
-241. An EC2 instance is unreachable over SSH. How would you troubleshoot it?
-242. An application works locally but fails in ECS. How would you debug it?
-243. How would you manage application secrets across development, staging, and production?
-244. How would you design backups and disaster recovery for a production application?
-245. How would you monitor errors, latency, CPU, and memory in production?
-246. How would you design a background email or notification worker using SQS?
-247. How would you deploy with minimal downtime?
-248. How would you restrict public access while allowing the ALB to reach application servers?
-249. How would you investigate an unexpected AWS bill increase?
-250. How would you design a secure, scalable, and cost-aware AWS architecture for a MERN application?
-
-## Recommended preparation order
-1. IAM and AWS fundamentals
-2. EC2, AMI, EBS and deployment
-3. S3
-4. VPC, subnets, Security Groups and NAT
-5. ALB and Auto Scaling
-6. RDS, Route 53 and CloudWatch
-7. ECR and ECS
-8. CI/CD and secrets
-9. Lambda, SQS/SNS and API Gateway
-10. EKS and production scenarios
-
-## Interview answer format
-For each question, prepare:
-- **English definition:** 1–3 sentences.
-- **Hinglish explanation:** explain the idea in simple language.
-- **Practical example:** connect it to a MERN/Node.js application.
-- **Trade-offs:** when to use it and what to watch out for.
