@@ -3606,3 +3606,80 @@ Yeh example `temporary/` prefix ke eligible objects ko 30 days baad expire karne
 - Lifecycle policies are useful for cost optimization and automated data retention, but expiration rules can permanently remove data; test scope carefully.
 
 ---
+
+### Q53. What is S3 Storage Class?
+
+#### 1. English Definition
+
+**An S3 storage class is a category of Amazon S3 storage designed for different access patterns, availability needs, retrieval speeds, and storage costs.**
+
+#### 2. Hindi Definition
+
+S3 Storage Class ek category hoti hai jo decide karti hai ki S3 mein file kis tarah store hogi, use kitni frequently access kiya jaata hai, aur storage aur retrieval par kitna kharcha ho sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein S3 par profile images, product images, invoices aur purane reports stored hain. Har file ko same tarah access nahi kiya jaata.
+
+- Product images frequently open hoti hain, isliye unke liye S3 Standard suitable ho sakta hai.
+- Purane reports kabhi-kabhi access hote hain, toh S3 Standard-IA suitable ho sakta hai.
+- Compliance ke liye rakhe gaye archives ko Glacier storage classes mein rakh sakte ho, agar unhe retrieve karne mein delay acceptable ho.
+
+Storage class select karte waqt storage price ke saath retrieval fees, minimum storage duration, availability requirements aur retrieval time bhi check karna chahiye.
+
+#### 4. Common S3 Storage Classes
+
+| Storage class | Typical use case | Key consideration |
+|---|---|---|
+| S3 Standard | Frequently accessed files, website assets | Fast, frequent access |
+| S3 Intelligent-Tiering | Access pattern unpredictable hai | Eligible objects ko access pattern ke according tiers mein move karta hai; monitoring/automation charges apply ho sakte hain |
+| S3 Standard-IA | Long-lived files jo less frequently access hoti hain | Retrieval charges aur minimum storage duration apply ho sakti hai |
+| S3 One Zone-IA | Infrequently accessed, re-creatable data jise ek AZ mein store karna acceptable hai | Single-AZ storage; AZ loss protection nahi |
+| S3 Glacier Instant Retrieval | Archive data jise rare access ke bawajood milliseconds mein retrieve karna hai | Retrieval fees aur minimum storage duration apply hoti hai |
+| S3 Glacier Flexible Retrieval | Archives jahan minutes se hours tak wait karna acceptable hai | Retrieval option ke hisaab se latency aur cost vary karti hai |
+| S3 Glacier Deep Archive | Long-term, rarely accessed archive data | Lowest-cost archive options mein se ek, lekin retrieval mein hours lag sakte hain |
+
+Exact pricing and availability depend on AWS Region and current service terms; check the AWS pricing page before choosing a class.
+
+#### 5. Practical Example — Choose a Storage Class
+
+For a MERN application, a reasonable starting point could be:
+
+```text
+Frequently accessed product images -> S3 Standard
+Unknown/changing access pattern     -> S3 Intelligent-Tiering
+Occasionally accessed older files   -> S3 Standard-IA (if suitable)
+Long-term compliance archive        -> Glacier storage class (based on retrieval needs)
+```
+
+Yeh fixed rule nahi hai. Access pattern, durability, availability, retrieval speed, minimum storage duration aur cost ko evaluate karke class choose karo.
+
+#### 6. How to Set a Storage Class
+
+When uploading an object, you can specify its storage class through the AWS SDK. For example:
+
+```javascript
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+
+const s3 = new S3Client({ region: process.env.AWS_REGION });
+
+await s3.send(new PutObjectCommand({
+  Bucket: process.env.S3_BUCKET_NAME,
+  Key: 'products/product-image.jpg',
+  Body: imageBuffer,
+  ContentType: 'image/jpeg',
+  StorageClass: 'STANDARD',
+}));
+```
+
+`StorageClass: 'STANDARD'` explicitly selects S3 Standard, which is also the usual default when no other storage class is specified. For other classes, use the supported AWS SDK storage-class value and confirm the object and operation are eligible.
+
+#### 7. Important Points
+
+- Storage class affects storage cost and access/retrieval characteristics; it does not itself make an object public or private.
+- Use Lifecycle rules to automate transitions when objects become less frequently accessed.
+- Glacier classes are for archive use cases; check retrieval delays and charges before selecting them.
+- S3 One Zone-IA stores data in one Availability Zone, so it is not appropriate for data that needs multi-AZ resilience.
+- Compare total cost, including requests, retrieval, transition and minimum-duration charges—not just the per-GB storage rate.
+
+---
