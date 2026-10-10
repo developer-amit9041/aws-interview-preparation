@@ -17538,3 +17538,57 @@ During each batch, deployment tooling should drain connections or remove instanc
 **Interview-ready answer:** Rolling Deployment is a strategy in which application instances are updated gradually in batches instead of updating all instances at once. The remaining healthy instances continue serving traffic, helping reduce downtime. Health checks, suitable batch sizes, and backward-compatible database changes are important for a safe rollout.
 
 ---
+
+### Q224. Blue-Green vs Rolling Deployment?
+
+#### 1. English Definition
+
+**Blue-Green Deployment** runs the current and new versions in separate production-like environments and switches traffic after validation. **Rolling Deployment** updates the existing application instances gradually in batches while the remaining healthy instances continue serving traffic.
+
+#### 2. Hindi Definition
+
+Blue-Green mein purana aur naya version alag-alag environments mein chalte hain; testing ke baad traffic new environment par switch kar dete hain. Rolling Deployment mein existing servers ko ek-ek karke ya batches mein update karte hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari Node.js application AWS par deploy hai aur ab v1 se v2 par jana hai.
+
+**Blue-Green:**
+- Blue environment par v1 live hai.
+- Green environment par v2 deploy karke test karte ho.
+- Test pass hone par load balancer ka traffic Green par switch karte ho.
+- Issue aaye toh traffic Blue par wapas bhej sakte ho, agar Blue available aur compatible hai.
+
+**Rolling:**
+- Tumhare paas 4 application instances hain, sab v1 par.
+- Pehle kuch instances ko v2 par update karte ho.
+- Health checks pass hone par next batch update karte ho.
+- Aakhir mein sabhi instances v2 par aa jate hain.
+
+#### 4. Comparison Table
+
+| Feature | Blue-Green Deployment | Rolling Deployment |
+|---|---|---|
+| Deployment method | Two separate environments | Existing instances updated in batches |
+| Traffic handling | Traffic is switched to the new environment | Healthy instances keep serving traffic as batches update |
+| Downtime | Can minimize downtime when routing and health checks are configured correctly | Can minimize downtime if enough healthy capacity remains |
+| Infrastructure cost | Often higher because both environments need capacity | Often lower, though temporary extra capacity may still be needed |
+| Rollback | Often fast: switch traffic back to old environment | May require rolling updated instances back to the old version |
+| Version overlap | Old and new environments coexist | Old and new versions may coexist across instances |
+| Main risk | Extra capacity and database/state compatibility | Insufficient healthy capacity and mixed-version compatibility |
+
+#### 5. AWS Practical Example
+
+**Blue-Green on AWS:** An Application Load Balancer routes traffic to a Blue target group running Node.js v1. Deploy v2 to a separate Green target group, run health checks, and then change routing to Green. If necessary, route traffic back to Blue.
+
+**Rolling on AWS:** Update instances in an Auto Scaling group or use a supported deployment service to replace/update a batch at a time. Configure health checks and minimum healthy capacity so the application can keep serving requests.
+
+#### 6. Which One Should You Choose?
+
+- Choose **Blue-Green** when fast traffic switching and a straightforward application-version rollback are priorities, and you can afford the extra environment capacity.
+- Choose **Rolling** when you want gradual updates and usually lower additional infrastructure cost, and your application supports old and new versions running together temporarily.
+- In both strategies, use backward-compatible database migrations, health checks, monitoring, and a rollback plan. Switching application traffic does not automatically undo database changes.
+
+**Interview-ready answer:** Blue-Green Deployment maintains two separate production-like environments and switches traffic to the new environment after validation. Rolling Deployment updates application instances gradually in batches while healthy instances continue serving traffic. Blue-Green can offer a faster traffic-based rollback but often costs more infrastructure; Rolling can use less extra capacity but rollback may take longer. The right choice depends on availability requirements, cost, architecture, and compatibility between application versions.
+
+---
