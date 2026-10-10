@@ -13659,3 +13659,119 @@ Replace `<SQS_QUEUE_URL>` with the actual queue URL. AWS CLI credentials and the
 | Common use cases | Order processing, email notifications, background jobs |
 
 **Interview-ready answer:** A queue in Amazon SQS temporarily stores messages until consumers retrieve and process them. It enables asynchronous communication between application components. For example, a Node.js order API can send an order message to SQS while a background worker processes it and sends a confirmation email.
+
+---
+
+### Q183. Standard Queue vs FIFO Queue?
+
+#### 1. English Definition
+
+**Amazon SQS Standard Queue provides very high throughput with at-least-once message delivery and best-effort ordering. FIFO (First-In-First-Out) Queue preserves message order within a message group and supports deduplication to help prevent duplicate sends.**
+
+#### 2. Hindi Definition
+
+**Standard Queue** high volume mein messages process karne ke liye hoti hai, lekin messages ka order guaranteed nahi hota aur duplicate delivery possible hai.
+
+**FIFO Queue** messages ko defined order mein process karne ke liye hoti hai. Ismein message groups ke andar ordering preserve hoti hai aur deduplication features bhi milte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, dono AWS SQS queues messages ko store karti hain, lekin main difference **ordering, deduplication aur throughput** ka hai.
+
+**Standard Queue:**
+- High throughput ke liye suitable hai.
+- Message ordering guaranteed nahi hoti.
+- At-least-once delivery ke kaaran duplicate message mil sakta hai.
+- Consumer ko duplicate messages safely handle karne chahiye.
+
+**FIFO Queue:**
+- FIFO ka full form **First-In-First-Out** hai.
+- Messages ka order same `MessageGroupId` ke andar preserve hota hai.
+- FIFO deduplication ID ya content-based deduplication ke configured behavior ke through duplicate sends ko suppress karne mein help karta hai.
+- Throughput limits aur FIFO-specific configuration apply hoti hain.
+
+**Kaunsi use karein?**
+- Email notifications, analytics events ya aise background jobs jahan strict order required nahi hai: Standard Queue aksar suitable hoti hai.
+- Order events, financial transaction workflows, ya sequential processing jahan order important hai: FIFO Queue consider karo. Phir bhi business logic ko idempotent aur failure-safe design karna chahiye.
+
+#### 4. Practical Example / Code
+
+**Standard Queue example:** Order confirmation email ke messages ko background worker process karta hai. Agar messages thode different order mein process hon, toh application ke liye ye acceptable ho sakta hai.
+
+**FIFO Queue example:** Ek hi customer ke account updates ko sequence mein process karna hai. FIFO queue mein message group set kar sakte ho:
+
+```javascript
+import {
+  SQSClient,
+  SendMessageCommand,
+} from "@aws-sdk/client-sqs";
+
+const sqs = new SQSClient({ region: "ap-south-1" });
+
+await sqs.send(new SendMessageCommand({
+  QueueUrl: process.env.SQS_FIFO_QUEUE_URL,
+  MessageBody: JSON.stringify({
+    event: "OrderStatusUpdated",
+    orderId: "order-123",
+    status: "SHIPPED",
+  }),
+  MessageGroupId: "order-123",
+  MessageDeduplicationId: "order-123-shipped-event-001",
+}));
+```
+
+**Important:** FIFO queue ka URL/name FIFO queue ko point karna chahiye, aam taur par queue name `.fifo` par end hota hai. `MessageGroupId` same group ke messages ka order maintain karta hai. `MessageDeduplicationId` duplicate sends ko deduplicate karne mein help karta hai within SQS's deduplication interval; ye end-to-end exactly-once business processing ki guarantee nahi hai.
+
+#### 5. Architecture Diagram — When Ordering Matters
+
+```text
+                 Producer
+                    |
+          +---------+---------+
+          |                   |
+          v                   v
+    Standard Queue         FIFO Queue
+    High throughput        Ordered within
+    Best-effort order      each message group
+          |                   |
+          v                   v
+    Worker/Consumer       Worker/Consumer
+    Duplicates possible   FIFO deduplication
+                          features available
+```
+
+**Flow:** Producer message bhejta hai → selected queue message store karti hai → consumer messages process karta hai. Queue type choose karte waqt check karo ki application ko strict ordering chahiye ya high throughput aur flexible ordering acceptable hai.
+
+#### 6. Practical Command / Configuration
+
+**Create a Standard Queue:**
+
+```bash
+aws sqs create-queue \
+  --queue-name order-notifications \
+  --region ap-south-1
+```
+
+**Create a FIFO Queue:**
+
+```bash
+aws sqs create-queue \
+  --queue-name order-events.fifo \
+  --attributes FifoQueue=true,ContentBasedDeduplication=false \
+  --region ap-south-1
+```
+
+FIFO queue ke liye messages bhejte waqt `MessageGroupId` required hota hai. Upar ke example mein explicit `MessageDeduplicationId` bhi diya gaya hai, kyunki content-based deduplication disabled hai.
+
+#### 7. Summary Table
+
+| Feature | Standard Queue | FIFO Queue |
+|---|---|---|
+| Ordering | Best-effort; order guaranteed nahi | Per message group ordering preserve hoti hai |
+| Delivery | At-least-once; duplicates possible | FIFO deduplication features; consumer idempotency phir bhi important |
+| Throughput | Very high throughput | FIFO-specific throughput limits apply |
+| Message grouping | `MessageGroupId` required nahi | `MessageGroupId` required |
+| Deduplication | Application ko duplicates handle karne chahiye | Deduplication ID ya configured content-based deduplication |
+| Best use case | Notifications, scalable background jobs | Ordered workflows, sequential events |
+
+---
