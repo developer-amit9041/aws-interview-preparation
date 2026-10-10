@@ -16219,3 +16219,71 @@ kubectl rollout status deployment/node-api
 **Interview-ready answer:** We use Kubernetes on AWS when an application needs Kubernetes orchestration features such as scaling, self-healing, rolling deployments, service discovery, and a broad ecosystem. Amazon EKS provides a managed Kubernetes control plane and integrates with AWS services such as IAM, VPC, ECR, and load balancers. However, EKS does not eliminate all operational work; teams still manage their workloads, configuration, security, and chosen compute resources.
 
 ---
+
+### Q209. What is an EKS Cluster?
+
+#### 1. English Definition
+
+An Amazon EKS cluster is a Kubernetes environment on AWS that includes an AWS-managed Kubernetes control plane and the compute resources where application workloads run. Those workloads can run on managed or self-managed EC2 nodes, or on supported AWS Fargate configurations.
+
+#### 2. Hindi Definition
+
+EKS Cluster AWS par bana hua Kubernetes environment hota hai. Ismein AWS Kubernetes ke control plane ko manage karta hai, aur tum apni application ke Pods ko EC2 worker nodes ya supported Fargate configuration par chala sakte ho.
+
+#### 3. Hinglish Explanation
+
+Bhai, simple words mein EKS Cluster ko apni Kubernetes application chalane ka poora environment samjho.
+
+Iske do main parts hote hain:
+
+1. **Control plane:** Kubernetes API aur cluster ki desired state ko manage karta hai. Amazon EKS is control plane ko operate karta hai.
+2. **Compute / worker capacity:** Yahan tumhare application Pods run hote hain. Ye EC2 nodes ya supported Fargate workloads ho sakte hain.
+
+Example: Tumhari MERN application ka Node.js API Docker image Amazon ECR mein hai. EKS cluster ke andar Kubernetes Deployment us image se Pods run karwa sakta hai. Service aur load balancer configuration users ke traffic ko API tak route kar sakti hai.
+
+Yaad rakho: **EKS = managed Kubernetes service; cluster = us Kubernetes environment ka instance.** EKS control plane manage karta hai, lekin application deployment, permissions, networking aur compute choices ko configure karna tumhari responsibility hoti hai.
+
+#### 4. Practical Architecture
+
+```text
+Amazon EKS Cluster
+  |
+  +-- AWS-managed Kubernetes control plane
+  |      +-- Kubernetes API
+  |      +-- Scheduling and cluster state
+  |
+  +-- Compute capacity
+         +-- EC2 worker nodes OR supported Fargate workloads
+                +-- Node.js API Pods
+                +-- Worker Pods
+```
+
+#### 5. Practical Commands
+
+```bash
+# List EKS clusters in a region
+aws eks list-clusters --region ap-south-1
+
+# Configure kubectl for a cluster
+aws eks update-kubeconfig --region ap-south-1 --name <CLUSTER_NAME>
+
+# View cluster nodes and workloads
+kubectl get nodes
+kubectl get pods --all-namespaces
+```
+
+`kubectl get nodes` is useful when the cluster uses node-based compute such as EC2; do not expect Fargate Pods to appear as regular Kubernetes worker nodes in the same way.
+
+#### 6. Summary Table
+
+| Component | Purpose |
+|---|---|
+| EKS control plane | AWS operates the Kubernetes control plane |
+| Worker nodes / compute | Runs application Pods |
+| Pods | Run one or more containers |
+| Deployment | Declares and manages application replicas and updates |
+| Service / load balancer | Provides networking and traffic access, when configured |
+
+**Interview-ready answer:** An EKS cluster is a Kubernetes environment provided by Amazon EKS. AWS manages the Kubernetes control plane, while application Pods run on configured compute such as EC2 worker nodes or supported Fargate workloads. We use the cluster to deploy, scale, and manage containerized applications using Kubernetes.
+
+---
