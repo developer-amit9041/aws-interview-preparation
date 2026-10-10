@@ -2143,3 +2143,153 @@ Isse configured startup mechanism reboot ke baad saved process list ko restore k
 **PM2 is a Node.js process manager used in production to run applications in the background, monitor processes, manage logs, and restart crashed applications. On EC2, I can also configure PM2 startup integration to restore the application after a server reboot.**
 
 ---
+
+### Q34. How do you configure Nginx with EC2?
+
+#### 1. English Definition
+
+**Nginx is a web server that can act as a reverse proxy, forwarding incoming HTTP/HTTPS requests to an application running on an EC2 instance.**
+
+#### 2. Hindi Definition
+
+Nginx ek web server hai jo user ki HTTP/HTTPS requests receive karke unhe EC2 par chal rahi Node.js application tak forward kar sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application AWS EC2 par deploy hai:
+
+- Node.js backend port `5000` par run kar raha hai.
+- PM2 backend process ko manage kar raha hai.
+- Nginx port `80` par incoming HTTP requests receive karega.
+- Nginx requests ko backend ke port `5000` par forward karega.
+
+Request flow:
+
+```text
+User's Browser
+      |
+      | HTTP request to EC2 public IP (port 80)
+      v
+AWS Security Group (allows HTTP port 80)
+      |
+      v
+Nginx (port 80) -- reverse proxy
+      |
+      v
+Node.js / Express (port 5000, managed by PM2)
+```
+
+Nginx ke through user ko backend ka port `5000` directly access karne ki zaroorat nahi hoti. Nginx public HTTP/HTTPS traffic handle karta hai aur backend ko internal port par forward kar sakta hai.
+
+#### 4. Practical Example — Configure Nginx on EC2
+
+Assumption: tum Ubuntu EC2 instance use kar rahe ho aur Express backend port `5000` par listen karta hai.
+
+**Step 1: EC2 Security Group configure karo**
+
+Inbound rules mein:
+
+- SSH: TCP `22`, preferably sirf tumhare IP address se.
+- HTTP: TCP `80`, public web traffic ke liye.
+- HTTPS: TCP `443`, jab TLS certificate configure ho.
+
+Port `5000` ko public internet ke liye open karne ki zaroorat nahi hai agar Nginx usi EC2 instance par hai. Backend ko preferably `127.0.0.1:5000` par bind karo.
+
+**Step 2: EC2 par SSH karo**
+
+```bash
+ssh -i your-key.pem ubuntu@YOUR_EC2_PUBLIC_IP
+```
+
+**Step 3: Nginx install aur start karo**
+
+```bash
+sudo apt update
+sudo apt install nginx -y
+sudo systemctl enable nginx
+sudo systemctl start nginx
+sudo systemctl status nginx
+```
+
+**Step 4: Backend ko PM2 se start karo**
+
+Project directory mein jaakar:
+
+```bash
+pm2 start server.js --name my-node-api
+pm2 status
+```
+
+Ensure karo Express app port `5000` par listen kar rahi ho. Same-instance Nginx setup mein backend ko localhost par bind karna achha practice hai, for example:
+
+```js
+app.listen(5000, '127.0.0.1', () => {
+  console.log('API listening on port 5000');
+});
+```
+
+**Step 5: Nginx reverse proxy configuration banao**
+
+```bash
+sudo nano /etc/nginx/sites-available/my-node-api
+```
+
+Is file mein ye configuration add karo:
+
+```nginx
+server {
+    listen 80;
+    server_name YOUR_EC2_PUBLIC_IP_OR_DOMAIN;
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+`YOUR_EC2_PUBLIC_IP_OR_DOMAIN` ko apne EC2 public IP ya domain se replace karo. Agar server IP ke through test kar rahe ho, toh IP use kar sakte ho.
+
+**Step 6: Configuration enable aur test karo**
+
+```bash
+sudo ln -s /etc/nginx/sites-available/my-node-api /etc/nginx/sites-enabled/my-node-api
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Agar default Nginx site ke saath conflict aaye, toh usse disable karne par vichaar karo:
+
+```bash
+sudo rm /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Default site ko remove karne se pehle confirm karo ki tumhe uski zaroorat nahi hai.
+
+**Step 7: Browser se test karo**
+
+```text
+http://YOUR_EC2_PUBLIC_IP
+```
+
+Request Nginx par aayegi aur Nginx use `127.0.0.1:5000` par chal rahi Express application ko forward karega. Agar API ka health endpoint `/health` hai, toh `http://YOUR_EC2_PUBLIC_IP/health` bhi test kar sakte ho.
+
+#### 5. Common Troubleshooting
+
+- **502 Bad Gateway:** Backend stopped hai, galat port par hai, ya Nginx upstream tak nahi pahunch pa raha. `pm2 status`, `pm2 logs my-node-api` aur `curl http://127.0.0.1:5000` check karo.
+- **Connection timeout:** EC2 Security Group mein port `80` rule aur instance/network status check karo.
+- **Nginx configuration error:** `sudo nginx -t` run karo aur error message dekho.
+- **HTTPS:** Production domain ke liye TLS certificate configure karo aur port `443` allow karo; sirf port `80` configuration HTTPS enable nahi karti.
+
+#### 6. Interview Summary
+
+**To configure Nginx with EC2, I install and start Nginx, allow HTTP/HTTPS in the EC2 Security Group, configure Nginx as a reverse proxy to my Node.js application's local port, test the configuration with `nginx -t`, and reload Nginx. This lets users access the application through the public IP or domain without exposing the Node.js port directly.**
+
+---
