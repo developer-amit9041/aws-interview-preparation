@@ -11305,3 +11305,97 @@ Route 53 console mein record create/edit karte waqt routing policy choose karo, 
 **Interview answer:** A Route 53 DNS routing policy controls how DNS queries are answered and which endpoint is returned. Common policies include Simple, Weighted, Latency-based, Failover, Geolocation, Geoproximity, IP-based, and Multivalue answer.
 
 ---
+
+### Q162. Simple vs Weighted Routing?
+
+#### 1. English Definition
+
+- **Simple routing policy:** Routes DNS queries using a basic record configuration, typically returning one resource or, when configured, multiple values without weighting between them.
+- **Weighted routing policy:** Routes DNS queries among multiple records according to the weights configured for those records.
+
+#### 2. Hindi Definition
+
+- **Simple Routing:** Basic DNS routing hoti hai; ismein records ke beech weight-based traffic distribution nahi hota.
+- **Weighted Routing:** DNS queries ko configured weights ke ratio ke according different endpoints par distribute kiya jata hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari application ke do endpoints hain: Server A aur Server B.
+
+**Simple routing:** Tum basic DNS answer configure karte ho. Is policy mein tum yeh specify nahi karte ki Server A ko 80% aur Server B ko 20% DNS queries milni chahiye.
+
+**Weighted routing:** Tum har record ko weight dete ho. Example:
+- Server A: weight 80
+- Server B: weight 20
+
+Agar dono records eligible hain aur DNS queries ka sample bada hai, to weighted routing roughly 80:20 proportion mein answers de sakti hai. Yeh exact per-request load balancing ya guaranteed 80/20 HTTP traffic split nahi hai—DNS caching, resolver behavior aur clients ke connection patterns actual traffic ko affect karte hain.
+
+#### 4. Practical Example
+
+Maan lo tum apni new MERN API ka naya version gradually release karna chahte ho.
+
+| Setting | Simple routing | Weighted routing |
+|---|---|---|
+| Server A | Basic DNS record | Weight 80 |
+| Server B | No weight-based split | Weight 20 |
+| Main purpose | Simple DNS setup | Controlled DNS answer distribution |
+| Common use | One endpoint | Gradual rollout or traffic distribution |
+
+Weighted routing mein weight zero set karke kisi record ko DNS answers se exclude karna bhi possible hai, depending on the record configuration. Health checks can also be configured so unhealthy endpoints are excluded from eligible answers.
+
+#### 5. Architecture Diagram — Simple vs Weighted
+
+```text
+SIMPLE
+DNS Query
+    |
+    v
+Route 53 Simple Policy
+    |
+    v
+Configured DNS answer
+
+
+WEIGHTED
+DNS Query
+    |
+    v
+Route 53 Weighted Policy
+    |
+    +------ Weight 80 ------> Server A
+    |
+    +------ Weight 20 ------> Server B
+```
+
+**Flow:** Simple policy basic configured answer return karti hai. Weighted policy multiple eligible records ke configured weights ko use karke DNS answer select karti hai.
+
+#### 6. Practical Command / Configuration
+
+Hosted Zone ke records inspect karo:
+
+```bash
+aws route53 list-resource-record-sets \
+  --hosted-zone-id YOUR_HOSTED_ZONE_ID
+```
+
+Weighted records create karte waqt Route 53 record configuration mein:
+- Same record name aur compatible record type use karo.
+- Har weighted record ko unique Set ID do.
+- Har record ka weight configure karo, jaise 80 aur 20.
+- Optional health checks configure karo if required.
+
+Actual AWS CLI change batch mein `Weight`, `SetIdentifier`, aur appropriate record fields set karne hote hain. Record type aur target ke hisaab se configuration alag ho sakti hai.
+
+#### 7. Summary Table
+
+| Feature | Simple | Weighted |
+|---|---|---|
+| Weight values | No | Yes |
+| Multiple record distribution | No weight-based distribution | Weight-based DNS answer selection |
+| Best for | Basic DNS setup | Gradual rollout / controlled distribution |
+| Guarantees exact HTTP traffic ratio? | No | No |
+| Example | Single configured endpoint | 80:20 weights |
+
+**Interview answer:** Simple routing provides a basic DNS response without weight-based distribution. Weighted routing assigns weights to multiple records so Route 53 selects DNS answers in roughly the configured proportions. It does not guarantee the same ratio for actual HTTP requests because DNS caching affects client traffic.
+
+---
