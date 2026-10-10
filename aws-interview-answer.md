@@ -7947,3 +7947,59 @@ Is example mein Lambda order change ke event par kaam karti hai. Tumhe sirf is b
 - For long-running or OS-level workloads, compare Lambda with EC2, ECS, or AWS Fargate before choosing.
 
 ---
+
+### Q123. What is Serverless?
+
+#### 1. English Definition
+
+**Serverless is a cloud computing model in which the cloud provider manages the underlying server infrastructure, allowing developers to focus on application code and pay according to the service's usage and pricing model.**
+
+#### 2. Hindi Definition
+
+Serverless ek cloud computing model hai jisme cloud provider underlying servers aur infrastructure ko manage karta hai. Developer ko server maintenance par kam dhyan dena padta hai aur woh application code par focus kar sakta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, serverless ka matlab yeh nahi hai ki servers exist hi nahi karte. Servers hote hain, lekin unhe provision, maintain aur manage karne ka kaam cloud provider karta hai.
+
+Example ke liye AWS Lambda use karo. Tum Node.js function likhte ho aur define karte ho ki woh kab run hoga—jaise API request aane par, S3 par file upload hone par, ya scheduled event par. AWS underlying infrastructure manage karta hai. Tumhe phir bhi code, permissions, timeout, monitoring aur application logic configure karna hota hai.
+
+Serverless services usage-based billing offer kar sakti hain, lekin exact billing service aur configuration par depend karti hai. Serverless ka matlab automatically free hona nahi hai.
+
+#### 4. Practical Example
+
+```text
+User uploads image to S3
+          |
+          v
+S3 event triggers AWS Lambda
+          |
+          v
+Lambda function processes image
+          |
+          v
+Save processed image / update metadata
+```
+
+Is example mein image upload hone par Lambda function execute hota hai. Tumhe image processing ke liye apna EC2 server continuously running rakhne ki zaroorat nahi hoti.
+
+#### 5. Serverless vs Traditional Server Hosting
+
+| Basis | Serverless (e.g., Lambda) | Traditional hosting (e.g., EC2) |
+|---|---|---|
+| Infrastructure | Cloud provider manages underlying servers | You manage the virtual server and OS configuration |
+| Execution | Often event- or request-driven | Can run continuously |
+| Scaling | Managed automatic scaling, within limits | Configure scaling, such as an Auto Scaling Group |
+| Billing | Depends on service usage and pricing model | Depends on instance and resource usage |
+| Control | Less OS-level control | More OS-level control |
+| Best fit | Event-driven functions and managed application components | Long-running services and workloads needing server-level control |
+
+#### 6. Important Points
+
+- Serverless does not mean there are no servers; it means the provider manages the underlying infrastructure.
+- AWS Lambda is a common serverless compute service; other AWS services also offer serverless models.
+- Developers still manage code, configuration, security permissions, monitoring, retries, and service limits.
+- Serverless can reduce operational overhead, but cost and performance depend on the workload.
+- Choose serverless when its execution model fits the application; it is not automatically the best choice for every workload.
+
+---
