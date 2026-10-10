@@ -4437,3 +4437,70 @@ For this common public NAT Gateway setup, the NAT Gateway is placed in a public 
 - NAT Gateway has hourly and data-processing charges, so production designs should consider availability and cost. For resilient designs, teams commonly use NAT Gateways across multiple Availability Zones and route each private subnet to a NAT Gateway in its own AZ.
 
 ---
+
+### Q65. Internet Gateway vs NAT Gateway?
+
+#### 1. English Definition
+
+**An Internet Gateway provides a route for internet communication between a VPC and the internet, while a NAT Gateway lets resources in a private subnet initiate outbound IPv4 internet connections without accepting unsolicited inbound connections through the NAT Gateway.**
+
+#### 2. Hindi Definition
+
+Internet Gateway VPC aur internet ke beech connectivity ka path provide karta hai. NAT Gateway private subnet ke resources ko outbound IPv4 internet connections banane deta hai, bina NAT Gateway ke through unsolicited inbound connections allow kiye.
+
+#### 3. Hinglish Explanation
+
+Bhai, dono ka kaam same nahi hai:
+
+- **Internet Gateway (IGW):** Public subnet ke properly configured resources ko internet se communicate karne ka route provide karta hai.
+- **NAT Gateway:** Private subnet ke resources ko internet par request bhejne deta hai, jaise Node.js backend ka npm packages download karna, bina backend ko direct inbound internet access dene ke.
+
+Yaad rahe: IGW ya NAT Gateway laga dena alone enough nahi. Route tables, IP configuration aur security rules bhi sahi hone chahiye.
+
+#### 4. Difference Table
+
+| Feature | Internet Gateway (IGW) | NAT Gateway |
+|---|---|---|
+| Primary purpose | VPC resources ke liye internet connectivity ka route | Private subnet resources ke outbound IPv4 internet connections |
+| Attached/placed | VPC ke saath attach hota hai | Public NAT Gateway ko public subnet mein place karte hain |
+| Public IPv4 | IGW khud Elastic IP nahi maangta; direct public IPv4 access wale resource ko suitable public IPv4 address chahiye | Public NAT Gateway ke paas Elastic IP hota hai |
+| Common route | Public subnet: `0.0.0.0/0 → IGW` | Private subnet: `0.0.0.0/0 → NAT Gateway` |
+| Inbound internet access | Routing, IP address aur security rules allow karein toh possible | NAT Gateway ke through unsolicited inbound connections initiate nahi hoti |
+| Typical use | Internet-facing Load Balancer ya public web tier | Private EC2 ko updates, package downloads ya external APIs ke liye outbound access |
+| Cost consideration | Internet Gateway ke liye separate hourly charge nahi; data transfer charges may apply | Hourly aur data-processing charges apply hote hain |
+
+#### 5. MERN Application Example
+
+```text
+                      Internet
+                         |
+                         v
+                 Internet Gateway
+                         |
+                  Public Subnet
+                 Load Balancer
+                         |
+                         v
+                  Private Subnet
+                 Node.js Backend
+                         |
+               outbound internet request
+                         v
+                  NAT Gateway
+                  (Public Subnet)
+                         |
+                  Internet Gateway
+                         |
+                      Internet
+```
+
+Diagram mein NAT Gateway ka outbound path dikhaya gaya hai. Private subnet ki route table outbound IPv4 request ko NAT Gateway par bhejti hai; NAT Gateway ki public subnet route table internet-bound traffic ko IGW par bhejti hai. Return traffic existing connection ke through wapas aata hai.
+
+#### 6. Important Points
+
+- Internet Gateway aur NAT Gateway interchangeable nahi hain; common public NAT Gateway setup mein dono saath use ho sakte hain.
+- Public subnet ke resources ko direct internet access ke liye suitable public IP, routing aur security configuration chahiye.
+- Private subnet resources ko outbound IPv4 access dene ke liye NAT Gateway common option hai; private resources ke liye har case mein NAT zaroori nahi hota.
+- NAT Gateway inbound public access dene ke liye nahi hai. Internet se users ko application access karwani ho toh load balancer ya another suitable public entry point use karo.
+
+---
