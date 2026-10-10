@@ -8529,3 +8529,41 @@ Setup karne ke liye:
 - Repeatedly failing messages ke liye dead-letter queue (DLQ) configure karna useful hai.
 - Visibility timeout itna suitable rakho ki processing ke dauran message doosre consumer ko jaldi available na ho; AWS ke recommended timeout relationship ko follow karo.
 - SQS standard queues may deliver messages more than once and not guarantee order. FIFO queues provide ordering within message groups, with their own throughput and configuration considerations.
+
+### Q133. What is Lambda Concurrency?
+
+#### 1. English Definition
+
+**Lambda concurrency** is the number of function invocations that are running at the same time.
+
+#### 2. Hindi Definition
+
+Lambda concurrency ka matlab hai ek hi waqt mein tumhari Lambda function ki kitni invocations execute ho rahi hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari Lambda function ek request ko process karne mein 2 seconds leti hai. Agar ek hi waqt mein 100 requests aati hain, toh Lambda multiple execution environments use karke requests ko parallel process kar sakti hai, subject to available concurrency and service limits.
+
+Concurrency **simultaneously running invocations** ko count karti hai, total requests ko nahi. Agar requests bahut tezi se aayengi aur concurrency limit hit ho jayegi, toh additional synchronous invocations throttle ho sakti hain; asynchronous sources jaise SQS mein messages queue mein wait/retry kar sakte hain.
+
+#### 4. Practical Example
+
+Suppose ek Lambda function ke paas 50 concurrent executions available hain:
+
+- 10 invocations ek saath run kar rahi hain → concurrency 10.
+- 50 invocations ek saath run kar rahi hain → concurrency 50.
+- 60 synchronous requests same time par aati hain → available concurrency na hone par kuch requests throttle ho sakti hain.
+
+Concurrency ko approximate karne ka useful relationship hai:
+
+**Concurrency ≈ requests per second × average duration in seconds**
+
+Example: 20 requests/second × 3 seconds average duration ≈ 60 concurrent executions, assuming a reasonably steady workload.
+
+#### 5. Important Points
+
+- **Reserved concurrency:** Function ke liye concurrency reserve karta hai aur us function ki maximum concurrency ko limit bhi karta hai.
+- **Provisioned concurrency:** Execution environments ko pre-initialize karta hai taaki predictable traffic mein cold-start latency reduce ho; yeh reserved concurrency se alag concept hai.
+- **Account concurrency quota:** Account/Region mein functions ki total available concurrency ko limit karti hai.
+- Concurrency planning ke liye request rate, execution duration, downstream database/API capacity, and throttling metrics monitor karo.
+- Concurrency increase karne se downstream database par load bhi badh sakta hai, isliye sirf limit badhana hamesha sahi solution nahi hota.
