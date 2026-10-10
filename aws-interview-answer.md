@@ -9273,3 +9273,99 @@ API Gateway ko configured authorizer token validate karne ke liye use kiya ja sa
 Secure API Gateway with strong authentication and authorization, HTTPS, appropriate resource policies, throttling, input validation, least-privilege permissions, and monitoring. Never rely on API keys or CORS alone to secure an API.
 
 ---
+
+### Q141. How do you implement authentication with API Gateway?
+
+#### 1. English Definition
+
+**Authentication with API Gateway is implemented by configuring an appropriate authorization mechanism—such as Amazon Cognito, a JWT authorizer, IAM authorization, or a Lambda authorizer—to verify the identity or credentials of API callers before allowing access. The available options depend on the API type.**
+
+#### 2. Hindi Definition
+
+API Gateway mein authentication implement karne ke liye Cognito, JWT authorizer, IAM authorization ya Lambda authorizer jaise supported mechanisms configure kiye jaate hain. Inka kaam caller ki identity ya credentials verify karna hota hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari React application mein `GET /profile` API hai. Tum chahte ho ki sirf login kiya hua user apna profile dekh sake.
+
+Typical flow:
+
+1. User login karta hai aur identity provider se access token milta hai.
+2. React request ke saath token bhejta hai.
+3. API Gateway par configured authorizer token ya credentials validate karta hai.
+4. Valid caller ki request backend tak jaati hai; invalid caller ko access denied response milta hai.
+5. Backend user ki resource-level permissions bhi verify karta hai.
+
+**Important:** Authentication batata hai user kaun hai; authorization batata hai user kya access kar sakta hai.
+
+#### 4. Common Authentication Options
+
+| Option | When to use it |
+|---|---|
+| Amazon Cognito | Managed user sign-in and token-based authentication |
+| JWT authorizer | Validate JWT access tokens from a trusted identity provider; available for API Gateway HTTP APIs |
+| IAM authorization | AWS IAM principals or signed AWS requests, including suitable service-to-service use cases |
+| Lambda authorizer | Custom authentication or authorization logic when built-in options do not meet requirements |
+| REST API Cognito user pool authorizer | Protect REST API methods using a Cognito user pool |
+
+The exact authorizer options vary between API Gateway HTTP APIs and REST APIs.
+
+#### 5. Practical Example — JWT Authentication
+
+Suppose React has received an access token after sign-in. It calls a protected route:
+
+```http
+GET /profile
+Authorization: Bearer <access-token>
+```
+
+For an **API Gateway HTTP API**, a common approach is to configure a JWT authorizer with the identity provider's issuer URL and the expected audience. Then attach that authorizer to the `GET /profile` route.
+
+```text
+User signs in
+     |
+     v
+Identity provider issues token
+     |
+     v
+React sends Bearer token
+     |
+     v
+API Gateway JWT authorizer
+     |
+     +---- Invalid token ---> 401 Unauthorized
+     |
+     v
+Lambda / backend
+     |
+     v
+Check user permissions and return profile
+```
+
+API Gateway validates the token according to the authorizer configuration, such as issuer, audience, expiry, and required scopes where configured. Do not accept arbitrary tokens or trust a token merely because it is present.
+
+#### 6. Implementation Checklist
+
+1. Choose the API type: HTTP API or REST API.
+2. Select an appropriate authorizer: Cognito, JWT, IAM, or Lambda authorizer, based on the API type and use case.
+3. Configure trusted issuer, audience/client details, identity source, and required scopes where applicable.
+4. Attach the authorizer to the protected routes or methods.
+5. Have the client send credentials securely, usually in the `Authorization` header for bearer tokens.
+6. Test valid, expired, malformed, and missing tokens.
+7. Enforce resource-level authorization in the backend too; authentication alone does not prove the caller can access every record.
+8. Use HTTPS, least-privilege IAM policies, safe logging, and secure token storage. Never log access tokens or passwords.
+
+#### 7. Common Mistakes
+
+- Using an API key as if it were user authentication.
+- Accepting expired tokens or failing to validate issuer/audience.
+- Protecting one route but leaving sensitive routes public.
+- Relying only on frontend checks instead of backend authorization.
+- Putting bearer tokens in URLs or logs.
+- Assuming HTTP API and REST API support exactly the same authorizer features.
+
+#### 8. Summary
+
+Configure an authorizer supported by your API Gateway API type, attach it to protected routes, and validate credentials on every protected request. For many user-facing applications, a trusted identity provider with JWT validation or Amazon Cognito is a practical choice. Keep authorization and resource-level checks in the backend as well.
+
+---
