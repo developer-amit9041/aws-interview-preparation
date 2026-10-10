@@ -12522,3 +12522,107 @@ After saving the complete configuration, start or restart the CloudWatch Agent u
 **Interview-ready answer:** I monitor application logs on EC2 by configuring the CloudWatch Agent to collect application and system log files and send them to CloudWatch Logs. I use Logs Insights to investigate errors, metric filters to track important patterns, and CloudWatch Alarms with SNS notifications to alert the team when configured error thresholds are exceeded.
 
 ---
+
+### Q173. CloudWatch vs CloudTrail?
+
+#### 1. English Definition
+
+- **Amazon CloudWatch:** A monitoring and observability service used to collect metrics, logs, and events, visualize resource performance, and trigger alarms.
+- **AWS CloudTrail:** An auditing service that records AWS account activity and API calls, helping you identify who performed an action, what happened, and when it occurred.
+
+#### 2. Hindi Definition
+
+- **CloudWatch:** AWS resources aur applications ki performance monitor karta hai—jaise CPU usage, application logs aur alarms.
+- **CloudTrail:** AWS account mein hui activities ka record rakhta hai—jaise kis user ya role ne EC2 instance start, stop ya terminate kiya aur kab kiya.
+
+#### 3. Hinglish Explanation
+
+Dono services ka purpose alag hai:
+
+**CloudWatch = Monitoring**
+- EC2 CPU utilization kitna hai?
+- Application mein errors aa rahe hain?
+- CPU high hone par alert kaise milega?
+- Metrics aur logs ko dashboard par kaise dekhein?
+
+**CloudTrail = Auditing**
+- EC2 instance kis identity ne stop kiya?
+- S3 bucket ki configuration kisne change ki?
+- Kaunsi AWS API call hui aur kab hui?
+- Action kis source IP ya role se aaya?
+
+Yaad rakhne ka easy trick: **CloudWatch batata hai system kaisa perform kar raha hai; CloudTrail batata hai AWS account mein kisne kya action kiya.**
+
+CloudTrail Event history mein recent management events inspect kar sakte ho. Long-term retention, organization-wide auditing, ya specific event collection ke liye CloudTrail trail ya event data store configure karna pad sakta hai.
+
+#### 4. Practical Example
+
+Suppose tumhari MERN application EC2 par deployed hai.
+
+- CPU 95% ho gaya aur alert chahiye → **CloudWatch Alarm** use karo.
+- Kisi ne EC2 instance terminate kar diya aur pata lagana hai kisne kiya → **CloudTrail event** inspect karo.
+- Node.js application error ka reason dekhna hai → **CloudWatch Logs** use karo.
+- Kis identity ne security group rule change kiya, uska audit karna hai → **CloudTrail** use karo.
+
+Dono ko saath use karne se performance monitoring aur security auditing dono cover hote hain.
+
+#### 5. Architecture Diagram — How They Work Together
+
+```text
+          AWS Account / EC2
+                 |
+        +--------+---------+
+        |                  |
+        v                  v
+    CloudWatch          CloudTrail
+        |                  |
+  Metrics and Logs    API / Account Events
+        |                  |
+        v                  v
+ Dashboards / Alarms   Audit / Investigation
+        |                  |
+        v                  v
+    SNS Alerts        Event History / Trail
+```
+
+**Flow:** CloudWatch performance data aur logs analyze karta hai; CloudTrail AWS API/account activity record karta hai. Troubleshooting mein dono ke timestamps aur event details ko correlate kar sakte ho.
+
+#### 6. Practical Command / Configuration
+
+**A. Check recent CloudTrail events**
+
+```bash
+aws cloudtrail lookup-events --max-results 10
+```
+
+This returns recent events visible through CloudTrail Event history, subject to permissions and supported event-history scope.
+
+**B. View EC2 CPU metrics in CloudWatch**
+
+```bash
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/EC2 \
+  --metric-name CPUUtilization \
+  --dimensions Name=InstanceId,Value=i-0123456789abcdef0 \
+  --start-time 2026-10-11T00:00:00Z \
+  --end-time 2026-10-11T01:00:00Z \
+  --period 300 \
+  --statistics Average
+```
+
+Replace the example instance ID and UTC time range with your actual values.
+
+#### 7. Summary Table
+
+| Feature | CloudWatch | CloudTrail |
+|---|---|---|
+| Main purpose | Monitoring and observability | Auditing and governance |
+| Tracks | Metrics, logs, alarms | AWS API activity and account events |
+| Example | EC2 CPU utilization | Who stopped an EC2 instance |
+| Alerting | Metric/log alarms | Events can be routed or used to trigger detection workflows |
+| Troubleshooting | Performance and application issues | Identity, API and configuration changes |
+| Typical question | Is the system healthy? | Who did what, and when? |
+
+**Interview-ready answer:** CloudWatch is used to monitor AWS resources and applications through metrics, logs, dashboards, and alarms. CloudTrail records AWS account activity and API calls, helping with auditing and security investigations. For example, CloudWatch can alert me when EC2 CPU is high, while CloudTrail can help identify who stopped an EC2 instance.
+
+---
