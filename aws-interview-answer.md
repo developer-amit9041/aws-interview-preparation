@@ -6479,3 +6479,58 @@ Production setup mein RDS ko generally private network access ke saath configure
 - High availability, backups, encryption, storage capacity and costs depend on the configuration you choose.
 
 ---
+
+### Q99. Which databases does RDS support?
+
+#### 1. English Definition
+
+**Amazon RDS supports several relational database engines: Amazon Aurora, MySQL, PostgreSQL, MariaDB, Oracle Database, and Microsoft SQL Server. The exact versions and available features depend on the engine and AWS Region.**
+
+#### 2. Hindi Definition
+
+Amazon RDS multiple relational database engines support karta hai: Amazon Aurora, MySQL, PostgreSQL, MariaDB, Oracle Database aur Microsoft SQL Server. Available versions aur features engine aur AWS Region par depend karte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, RDS ek database engine nahi hai. Yeh AWS ki managed service hai jiske through tum supported relational database engines choose karke cloud mein database run kar sakte ho.
+
+For example, agar tumhari Node.js application SQL database use karti hai, toh requirement ke according PostgreSQL ya MySQL choose kar sakte ho. AWS database infrastructure aur kai routine administrative tasks manage karne mein help karta hai, lekin schema, queries, permissions, network access aur cost configuration tumhe sahi rakhni hoti hai.
+
+#### 4. Database Engines Supported by RDS
+
+| Database Engine | Typical use / note |
+|---|---|
+| **Amazon Aurora** | AWS-designed relational database compatible with MySQL and PostgreSQL. |
+| **MySQL** | Popular open-source relational database. |
+| **PostgreSQL** | Relational database with advanced SQL and extensibility features. |
+| **MariaDB** | Open-source relational database engine. |
+| **Oracle Database** | Commercial relational database engine for enterprise workloads. |
+| **Microsoft SQL Server** | Microsoft's relational database engine. |
+
+#### 5. Practical Example
+
+```text
+Node.js / Express Application
+             |
+             v
+         Amazon RDS
+             |
+       Choose an engine:
+       - PostgreSQL
+       - MySQL
+       - MariaDB
+       - Oracle
+       - SQL Server
+       - Amazon Aurora
+```
+
+Maan lo tum ek registration API bana rahe ho. Agar project PostgreSQL use karta hai, toh RDS mein PostgreSQL engine choose karke database create kar sakte ho aur Node.js backend ko securely connect kar sakte ho.
+
+#### 6. Important Points
+
+- RDS supports **relational database engines**, not every type of database.
+- MongoDB is not one of the Amazon RDS database engines. For MongoDB, options include MongoDB Atlas or self-managed MongoDB; Amazon DocumentDB is a separate AWS document database service with compatibility considerations.
+- Exact engine versions, regions, and feature support can change, so verify AWS's current RDS engine availability when creating a production database.
+- Select an engine based on application compatibility, SQL features, licensing, migration needs, operational requirements, and cost.
+
+---
