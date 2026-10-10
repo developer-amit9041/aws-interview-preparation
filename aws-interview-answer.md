@@ -17160,3 +17160,150 @@ For production, consider a GitHub Environment with required reviewers, branch pr
 **Interview-ready answer:** I would configure a GitHub Actions workflow triggered by pushes or pull requests, run tests, and authenticate to AWS through GitHub OIDC and a least-privilege IAM role instead of long-lived access keys. The workflow would build and tag a Docker image, push it to Amazon ECR, and then deploy that exact image to ECS or EKS using a restricted deployment step. For production, I would add approvals, secrets management, image scanning, health checks, and rollback controls.
 
 ---
+
+### Q220. Docker + AWS CI/CD pipeline kaise banayenge?
+
+#### 1. English Definition
+
+A Docker + AWS CI/CD pipeline automates testing application code, building a Docker image, pushing it to Amazon ECR, and deploying the image to an AWS runtime such as ECS or EKS.
+
+#### 2. Hindi Definition
+
+Docker + AWS CI/CD pipeline mein code ko automatically test kiya jata hai, Docker image banayi jati hai, image Amazon ECR mein push hoti hai, aur phir application ko ECS ya EKS jaise AWS environment par deploy kiya jata hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, MERN ya Node.js application ke liye flow yaad rakho:
+
+**GitHub → CodePipeline → CodeBuild → Docker Image → ECR → ECS/EKS**
+
+- **GitHub:** Source code store karta hai.
+- **CodePipeline:** Source, build aur deploy stages ko orchestrate karta hai.
+- **CodeBuild:** Tests run karta hai aur Docker image build karta hai.
+- **ECR:** Docker image ko private registry mein store karta hai.
+- **ECS/EKS:** ECR se image pull karke application run karta hai.
+
+Production mein image ko `latest` ke bajay unique immutable tag, jaise commit SHA, se tag karna useful hai, taaki deployment ka exact version identify ho sake.
+
+#### 4. Practical Docker + AWS Pipeline
+
+**Step 1: Add a Dockerfile**
+
+```dockerfile
+FROM node:22-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY . .
+ENV NODE_ENV=production
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+Ensure the app listens on `0.0.0.0:3000`. Add `.dockerignore` to exclude `node_modules`, `.git`, and local secret files. Select a supported Node.js image version suitable for the project.
+
+**Step 2: Create an ECR repository**
+
+```bash
+aws ecr create-repository \
+  --repository-name node-api \
+  --region ap-south-1
+```
+
+**Step 3: Configure CodeBuild**
+
+Create a `buildspec.yml` in the repository. This example tests the application, builds a Docker image, logs in to ECR, and pushes a commit-tagged image.
+
+```yaml
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 22
+  pre_build:
+    commands:
+      - npm ci
+      - npm test --if-present
+      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - REGISTRY=$ACCOUNT_ID.dkr.ecr.ap-south-1.amazonaws.com
+      - IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - IMAGE_TAG=${IMAGE_TAG:0:12}
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $REGISTRY
+  build:
+    commands:
+      - docker build -t $REGISTRY/node-api:$IMAGE_TAG .
+      - docker push $REGISTRY/node-api:$IMAGE_TAG
+  post_build:
+    commands:
+      - printf '{"imageUri":"%s"}\n' "$REGISTRY/node-api:$IMAGE_TAG" > imageDetail.json
+
+artifacts:
+  files:
+    - imageDetail.json
+```
+
+This is an illustrative CodeBuild buildspec. Configure the CodeBuild project with Docker build support / privileged mode where required, an appropriate Node.js runtime, and an IAM service role with least-privilege ECR permissions. Ensure the source revision value is available and valid for your source provider; fail the build if the image tag is empty. The artifact format required by the deployment action may differ by target.
+
+**Step 4: Connect CodePipeline stages**
+
+1. **Source:** Connect GitHub using the supported CodePipeline connection and select the repository/branch.
+2. **Build:** Add the CodeBuild project that uses `buildspec.yml`.
+3. **Deploy:** Configure a target-appropriate action. For ECS, update the task definition to use the new ECR image and deploy the service. For EKS, use a Kubernetes-compatible deployment step to update the image in the Deployment/Helm configuration.
+4. **Optional approval:** Add a manual approval stage before production.
+
+**Step 5: Verify deployment**
+
+- For ECS, check service events, task health, and load balancer target health.
+- For EKS, check `kubectl rollout status deployment/<DEPLOYMENT_NAME>` and `kubectl get pods`.
+- Review logs and health checks, and configure rollback behavior appropriate to the target.
+
+#### 5. Architecture
+
+```text
+Developer pushes code
+        |
+        v
+GitHub Source
+        |
+        v
+AWS CodePipeline
+        |
+        v
+AWS CodeBuild
+  - Install / test
+  - Build Docker image
+  - Push image to ECR
+        |
+        v
+Amazon ECR (versioned image)
+        |
+        v
+Deploy action
+   |            |
+  ECS          EKS
+   |            |
+Application running
+```
+
+#### 6. Security Best Practices
+
+- Use least-privilege IAM roles for CodeBuild and deployment stages.
+- Keep secrets out of Docker images, GitHub, and build logs; use Secrets Manager or Parameter Store where appropriate.
+- Scan images for vulnerabilities and promote the same tested image between environments.
+- Use unique image tags such as commit SHA and restrict who can deploy to production.
+- Configure health checks, monitoring, and rollback procedures.
+
+#### 7. Summary Table
+
+| Component | Responsibility |
+|---|---|
+| GitHub | Stores source code |
+| CodePipeline | Orchestrates CI/CD stages |
+| CodeBuild | Tests code and builds/pushes Docker image |
+| Amazon ECR | Stores versioned container images |
+| ECS / EKS | Runs the deployed container image |
+
+**Interview-ready answer:** I would connect GitHub to AWS CodePipeline, use CodeBuild to install dependencies, run tests, and build a Docker image, then push that image to Amazon ECR with a unique commit-based tag. The deployment stage would update an ECS task definition or an EKS Kubernetes Deployment to use that exact image. I would secure the pipeline with least-privilege IAM roles, protect secrets, scan images, verify health, and configure rollback.
+
+---
