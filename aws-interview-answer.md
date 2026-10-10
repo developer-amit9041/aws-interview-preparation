@@ -13518,3 +13518,144 @@ Replace placeholders with actual values. Configure appropriate IAM permissions f
 **Interview-ready answer:** I use Amazon SQS to decouple services and process background tasks asynchronously. For example, after a customer places an order, a Node.js API sends an order event to SQS and responds quickly. Background workers then generate invoices and send emails. SQS buffers traffic spikes and supports retries, while consumers should handle possible duplicate deliveries safely.
 
 ---
+
+
+### Q182. What is a Queue?
+
+#### 1. English Definition
+
+**A queue in Amazon SQS is a fully managed message storage mechanism that temporarily stores messages until consumers retrieve and process them. It enables asynchronous communication between application components.**
+
+#### 2. Hindi Definition
+
+AWS SQS mein Queue ek aisi jagah hoti hai jahan messages temporarily store hote hain. Consumer jab ready hota hai, tab woh queue se messages receive karke process karta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN e-commerce application mein user order place karta hai aur uske baad confirmation email bhi send karni hai.
+
+Agar backend email send hone ka wait karega, toh user ko response dene mein delay ho sakta hai. Isliye Node.js backend order-related message SQS queue mein bhej sakta hai. Background worker us message ko baad mein receive karke email send karega.
+
+Queue ke 3 main components hote hain:
+
+- **Producer:** Queue mein message send karta hai, jaise Node.js backend.
+- **Queue:** Message ko temporarily store karti hai.
+- **Consumer:** Message receive karke task process karta hai, jaise email bhejna.
+
+SQS producer aur consumer ko loosely coupled banata hai. Standard queues mein duplicate delivery aur message reordering possible hai, isliye consumer ko duplicate processing safely handle karni chahiye.
+
+#### 4. Practical Example / Code
+
+Node.js backend se SQS queue mein order message send karne ka example:
+
+Install AWS SDK:
+
+```bash
+npm install @aws-sdk/client-sqs
+```
+
+Code:
+
+```javascript
+import {
+  SQSClient,
+  SendMessageCommand,
+} from "@aws-sdk/client-sqs";
+
+const sqs = new SQSClient({
+  region: "ap-south-1",
+});
+
+export async function sendOrderMessage(order) {
+  const command = new SendMessageCommand({
+    QueueUrl: process.env.SQS_QUEUE_URL,
+    MessageBody: JSON.stringify({
+      orderId: order._id,
+      email: order.email,
+    }),
+  });
+
+  return sqs.send(command);
+}
+```
+
+**Working flow:**
+
+1. User order place karta hai.
+2. Backend order ko database mein save karta hai.
+3. Backend `sendOrderMessage()` call karke SQS queue mein message bhejta hai.
+4. Background worker message receive karke confirmation email send karta hai.
+5. Successful processing ke baad worker message delete karta hai.
+
+**Important:** Yeh code producer ka example hai. Email process karne ke liye alag consumer/worker banana hoga. Production application mein order save aur message publish ke beech failure risk handle karne ke liye transactional outbox jaise pattern par bhi consider kar sakte ho.
+
+#### 5. Architecture Diagram
+
+```text
+          User Places Order
+                  |
+                  v
+          Node.js Backend
+             (Producer)
+                  |
+           Save Order to DB
+                  |
+                  v
+             Amazon SQS
+               (Queue)
+                  |
+                  v
+        Background Worker
+             (Consumer)
+                  |
+                  v
+        Send Confirmation Email
+                  |
+                  v
+       Delete message after
+       successful processing
+```
+
+**Flow:** Producer message queue mein bhejta hai → SQS message store karta hai → consumer message receive aur process karta hai → successful processing ke baad consumer message delete karta hai.
+
+#### 6. Practical Command / Configuration
+
+**A. Create an SQS queue**
+
+```bash
+aws sqs create-queue \
+  --queue-name order-queue \
+  --region ap-south-1
+```
+
+**B. Get the queue URL**
+
+```bash
+aws sqs get-queue-url \
+  --queue-name order-queue \
+  --region ap-south-1
+```
+
+**C. Send a message**
+
+```bash
+aws sqs send-message \
+  --queue-url "<SQS_QUEUE_URL>" \
+  --message-body '{"orderId":"12345"}' \
+  --region ap-south-1
+```
+
+Replace `<SQS_QUEUE_URL>` with the actual queue URL. AWS CLI credentials and the required IAM permissions must be configured.
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| Queue | Messages ko temporarily store karti hai |
+| Producer | Queue mein message bhejta hai |
+| Consumer | Message receive aur process karta hai |
+| Message | Process hone wala data |
+| Main benefit | Asynchronous communication and decoupling |
+| Common use cases | Order processing, email notifications, background jobs |
+
+**Interview-ready answer:** A queue in Amazon SQS temporarily stores messages until consumers retrieve and process them. It enables asynchronous communication between application components. For example, a Node.js order API can send an order message to SQS while a background worker processes it and sends a confirmation email.
