@@ -3957,3 +3957,113 @@ For some requests, the browser sends an `OPTIONS` preflight request first. S3 CO
 - For direct browser uploads, you need both valid S3 authorization (such as a pre-signed URL) and suitable CORS configuration.
 
 ---
+
+### Q58. How do you store user profile images in S3?
+
+#### 1. English Definition
+
+**To store user profile images in S3, the backend uploads the validated image to an S3 bucket using the AWS SDK, then stores the object's key (or related metadata) in the user's database record.**
+
+#### 2. Hindi Definition
+
+User ki profile image S3 mein store karne ke liye backend image ko S3 bucket par upload karta hai aur us file ki key MongoDB mein user ke record ke saath save karta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein user profile photo upload karta hai. Image ko MongoDB mein binary form mein store karne ke bajaye, commonly image S3 mein store karte hain aur MongoDB mein uska object key save karte hain.
+
+Flow:
+
+```text
+React -> Express API -> Validate image -> Upload to S3
+                                      |
+                                      v
+                              Save S3 object key in MongoDB
+```
+
+Example MongoDB user document:
+
+```json
+{
+  "_id": "user-id",
+  "name": "Example User",
+  "profileImageKey": "profile-images/user-id/unique-image-id.jpg"
+}
+```
+
+Object key ko save karna usually fixed public URL save karne se more flexible hota hai, kyunki bucket private reh sakti hai aur backend zaroorat par pre-signed URL ya CloudFront URL generate kar sakta hai.
+
+#### 4. Practical Example — Express, Multer, S3 SDK v3
+
+**Install packages:**
+
+```bash
+npm install @aws-sdk/client-s3 multer
+```
+
+**Upload route (simplified example):**
+
+```javascript
+const express = require('express');
+const multer = require('multer');
+const { randomUUID } = require('crypto');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+
+const app = express();
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+});
+
+const s3 = new S3Client({ region: process.env.AWS_REGION });
+
+app.post('/profile-image', authenticateUser, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Image is required' });
+    }
+
+    // Validate actual file content/type in production; do not trust MIME alone.
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({ message: 'Unsupported image type' });
+    }
+
+    const key = `profile-images/${req.user.id}/${randomUUID()}`;
+
+    await s3.send(new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: key,
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype,
+    }));
+
+    // Persist `key` on the authenticated user's MongoDB document here.
+    // Use your Mongoose User model and handle database failures/cleanup.
+
+    return res.status(201).json({
+      message: 'Profile image uploaded',
+      profileImageKey: key,
+    });
+  } catch (error) {
+    console.error('Profile image upload failed:', error);
+    return res.status(500).json({ message: 'Could not upload profile image' });
+  }
+});
+```
+
+`authenticateUser` is your application's authentication middleware and must populate `req.user`; it is a placeholder in this example. Also ensure that the authenticated user can update only their own profile. Validate image contents, not just the supplied MIME type, and consider image decoding/re-encoding, rate limiting, and malware scanning where appropriate. Memory storage is suitable only for controlled, small uploads; use streaming or direct-to-S3 pre-signed uploads for larger scale.
+
+#### 5. How to Display the Image
+
+If the bucket is private, keep it private and have the backend authorize the user, then return a short-lived pre-signed `GetObject` URL or serve the image through an authorized endpoint/CloudFront setup. Avoid making the whole bucket public just to show profile photos.
+
+#### 6. Important Points
+
+- Store the S3 object key in MongoDB, not the image binary in the user document for typical S3-backed designs.
+- Keep the bucket private unless images are intentionally public.
+- Use an IAM role with only the required S3 permissions; never put AWS credentials in React.
+- Validate image type/content and file size; never trust client-provided filenames or MIME types alone.
+- If replacing an old image, plan cleanup of the previous S3 object after the new upload and database update succeed.
+
+---
