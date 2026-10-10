@@ -18010,3 +18010,67 @@ This example assumes the secret has already been securely injected into the runt
 **Interview-ready answer:** I store JWT signing secrets outside the source code. For local development, I use a `.env` file that is excluded from Git. In AWS production, I use Secrets Manager or Parameter Store `SecureString` and grant the backend's IAM role least-privilege access. I never expose the signing secret to the React frontend or logs. I also use a strong random key, token expiration, strict verification, and a planned rotation strategy.
 
 ---
+
+### Q231. Why should AWS Access Keys not be hardcoded?
+
+#### 1. English Definition
+
+AWS access keys should not be hardcoded because they are long-lived credentials that can grant access to AWS resources. If committed to source control, logs, or exposed in a client application, attackers may use them to access resources, steal data, or create unexpected charges.
+
+#### 2. Hindi Definition
+
+AWS Access Keys ko code mein hardcode nahi karna chahiye, kyunki ye AWS account ya resources tak access de sakti hain. Agar keys GitHub, logs, ya frontend code mein leak ho gayin, toh koi unauthorized person resources access kar sakta hai aur financial damage bhi ho sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tum Node.js backend mein AWS S3 use kar rahe ho aur code mein keys likh dete ho:
+
+```js
+// WRONG: Never hardcode credentials
+const accessKeyId = "AKIA...";
+const secretAccessKey = "your-secret-key";
+```
+
+Agar ye code GitHub par push ho gaya, toh keys public ya unauthorized logon tak pahunch sakti hain. Private repository bhi complete protection nahi hai—authorized collaborators, compromised accounts, logs, ya accidental sharing se keys expose ho sakti hain.
+
+Attacker leaked keys se permissions ke according S3 data read/delete, resources create, ya costly services launch kar sakta hai.
+
+#### 4. Secure Approach on AWS
+
+**Preferred:** AWS-hosted application ke liye IAM role use karo, jaise EC2 instance profile, ECS task role, ya EKS workload identity/IRSA where applicable. AWS SDK temporary credentials automatically obtain kar sakta hai; long-lived access keys code mein rakhne ki zaroorat nahi hoti.
+
+Example Node.js AWS SDK v3:
+
+```js
+import { S3Client } from "@aws-sdk/client-s3";
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+});
+```
+
+SDK default credential provider chain se credentials discover karta hai, including an attached IAM role where configured. Grant only the permissions the application actually needs.
+
+For local development, prefer AWS IAM Identity Center/SSO or another approved short-lived credential workflow. If long-lived keys are unavoidable for a specific external use case, keep them in an approved secret store, restrict permissions, rotate them, and never commit them to source control.
+
+#### 5. If a Key Is Accidentally Exposed
+
+1. Disable or deactivate the exposed access key immediately and replace it with a secure credential method.
+2. Review CloudTrail and relevant service logs for suspicious activity.
+3. Check affected resources and unexpected billing.
+4. Remove the key from code and repository history where practical; deleting the visible line alone does not make a leaked key safe.
+5. Follow your organization's incident response process.
+
+#### 6. Summary Table
+
+| Risk / Practice | Explanation |
+|---|---|
+| Hardcoded credentials | Can leak through source code, commits, logs, or shared artifacts |
+| IAM roles | Provide temporary credentials to AWS workloads without embedding long-lived keys |
+| Least privilege | Limits damage if a credential is misused |
+| Rotation and revocation | Helps respond to exposure; exposed keys should be revoked promptly |
+| CloudTrail monitoring | Helps investigate API activity associated with AWS credentials |
+
+**Interview-ready answer:** AWS access keys should never be hardcoded because they can be exposed through source code, Git history, logs, or client-side bundles. A leaked key can allow unauthorized AWS API calls according to its permissions, causing data loss or unexpected costs. For AWS workloads, I prefer IAM roles and temporary credentials, follow least privilege, and use monitoring. If a key leaks, I revoke it promptly and investigate the activity.
+
+---
