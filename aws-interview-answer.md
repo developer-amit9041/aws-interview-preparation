@@ -3804,3 +3804,79 @@ This policy denies requests that use insecure transport (HTTP). Test policies ca
 - Encryption protects data at rest, but it does not replace access control, TLS, monitoring, or backups.
 
 ---
+
+### Q56. What is S3 Static Website Hosting?
+
+#### 1. English Definition
+
+**S3 Static Website Hosting is a feature that lets you host static website files—such as HTML, CSS, JavaScript, and images—directly from an Amazon S3 bucket.**
+
+#### 2. Hindi Definition
+
+S3 Static Website Hosting ek feature hai jisse HTML, CSS, JavaScript aur images jaisi static website files ko Amazon S3 bucket se host kiya ja sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumne React frontend banaya hai aur uska production build ready hai. Agar frontend ko Node.js server par render karne ki zaroorat nahi hai, toh uske static build files S3 mein upload karke website host kar sakte ho.
+
+Flow:
+
+```text
+React App -> Production Build (HTML/CSS/JS)
+                    |
+                    v
+                S3 Bucket
+                    |
+                    v
+              Website Visitors
+```
+
+S3 static website hosting static files serve karta hai; yeh Node.js/Express backend ya database ko run nahi karta. Dynamic APIs ke liye backend alag service par deploy hota hai.
+
+#### 4. How to Enable Static Website Hosting
+
+1. React app ka production build banao, for example `npm run build` (tooling ke according output folder `dist` ya `build` ho sakta hai).
+2. AWS S3 mein bucket create karo.
+3. Build folder ki files bucket mein upload karo.
+4. Bucket ke **Properties → Static website hosting** section mein **Enable** select karo.
+5. Index document set karo, usually `index.html`; optional error document bhi configure kar sakte ho.
+6. Website access method configure karo.
+
+**Security note:** S3 website endpoints support HTTP, not HTTPS. Public S3 website hosting commonly requires public read access for the website files and appropriate Block Public Access/policy configuration. For production, a common safer approach is CloudFront with Origin Access Control in front of a private S3 bucket, providing HTTPS without making the bucket public. Do not expose sensitive files in the hosting bucket.
+
+#### 5. Example: React Static Build
+
+```bash
+npm run build
+```
+
+Upload the generated static output directory's contents (for example, `dist/` or `build/`) to the bucket root, ensuring `index.html` is where the hosting configuration expects it.
+
+A simple static site can include:
+
+```text
+index.html
+assets/
+  app.js
+  app.css
+images/
+  logo.png
+```
+
+#### 6. S3 Static Website Hosting vs EC2 Hosting
+
+| S3 Static Website Hosting | EC2 Hosting |
+|---|---|
+| Serves static files | Can run Node.js, Express and other server processes |
+| No server management for static content | You manage/configure the instance and runtime |
+| Suitable for static React builds and landing pages | Suitable for backend applications or server-rendered workloads |
+| Static website endpoint itself supports HTTP, not HTTPS | HTTPS can be configured using a reverse proxy/load balancer and certificates |
+
+#### 7. Important Points
+
+- S3 static website hosting is for static content, not a Node.js backend.
+- Single-page React routing may need an appropriate error/routing strategy; check your framework and hosting setup.
+- For production HTTPS and a private origin, consider CloudFront with Origin Access Control.
+- Keep API/backend deployment separate, and configure frontend API URLs and CORS as needed.
+
+---
