@@ -14421,3 +14421,85 @@ aws sqs create-queue \
 **Interview-ready answer:** I would enqueue a job from my Node.js API into SQS and process it using a separate worker service. The worker polls with long polling, processes the task, and deletes the message only after success. I would configure visibility timeout, retries and a DLQ, make handlers idempotent to handle duplicate deliveries, and scale workers based on queue depth.
 
 ---
+
+### Q190. What is ECS?
+
+#### 1. English Definition
+
+**Amazon Elastic Container Service (ECS)** is a fully managed AWS container orchestration service that helps you deploy, run, scale, and manage Docker containers on AWS.
+
+#### 2. Hindi Definition
+
+Amazon ECS AWS ki container orchestration service hai, jo Docker containers ko deploy, run, scale aur manage karne mein help karti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application mein React frontend, Node.js backend aur MongoDB hai. Tum backend ko Docker image mein package kar dete ho. Ab AWS par container ko run karna, required number of copies maintain karna, failures par replace karna aur load ke hisaab se scale karna hota hai.
+
+ECS in container-related tasks ko manage karne mein help karta hai. Tum ECS mein **task definition** se batate ho ki container kaunsi image use karega, kaunse ports aur environment variables honge, aur kitne CPU/memory resources chahiye. Phir **task** run hota hai; long-running application ke liye **service** desired number of tasks maintain kar sakti hai.
+
+ECS ke do common launch options:
+- **Fargate:** AWS underlying server infrastructure manage karta hai; tum tasks aur resources specify karte ho.
+- **EC2 launch type:** Tum ECS cluster ke liye EC2 instances provide/manage karte ho, aur ECS un par containers schedule karta hai.
+
+#### 4. Practical Example / Architecture
+
+```text
+Developer
+   | build Docker image
+   v
+Amazon ECR (image registry)
+   |
+   v
+Amazon ECS Service
+   |
+   +---- Task 1: Node.js container
+   +---- Task 2: Node.js container
+   |
+   v
+Application Load Balancer
+   |
+   v
+Users / React frontend
+```
+
+Example: tumhara Express API ECS service mein do tasks ke saath run ho sakta hai. Application Load Balancer incoming requests ko healthy tasks tak route karta hai. ECS service desired count maintain kar sakti hai; autoscaling policies ke saath task count demand ke hisaab se change ho sakta hai.
+
+#### 5. Important ECS Terms
+
+| Term | Meaning |
+|---|---|
+| Cluster | Logical grouping where ECS tasks and services run |
+| Task definition | Blueprint for container images, ports, CPU/memory, environment and IAM settings |
+| Task | Running instance of a task definition |
+| Service | Keeps the desired number of tasks running and can integrate with load balancing |
+| ECR | AWS container image registry |
+| Fargate | Serverless compute option for ECS tasks |
+| EC2 launch type | Runs ECS tasks on EC2 instances you manage |
+
+#### 6. Practical Command / Configuration
+
+**Build and push a Docker image to ECR** (after creating an ECR repository and configuring AWS CLI):
+
+```bash
+docker build -t my-node-api .
+aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com
+docker tag my-node-api:latest <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/my-node-api:latest
+docker push <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/my-node-api:latest
+```
+
+Then create an ECS task definition referencing that ECR image and create an ECS service in your selected cluster. Configure networking, security groups, logs, IAM roles, health checks and (if needed) an Application Load Balancer. Replace `<ACCOUNT_ID>` and repository details with your actual values.
+
+#### 7. Summary Table
+
+| Question | Short answer |
+|---|---|
+| What is ECS? | AWS service to orchestrate and manage containers |
+| Why use it? | Deployment, scheduling, scaling and service management |
+| What runs in ECS? | Tasks and services defined using task definitions |
+| ECS compute choices? | Fargate or EC2 launch type |
+| Where are images stored? | Commonly Amazon ECR |
+
+**Interview-ready answer:** Amazon ECS is AWS's managed container orchestration service. It runs and manages Docker containers using task definitions, tasks, and services. ECS supports Fargate for serverless container compute or EC2 instances that you manage, and it can integrate with ECR, IAM, CloudWatch, and load balancers to deploy and scale applications.
+
+---
