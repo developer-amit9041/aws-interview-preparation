@@ -5952,3 +5952,54 @@ ALB incoming requests ko target group ke healthy instances tak route karta hai. 
 - ASG configured maximum capacity se upar automatically scale nahi karta; capacity limits aur scaling settings ko workload ke according plan karna chahiye.
 
 ---
+
+### Q90. Why use Auto Scaling?
+
+#### 1. English Definition
+
+**Auto Scaling is used to automatically increase or decrease application capacity based on demand, helping maintain performance and availability while avoiding unnecessary infrastructure costs.**
+
+#### 2. Hindi Definition
+
+Auto Scaling ka use demand ke according application ki capacity ko automatically badhane ya ghatane ke liye hota hai, jisse performance aur availability maintain karne aur unnecessary cost se bachne mein help milti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application AWS EC2 par chal rahi hai. Normal days par 2 EC2 instances sufficient hain, lekin festival sale ke time users aur requests bahut badh jaati hain.
+
+Agar servers kam hon, toh response slow ho sakta hai. Auto Scaling configured policies ke according extra instances launch kar sakta hai. Jab traffic kam ho jaata hai, toh woh extra instances reduce bhi kar sakta hai. Isliye har baar manually EC2 instances add ya remove nahi karne padte.
+
+#### 4. Why Do We Use Auto Scaling?
+
+1. **Handle changing traffic:** High demand par instances add kar sakta hai aur low demand par reduce kar sakta hai.
+2. **Improve availability:** Instance unhealthy ho jaaye toh configured ASG health checks aur replacement settings usko replace karne mein help kar sakte hain.
+3. **Maintain performance:** Sahi scaling policies aur sufficient capacity ke saath high load handle karne mein help milti hai.
+4. **Optimize costs:** Low demand par unnecessary instances reduce kiye ja sakte hain, subject to minimum capacity and scaling settings.
+5. **Reduce manual work:** Instance capacity manage karne ke liye har change manually karna zaroori nahi hota.
+6. **Work with load balancing:** ALB ke saath integrate karke traffic ko healthy targets par route kar sakte hain while ASG manages EC2 capacity.
+
+#### 5. Practical Example: MERN Application
+
+```text
+Normal traffic:
+ALB -> EC2 #1, EC2 #2
+
+Traffic increases:
+ALB -> EC2 #1, EC2 #2, EC2 #3, EC2 #4
+       ASG launches additional instances as required
+
+Traffic decreases:
+ALB -> EC2 #1, EC2 #2
+       ASG may scale in according to its policy
+```
+
+Example ASG settings: minimum `2`, desired `2`, maximum `6`. A configured scaling policy may add instances when CPU utilization rises and remove instances when demand falls. Actual behavior depends on the metric, thresholds, cooldown/warmup settings, and capacity limits.
+
+#### 6. Important Points
+
+- Auto Scaling does not guarantee that every traffic spike is handled instantly; launching and warming up new instances takes time.
+- Correct scaling policies, health checks, capacity limits, and application startup configuration are important.
+- Auto Scaling manages capacity; ALB distributes incoming traffic. They solve related but different problems.
+- Auto Scaling can help optimize costs, but it does not guarantee the lowest bill. Minimum capacity, instance types, scaling thresholds, and workload must be configured appropriately.
+
+---
