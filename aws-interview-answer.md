@@ -17407,3 +17407,72 @@ Use health checks, logs, deployment status checks, and a rollback strategy. Stor
 **Interview-ready answer:** I would set up a CI/CD workflow triggered by changes to the main branch. It would install dependencies, run tests, build a Docker image, push it to Amazon ECR with a unique commit-based tag, and then deploy that exact image to ECS or EKS. I would use short-lived AWS credentials through OIDC, least-privilege permissions, health checks, monitoring, and rollback controls to make deployments secure and reliable.
 
 ---
+
+### Q222. Blue-Green Deployment kya hota hai?
+
+#### 1. English Definition
+
+Blue-Green Deployment is a release strategy that maintains two production-like environments: Blue (the current version) and Green (the new version). Traffic is switched to Green after validation, enabling a quick rollback to Blue if issues occur.
+
+#### 2. Hindi Definition
+
+Blue-Green Deployment mein application ke do environments rakhe jaate hain: Blue, jahan current version chal raha hota hai, aur Green, jahan new version deploy karke test kiya jata hai. Sab sahi hone par traffic Green par shift kar dete hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari Node.js application ka version v1 users ke liye chal raha hai.
+
+- **Blue environment:** Current production application (v1).
+- **Green environment:** New application version (v2), jise production traffic dene se pehle test karte hain.
+- **Traffic switch:** Load balancer ya routing configuration ko Green par point kar dete hain.
+- **Rollback:** Agar v2 mein problem aaye, traffic wapas Blue par bhej sakte hain—jab tak Blue environment compatible aur available hai.
+
+Is strategy ka main benefit hai controlled release aur fast rollback. Lekin ismein temporary extra infrastructure cost lag sakti hai, aur database/schema changes ko dono versions ke saath compatible rakhna zaroori hai.
+
+#### 4. Practical AWS Example
+
+Example: Node.js application AWS par Application Load Balancer (ALB) ke peeche chal rahi hai.
+
+1. ALB users ka traffic Blue target group (v1) ko bhejta hai.
+2. Green environment mein v2 deploy karo.
+3. Green par health checks aur smoke tests run karo.
+4. ALB listener/routing ko Green target group par switch karo.
+5. Error rate badhne ya health checks fail hone par traffic Blue par wapas shift karo.
+
+```text
+Users
+  |
+  v
+Application Load Balancer
+  |
+  +---- Blue Target Group  -> Node.js v1 (current)
+  |
+  +---- Green Target Group -> Node.js v2 (new; test first)
+
+After validation: route traffic to Green
+On failure:       route traffic back to Blue
+```
+
+ALB-based traffic switching is one possible implementation; ECS, CodeDeploy, or other deployment tooling may manage the deployment and routing depending on the architecture.
+
+#### 5. Important Points
+
+- Blue-Green is different from a rolling deployment: Blue-Green switches traffic between two environments, while rolling deployment replaces instances gradually.
+- Keep the old environment running until the new version is verified and rollback is no longer needed.
+- Use backward-compatible database migrations; switching application traffic does not automatically roll back database changes.
+- Monitor health checks, latency, error rates, and logs before completing the release.
+
+#### 6. Summary Table
+
+| Term | Meaning |
+|---|---|
+| Blue | Current stable production version |
+| Green | New version deployed for validation |
+| Traffic switch | Route users to the new environment |
+| Rollback | Route users back to the old environment |
+| Main advantage | Fast, controlled rollback |
+| Main trade-off | Extra capacity/cost and data-compatibility planning |
+
+**Interview-ready answer:** Blue-Green Deployment is a deployment strategy where two production-like environments are maintained. The current version runs in Blue, while the new version is deployed and tested in Green. Once Green passes health checks, traffic is switched to it. If a problem occurs, traffic can be routed back to Blue, provided the old environment and data changes remain compatible.
+
+---
