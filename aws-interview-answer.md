@@ -11751,3 +11751,109 @@ Console configuration:
 **Interview answer:** I connect a domain to an ALB by creating a Route 53 A-type Alias record that targets the load balancer. I configure an HTTPS listener with an ACM certificate, register healthy targets in the target group, and verify that the domain resolves and serves traffic securely.
 
 ---
+
+## 13. CloudWatch ⭐⭐⭐
+
+### Q166. What is CloudWatch?
+
+#### 1. English Definition
+
+**Amazon CloudWatch is an AWS monitoring and observability service that collects metrics, logs, and events to help you monitor AWS resources and applications, troubleshoot problems, and create alarms.**
+
+#### 2. Hindi Definition
+
+Amazon CloudWatch AWS ki monitoring service hai. Iski help se hum servers aur applications ke metrics, logs aur events dekh sakte hain, problems troubleshoot kar sakte hain aur alarms configure kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application EC2 par deployed hai. Tumhe pata karna hai:
+- EC2 ka CPU usage kitna hai?
+- Application mein errors kyun aa rahe hain?
+- Server par memory ya disk usage badh raha hai ya nahi?
+- CPU usage high hone par notification kaise mile?
+
+In cheezon ko monitor karne ke liye CloudWatch use kar sakte ho.
+
+CloudWatch ke important parts:
+- **Metrics:** Numerical measurements, jaise EC2 CPU utilization.
+- **Logs:** Application aur system logs, jaise Node.js errors.
+- **Alarms:** Threshold ya metric condition meet hone par action/notification trigger kar sakte hain.
+- **Dashboards:** Important metrics ko ek jagah visualize karte hain.
+- **Events and automation:** CloudWatch alarms aur related AWS integrations ke through automated actions initiate kiye ja sakte hain.
+
+Note: EC2 ka basic CPU metric by default available hota hai. Memory aur disk utilization jaise guest operating system metrics ke liye aam taur par CloudWatch Agent ya another configured collection method chahiye.
+
+#### 4. Practical Example
+
+Maan lo tumhari Node.js API EC2 par chal rahi hai aur tum CPU utilization 80% se zyada hone par alert chahte ho.
+
+CloudWatch alarm:
+- Metric: EC2 CPUUtilization
+- Condition: Greater than 80%
+- Period: 5 minutes (example)
+- Action: Amazon SNS notification
+
+Isse CPU usage configured condition meet karne par notification mil sakta hai. Production mein threshold aur evaluation periods apne workload ke according tune karne chahiye.
+
+#### 5. Architecture Diagram — CloudWatch Monitoring Flow
+
+```text
+EC2 / Node.js Application
+          |
+          | Metrics and logs
+          v
+     Amazon CloudWatch
+       /      |      \\
+      v       v       v
+   Metrics   Logs   Dashboard
+      |
+      v
+    Alarm
+      |
+      v
+  Amazon SNS
+      |
+      v
+ Email / Notification
+```
+
+**Flow:** EC2 metrics aur configured application logs CloudWatch mein collect hote hain → dashboards monitoring mein help karte hain → metric condition meet hone par alarm state change hoti hai → configured SNS action notification bhej sakta hai.
+
+#### 6. Practical Command / Configuration
+
+EC2 CPU metric retrieve karne ke liye AWS CLI:
+
+```bash
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/EC2 \
+  --metric-name CPUUtilization \
+  --dimensions Name=InstanceId,Value=i-0123456789abcdef0 \
+  --start-time 2026-10-10T00:00:00Z \
+  --end-time 2026-10-10T01:00:00Z \
+  --period 300 \
+  --statistics Average
+```
+
+Example mein instance ID aur time range ko apne environment ke according replace karo.
+
+CloudWatch console mein:
+1. CloudWatch open karo.
+2. **Metrics** mein EC2 CPUUtilization select karo.
+3. **Alarms → Create alarm** se threshold configure karo.
+4. Zarurat ho toh SNS topic aur notification destination configure karo.
+5. Application logs ke liye CloudWatch Agent/log collection setup karo, phir Log Group aur Log Stream inspect karo.
+
+#### 7. Summary Table
+
+| Feature | Purpose |
+|---|---|
+| Metrics | CPU utilization jaise numerical measurements |
+| Logs | Application/system logs aur errors |
+| Alarms | Conditions meet hone par alert/action |
+| Dashboards | Monitoring data ko visualize karna |
+| CloudWatch Agent | Memory, disk aur logs jaise extra host data collect karna |
+| SNS integration | Alarm notifications bhejna |
+
+**Interview answer:** Amazon CloudWatch is an AWS monitoring and observability service used to collect metrics, logs, and events from AWS resources and applications. It helps teams monitor performance, troubleshoot errors, visualize metrics, and configure alarms for notifications or automated actions.
+
+---
