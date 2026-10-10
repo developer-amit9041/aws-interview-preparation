@@ -4315,3 +4315,61 @@ Is example mein load balancer internet traffic receive karta hai. Backend ko sir
 - Dono subnet types mein Security Groups, Network ACLs aur least-privilege rules configure karna important hai.
 
 ---
+
+### Q63. What is an Internet Gateway?
+
+#### 1. English Definition
+
+**An Internet Gateway (IGW) is a horizontally scaled, redundant, and highly available VPC component that enables communication between a VPC and the internet, when routing, IP addressing, and security settings permit it.**
+
+#### 2. Hindi Definition
+
+Internet Gateway AWS VPC ka ek component hai jo VPC aur internet ke beech communication ka raasta provide karta hai, jab route table, IP addressing aur security configuration sahi ho.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari AWS VPC mein EC2 instance hai aur tum chahte ho ki internet users tumhari website access kar saken. VPC ke saath Internet Gateway attach karna aur public subnet ki route table mein internet route configure karna is setup ka important part hai.
+
+Internet Gateway ko internet aur VPC ke beech ek network gateway samajh sakte ho. Lekin **sirf IGW attach kar dene se EC2 instance automatically internet-accessible nahi hota**. Required routing, suitable public IP address, aur Security Group/Network ACL rules bhi chahiye.
+
+#### 4. How It Works
+
+```text
+Internet User
+     |
+     v
+Internet
+     |
+     v
+Internet Gateway (IGW)
+     |
+     v
+VPC Route Table
+  0.0.0.0/0 -> IGW
+     |
+     v
+EC2 with Public IPv4
+and suitable security rules
+```
+
+- IGW ko VPC ke saath attach kiya jata hai.
+- Public subnet ki route table mein `0.0.0.0/0` ko Internet Gateway par route kiya ja sakta hai for IPv4 internet traffic.
+- Resource ko internet se direct IPv4 communication ke liye suitable public IPv4 address aur allowed security rules ki zaroorat hoti hai.
+- IPv6 ke liye routing mein `::/0` jaise IPv6 route ka use ho sakta hai, with appropriate IPv6 and security configuration.
+
+#### 5. Internet Gateway vs NAT Gateway
+
+| Internet Gateway | NAT Gateway |
+|---|---|
+| VPC aur internet ke beech internet connectivity provide karta hai | Private subnet ke resources ko generally outbound IPv4 internet access deta hai |
+| Public subnet ke internet-facing resources ke liye use hota hai | Private subnet ke resources ke outbound connections ke liye use hota hai |
+| Inbound reachability resource ke IP aur security rules par depend karti hai | Unsolicited inbound internet connections ko private resource tak initiate karne ke liye design nahi kiya gaya |
+
+#### 6. Important Points
+
+- Internet Gateway VPC se attach hota hai, individual EC2 instance se nahi.
+- Internet route, public IP configuration aur security rules sab milkar internet connectivity enable karte hain.
+- Private subnet ko sirf IGW route na hone ke karan direct internet route nahi milta; outbound access ke liye NAT Gateway jaise option configure kiye ja sakte hain.
+- IGW AWS-managed, redundant infrastructure hai; ise EC2 server ki tarah manage nahi karna padta.
+
+---
