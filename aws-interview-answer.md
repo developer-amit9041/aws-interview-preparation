@@ -6826,3 +6826,60 @@ RDS restore generally ek **new DB instance** create karta hai; restore ke baad a
 - Backup, retention, restore, and point-in-time recovery capabilities vary by RDS engine and configuration.
 
 ---
+
+### Q105. What is a Database Snapshot?
+
+#### 1. English Definition
+
+**A database snapshot is a point-in-time copy of a database that can be used to restore the database to the state captured by that snapshot.**
+
+#### 2. Hindi Definition
+
+Database snapshot database ki ek particular time par capture ki gayi copy hoti hai, jiska use zaroorat padne par database ko us captured state mein restore karne ke liye kiya ja sakta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari application ka database AWS RDS par hai aur tum production mein koi major schema change ya deployment karne wale ho. Change se pehle tum ek manual DB snapshot create kar sakte ho.
+
+Agar change ke baad data ya database mein problem aa jaaye, toh us snapshot se database restore kar sakte ho. Snapshot ko ek save point ki tarah samjho—ye us moment ki database state ko capture karta hai; snapshot banne ke baad ka data us snapshot mein automatically include nahi hota.
+
+RDS snapshots AWS-managed storage mein store hote hain. Restore karne par RDS generally ek new DB instance create karta hai, jise verify karke application ko point kiya ja sakta hai.
+
+#### 4. Practical Example
+
+```text
+Production RDS Database
+          |
+          | Create snapshot before deployment
+          v
+   Manual DB Snapshot
+          |
+          | If deployment causes a problem
+          v
+   Restore from snapshot
+          |
+          v
+   New RDS DB instance
+```
+
+Example: Tum 2:00 PM par snapshot lete ho aur 2:30 PM par deployment se database corrupt ho jaata hai. Snapshot restore karne par tumhe 2:00 PM ke captured state ke hisaab se database milta hai; 2:00 PM ke baad ke changes snapshot mein nahi hote.
+
+#### 5. Database Snapshot vs Automated Backup
+
+| Basis | Manual Database Snapshot | Automated Backup |
+|---|---|---|
+| Creation | User creates it manually or through automation | RDS manages backups automatically when configured/enabled |
+| Recovery point | Snapshot ka captured point in time | Supported engines/configurations mein point-in-time recovery |
+| Retention | Generally retained until deleted, subject to policies | Configured retention period ke according |
+| Common use | Before important deployment or database change | Regular recovery and protection against data loss |
+
+#### 6. Important Points
+
+- Snapshot is a recovery point, not a live replica for serving application traffic.
+- A snapshot does not automatically include changes made after it was captured.
+- Snapshots can take time and incur storage costs; details depend on the service and configuration.
+- Protect snapshots using suitable IAM permissions and encryption settings.
+- Test the restore process; restore typically creates a new RDS DB instance, and the application endpoint may need to be updated.
+- Snapshot and restore behavior can vary by database engine and AWS service configuration.
+
+---
