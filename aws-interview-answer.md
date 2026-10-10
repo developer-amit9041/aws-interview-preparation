@@ -17807,3 +17807,50 @@ Check current AWS pricing and parameter-tier limits before choosing a design, si
 **Interview-ready answer:** AWS Systems Manager Parameter Store is a service capability for storing and managing application configuration and parameters. It supports `String`, `StringList`, and encrypted `SecureString` values, which applications can retrieve through AWS APIs using IAM permissions. It is commonly used for centralized configuration and encrypted parameters, while Secrets Manager is often chosen when managed secret rotation and credential lifecycle features are required.
 
 ---
+
+### Q228. Secrets Manager vs Parameter Store?
+
+#### 1. English Definition
+
+AWS Secrets Manager is designed for managing sensitive secrets, including supported automatic rotation workflows. Systems Manager Parameter Store is designed for hierarchical configuration and parameter storage, and it can also store encrypted values using `SecureString`.
+
+#### 2. Hindi Definition
+
+Secrets Manager ka focus passwords aur API keys jaise secrets ko manage karna aur supported cases mein unki rotation automate karna hai. Parameter Store ka focus configuration aur parameters ko centrally store karna hai; ismein encrypted `SecureString` bhi rakh sakte hain.
+
+#### 3. Hinglish Explanation
+
+Dono values securely store kar sakte hain, lekin use case aur features alag hain.
+
+- **Secrets Manager:** Production database credentials ya API secrets, especially jab managed rotation chahiye.
+- **Parameter Store:** Application configuration, URLs, feature settings, aur zaroorat par encrypted `SecureString` values.
+
+Example: `/myapp/prod/API_BASE_URL` ko Parameter Store mein rakh sakte ho. Database password ko Secrets Manager mein rakhna useful hai jab tumhe uski managed rotation aur secret lifecycle features chahiye. Final choice requirements, pricing, rotation support, and parameter limits par depend karti hai.
+
+#### 4. Comparison Table
+
+| Feature | Secrets Manager | Systems Manager Parameter Store |
+|---|---|---|
+| Primary focus | Secrets lifecycle and credential management | Configuration and parameter storage |
+| Sensitive values | Yes | Yes, using `SecureString` |
+| Automatic rotation | Built-in rotation workflows for supported secrets and setups | Does not provide the same general-purpose built-in secret rotation workflow; custom automation may be needed |
+| Hierarchical names | Supports secret names and organization | Hierarchical parameter paths are a core feature |
+| Encryption | Uses AWS KMS for encryption at rest | `SecureString` uses AWS KMS |
+| Typical examples | Database credentials, API keys, tokens | URLs, feature flags, environment settings, encrypted parameters |
+| Pricing | Charges may apply for secrets stored and API calls | Standard parameters generally have no additional charge within service limits; advanced features may be charged |
+
+#### 5. Practical MERN/AWS Guidance
+
+```text
+Node.js backend
+  |
+  +--> Parameter Store: API_BASE_URL, feature settings
+  |
+  +--> Secrets Manager: production DB password / rotating credentials
+```
+
+Use an IAM role for the application and grant access only to required names/paths. Avoid hardcoding credentials or logging returned values. Check current AWS pricing, service quotas, and rotation compatibility before choosing.
+
+**Interview-ready answer:** Secrets Manager is focused on secure secret lifecycle management and supports automatic rotation for supported credentials. Parameter Store is focused on hierarchical configuration storage and supports encrypted `SecureString` parameters. I would typically use Parameter Store for application configuration and Secrets Manager for sensitive production credentials when managed rotation or secret lifecycle features are needed.
+
+---
