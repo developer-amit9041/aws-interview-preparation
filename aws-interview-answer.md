@@ -16401,3 +16401,159 @@ Suppose you deploy a MERN application with Kubernetes.
 **Interview-ready answer:** Amazon EKS is a managed Kubernetes service in which AWS operates the control plane, reducing the amount of control-plane maintenance the team must perform. With self-managed Kubernetes, the team is responsible for installing, securing, upgrading, and maintaining the control plane and supporting infrastructure. EKS generally reduces operational overhead, while self-managed Kubernetes offers more direct control but requires more expertise and ongoing maintenance.
 
 ---
+
+### Q212. How do you deploy a Node.js application on EKS?
+
+#### 1. English Definition
+
+To deploy a Node.js application on Amazon EKS, package it as a container image, store the image in Amazon ECR, configure access to an EKS cluster, and use Kubernetes resources such as a Deployment and Service to run and expose the application.
+
+#### 2. Hindi Definition
+
+Node.js application ko EKS par deploy karne ke liye pehle Docker image banate hain, use Amazon ECR mein push karte hain, phir Kubernetes Deployment se Pods run karwate hain aur Service ya Load Balancer ke through application ko access karte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, overall flow yaad rakho:
+
+**Node.js code → Docker image → Amazon ECR → EKS Cluster → Deployment / Pods → Service / Load Balancer**
+
+- Docker image application aur uski runtime dependencies ko package karti hai.
+- ECR image ko store karta hai.
+- EKS par Kubernetes Deployment Pods ko run aur replicas ko maintain karta hai.
+- Service Pods ko stable network access deti hai; external access ke liye LoadBalancer Service ya Ingress / AWS Load Balancer Controller configure kar sakte ho.
+
+#### 4. Step-by-Step Practical Example
+
+Assume Node.js API port `3000` par listen karti hai, Docker installed hai, AWS CLI aur `kubectl` configured hain, aur EKS cluster plus required permissions already available hain.
+
+**Step 1: Create a Dockerfile**
+
+```dockerfile
+FROM node:22-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY . .
+ENV NODE_ENV=production
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+Make sure `server.js` starts the application on port 3000 and listens on `0.0.0.0`, for example `app.listen(3000, '0.0.0.0')`. Add a `.dockerignore` file to exclude `node_modules`, `.git`, and local environment files. Use a maintained Node.js base image that matches your project's runtime requirements.
+
+**Step 2: Create an ECR repository**
+
+```bash
+aws ecr create-repository \
+  --repository-name node-api \
+  --region ap-south-1
+```
+
+**Step 3: Authenticate Docker and push the image**
+
+Replace `<ACCOUNT_ID>` with your AWS account ID.
+
+```bash
+aws ecr get-login-password --region ap-south-1 | \\
+  docker login --username AWS --password-stdin \\
+  <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com
+
+docker build -t node-api .
+docker tag node-api:latest <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:latest
+docker push <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:latest
+```
+
+**Step 4: Configure kubectl for EKS**
+
+```bash
+aws eks update-kubeconfig \
+  --region ap-south-1 \
+  --name <CLUSTER_NAME>
+
+kubectl get nodes
+```
+
+**Step 5: Create a Deployment and Service**
+
+Save as `node-api.yaml`, replacing the image placeholder with the actual ECR image URI:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: node-api
+  template:
+    metadata:
+      labels:
+        app: node-api
+    spec:
+      containers:
+        - name: node-api
+          image: <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:latest
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: node-api
+  ports:
+    - port: 80
+      targetPort: 3000
+```
+
+The EKS cluster must have the required IAM permissions and image-pull access to ECR. For a production cluster, configure appropriate health probes, secret management, least-privilege IAM, image tags, and network access. On AWS, a `LoadBalancer` Service commonly provisions an AWS load balancer when the required cloud integration is configured; many production setups instead use an Ingress with AWS Load Balancer Controller.
+
+**Step 6: Deploy and verify**
+
+```bash
+kubectl apply -f node-api.yaml
+kubectl get deployments
+kubectl get pods
+kubectl get services
+kubectl rollout status deployment/node-api
+```
+
+Get the external address after the load balancer is provisioned:
+
+```bash
+kubectl get service node-api
+```
+
+Access the API through the address shown in `EXTERNAL-IP` or the provisioned hostname. Provisioning may take a few minutes. If the application uses MongoDB, configure its connection string securely using Kubernetes Secrets or an appropriate secrets integration; do not bake credentials into the image.
+
+#### 5. Deployment Flow Summary
+
+| Step | AWS / Kubernetes service | Purpose |
+|---|---|---|
+| 1 | Docker | Package Node.js application |
+| 2 | Amazon ECR | Store container image |
+| 3 | Amazon EKS | Provide Kubernetes cluster |
+| 4 | Deployment / Pods | Run and maintain application replicas |
+| 5 | Service / Load Balancer | Route traffic to the Pods |
+
+**Interview-ready answer:** To deploy a Node.js application on EKS, I first containerize it with Docker and push the image to Amazon ECR. Then I configure `kubectl` for the EKS cluster and create a Kubernetes Deployment that runs the image in Pods. I expose the Pods through a Service or a load balancer, then verify the rollout, Pod health, and external connectivity. For production, I also configure secrets, health checks, resource limits, IAM permissions, and monitoring.
+
+---
