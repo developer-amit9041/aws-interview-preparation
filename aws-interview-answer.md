@@ -11205,3 +11205,103 @@ CLI se Alias record create karne ke liye change batch mein `AliasTarget` configu
 **Interview answer:** A Route 53 Alias record points a domain to supported AWS resources such as CloudFront or an Application Load Balancer. It is especially useful for root domains because a standard CNAME generally cannot be used at the DNS zone apex.
 
 ---
+
+### Q161. What is DNS Routing Policy?
+
+#### 1. English Definition
+
+**A DNS routing policy determines how Amazon Route 53 responds to DNS queries and which endpoint or resource it directs the requester toward.**
+
+#### 2. Hindi Definition
+
+DNS Routing Policy ek rule ya strategy hai jo decide karti hai ki DNS query aane par Route 53 user ko kis endpoint ya resource ki taraf direct karega.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari website ke multiple servers ya endpoints hain. Tum decide karna chahte ho ki:
+- User ko nearest/lowest-latency endpoint mile.
+- Traffic multiple endpoints mein distribute ho.
+- Primary server fail ho to backup server use ho.
+- Sirf specific country ke users ko particular endpoint mile.
+
+Route 53 routing policy ke through tum DNS response ko apni requirement ke according control kar sakte ho.
+
+**Important:** DNS routing policy DNS query ka answer choose karti hai. Yeh application ke har HTTP request ko proxy karke route nahi karti; DNS caching ki wajah se change har user ko immediately dikhna guaranteed nahi hota.
+
+#### 4. Practical Example
+
+Maan lo tumhari MERN application ke endpoints hain:
+- Primary API: Mumbai region
+- Backup API: Singapore region
+
+Agar primary endpoint unhealthy ho, to **Failover routing policy** backup endpoint ka DNS answer de sakti hai, provided health checks aur records correctly configured hon.
+
+Common Route 53 routing policies:
+
+| Policy | Use case |
+|---|---|
+| Simple | Single resource ya basic DNS response |
+| Weighted | Configured weights ke according DNS answers distribute karna |
+| Latency-based | AWS Regions mein measured latency ke basis par suitable endpoint choose karna |
+| Failover | Primary/secondary setup for disaster recovery |
+| Geolocation | User ki geographic location ke basis par answer |
+| Geoproximity | User/resource location aur configured bias ke basis par routing |
+| IP-based | Client IP ke defined CIDR range ke basis par answer |
+| Multivalue answer | Multiple healthy record values return karna |
+
+#### 5. Architecture Diagram — Failover Routing Example
+
+```text
+              User
+                |
+                v
+         Route 53 DNS Query
+                |
+                v
+       Failover Routing Policy
+                |
+         Health check status
+           /           \\
+          v             v
+   Primary healthy?   Primary unhealthy?
+          |             |
+          v             v
+    Primary API       Backup API
+      (Mumbai)       (Singapore)
+```
+
+**Flow:** DNS query aati hai → Route 53 configured policy aur applicable health-check status evaluate karta hai → DNS response mein selected endpoint deta hai. Actual failover timing DNS TTL, resolver caching aur health-check configuration par depend karti hai.
+
+#### 6. Practical Command / Configuration
+
+Hosted Zone ke records inspect karne ke liye:
+
+```bash
+aws route53 list-resource-record-sets \
+  --hosted-zone-id YOUR_HOSTED_ZONE_ID
+```
+
+Health checks list karne ke liye:
+
+```bash
+aws route53 list-health-checks
+```
+
+Route 53 console mein record create/edit karte waqt routing policy choose karo, phir us policy ke required fields configure karo. For example, weighted policy mein weight set karo; failover policy mein primary ya secondary role select karo. Policy aur record type ke hisaab se available options vary karte hain.
+
+#### 7. Summary Table
+
+| Requirement | Suitable policy |
+|---|---|
+| Basic DNS answer | Simple |
+| Traffic split by weights | Weighted |
+| Lowest-latency Region endpoint | Latency-based |
+| Primary/backup recovery | Failover |
+| Country/continent-based answer | Geolocation |
+| Proximity plus bias | Geoproximity |
+| Client IP range-based answer | IP-based |
+| Multiple healthy answers | Multivalue answer |
+
+**Interview answer:** A Route 53 DNS routing policy controls how DNS queries are answered and which endpoint is returned. Common policies include Simple, Weighted, Latency-based, Failover, Geolocation, Geoproximity, IP-based, and Multivalue answer.
+
+---
