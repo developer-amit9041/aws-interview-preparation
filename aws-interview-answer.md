@@ -8758,3 +8758,112 @@ API Gateway configured `POST /login` route ke through request ko Lambda function
 | Example | React login request → API Gateway → Lambda → response |
 
 ---
+
+### Q136. API Gateway vs ALB?
+
+#### 1. English Definition
+
+**Amazon API Gateway is a managed service for creating, securing, publishing, and managing APIs. An Application Load Balancer (ALB) distributes incoming HTTP/HTTPS traffic across targets such as EC2 instances, containers, and IP addresses.**
+
+#### 2. Hindi Definition
+
+API Gateway APIs ko create, secure aur manage karne ki service hai. ALB incoming HTTP/HTTPS traffic ko multiple backend targets, jaise EC2 instances ya containers, mein distribute karta hai.
+
+#### 3. Hinglish Explanation
+
+Dono HTTP/HTTPS requests handle kar sakte hain, lekin inka main purpose alag hai.
+
+- **API Gateway:** API management par focus karta hai. Ismein API routes, authorization integrations, throttling, quotas aur request/response handling jaise features milte hain. Yeh Lambda aur HTTP backends ke saath commonly use hota hai.
+- **ALB (Application Load Balancer):** Application traffic ko multiple healthy targets mein distribute karta hai. Yeh EC2 instances, ECS tasks, IP addresses aur supported Lambda targets ke saath use ho sakta hai. Ismein host-based aur path-based routing bhi hoti hai.
+
+**Easy way to remember:** API Gateway = API management; ALB = application traffic load balancing and routing.
+
+#### 4. Practical Example
+
+**Scenario A — Serverless API**
+
+Tumhara React frontend AWS Lambda par deployed Node.js API ko call karta hai:
+
+```text
+React Frontend
+      |
+      v
+API Gateway
+      |
+      v
+Lambda (Node.js)
+      |
+      v
+Database
+```
+
+Yahan API Gateway useful hai, especially jab API-specific controls, authorization integrations aur throttling chahiye.
+
+**Scenario B — MERN backend on EC2**
+
+Tumhara Node.js/Express backend multiple EC2 instances par run ho raha hai:
+
+```text
+React Frontend
+      |
+      v
+Application Load Balancer
+      |
+      +----------+----------+
+      |                     |
+      v                     v
+EC2 Instance 1         EC2 Instance 2
+Node.js / Express      Node.js / Express
+      |                     |
+      +----------+----------+
+                 |
+                 v
+              Database
+```
+
+Yahan ALB requests ko healthy backend instances mein distribute karta hai.
+
+#### 5. Key Differences
+
+| Feature | API Gateway | Application Load Balancer (ALB) |
+|---|---|---|
+| Primary purpose | API creation and management | HTTP/HTTPS traffic distribution |
+| Typical backends | Lambda, HTTP endpoints, supported AWS integrations | EC2, containers, IP targets, and supported Lambda targets |
+| API keys and usage plans | Supported for applicable API types | Not a direct equivalent to API Gateway usage plans |
+| Throttling and quotas | API-level throttling and quotas available | Different traffic controls; not a replacement for API Gateway usage plans |
+| Routing | API routes and integrations | Host-based and path-based listener rules |
+| Health checks | Depends on API/integration design | Target health checks are a core feature |
+| Common use case | Managed public APIs and serverless applications | Load balancing for web applications and services |
+| Can they be combined? | Yes | Yes |
+
+#### 6. Can We Use Both Together?
+
+Yes. For some architectures, API Gateway can sit in front of an ALB when API management features are needed in addition to load balancing.
+
+```text
+Client / React Frontend
+          |
+          v
+     API Gateway
+  (API controls, auth)
+          |
+          v
+         ALB
+  (traffic distribution)
+          |
+     +----+----+
+     |         |
+     v         v
+   EC2-1     EC2-2
+  Express    Express
+```
+
+Lekin har application ko dono services ki zaroorat nahi hoti. Architecture aur required features ke hisaab se choose karo.
+
+#### 7. Summary
+
+- **API Gateway choose karo** jab managed API features, API-level throttling/quotas, aur serverless API integrations important hon.
+- **ALB choose karo** jab HTTP/HTTPS traffic ko multiple EC2/container targets mein distribute karna ho aur target health checks chahiye.
+- **Dono use karo** jab API management aur backend load balancing dono ki clear requirement ho.
+
+---
