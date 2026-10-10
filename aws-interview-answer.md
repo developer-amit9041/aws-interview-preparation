@@ -2823,3 +2823,52 @@ Application files ko authorized users ko serve karne ke liye presigned URLs ya c
 - S3 storage and requests can incur charges depending on usage and storage class.
 
 ---
+
+### Q43. What is the difference between an S3 Bucket and an Object?
+
+#### 1. English Definition
+
+- **S3 Bucket:** A container in Amazon S3 used to store objects.
+- **S3 Object:** The individual data item stored in a bucket, consisting of the data, metadata, and an object key.
+
+#### 2. Hindi Definition
+
+- **Bucket:** S3 mein files store karne ka container.
+- **Object:** Bucket ke andar stored actual file/data, uske metadata aur uski key ke saath.
+
+#### 3. Hinglish Explanation
+
+Bhai, simple example se samjho: bucket ek container hai aur object uske andar rakhi hui file hai. MERN application mein `my-mern-app-uploads` bucket ho sakta hai, aur `users/123/profile.jpg` us bucket ke andar ek object ho sakta hai.
+
+```text
+S3 Bucket: my-mern-app-uploads
+  ├── users/123/profile.jpg   <- Object
+  ├── products/shoes.png      <- Object
+  └── documents/invoice.pdf   <- Object
+```
+
+Object key, jaise `users/123/profile.jpg`, bucket ke andar object ko identify karti hai. `/` folder jaisa path dikhata hai, lekin S3 fundamentally object storage hai.
+
+#### 4. Difference Table
+
+| Feature | Bucket | Object |
+|---|---|---|
+| Meaning | Container | Stored data item |
+| Example | `my-mern-app-uploads` | `users/123/profile.jpg` |
+| Contains | Objects | File data, metadata, and key |
+| Purpose | Objects ko organize aur access policies apply karne ke liye | Actual file/data store karne ke liye |
+| Created/deleted | Bucket create/delete karte hain | Object upload/delete karte hain |
+| Access control | Bucket policies and settings can control access | Object access is also affected by IAM, bucket policies, and other applicable controls |
+
+#### 5. Practical MERN Example
+
+When a user uploads a profile photo:
+
+1. Backend object ko `my-mern-app-uploads` bucket mein upload karta hai.
+2. Object key `users/123/profile.jpg` ho sakti hai.
+3. MongoDB mein application is key ko save kar sakti hai.
+4. User ko photo dikhate waqt backend authorization check karke object ko presigned URL ya configured delivery method se serve kar sakta hai.
+
+Bucket ka naam aur object key milkar object ko identify karne mein help karte hain. Bucket private rakhna aur frontend mein AWS secret keys expose na karna important hai.
+
+---
