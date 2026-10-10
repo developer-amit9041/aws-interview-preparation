@@ -438,3 +438,74 @@ Yeh conceptual diagram hai: actual setup mein Load Balancer ko dono AZs ke healt
 **Yaad rakhne ki trick:** Region batata hai *kahan* deploy karna hai; AZ batata hai us Region ke andar resources ko *kaise alag locations mein distribute* karna hai.
 
 ---
+
+---
+
+### Q7. What is an Edge Location?
+
+#### 1. English Definition
+
+**An AWS Edge Location is a site in AWS's global edge network used to deliver content and services to users with low latency. Services such as Amazon CloudFront use edge locations to cache and deliver content closer to users.**
+
+#### 2. Hindi Definition
+
+AWS Edge Location, AWS ke global edge network ka ek location hota hai, jiska use users ko content aur services jaldi deliver karne ke liye kiya jata hai. Amazon CloudFront jaise services yahan content cache karke users ke paas se deliver kar sakti hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN e-commerce website Mumbai ke AWS Region mein host hai aur tumhare users India, Europe aur America mein hain.
+
+Agar har user ko product images Mumbai ke original server se hi download karni padengi, toh door ke users ko images load hone mein zyada time lag sakta hai.
+
+Is problem ko reduce karne ke liye tum **Amazon CloudFront**, jo AWS ka Content Delivery Network (CDN) hai, use kar sakte ho:
+
+- CloudFront users ki requests ko suitable edge location par serve karne ki koshish karta hai.
+- Agar requested image edge location ke cache mein available hai, toh content wahin se deliver ho sakta hai.
+- Agar content cache mein nahi hai, toh CloudFront configured origin—jaise S3 bucket—se content retrieve kar sakta hai aur caching rules ke according cache kar sakta hai.
+- Isse latency kam ho sakti hai aur origin server par repeated requests ka load reduce ho sakta hai.
+
+#### 4. Architecture Example — MERN + CloudFront + S3
+
+```text
+              User / Browser
+                    |
+                    v
+             Amazon CloudFront
+                    |
+             Nearest suitable
+              Edge Location
+               /         \\
+       Cache HIT         Cache MISS
+           |                 |
+           v                 v
+     Return cached      Fetch from Origin
+       image/file        (Amazon S3)
+                             |
+                             v
+                     Cache as configured
+```
+
+**Example:** Product images S3 mein store karo aur CloudFront distribution ko S3 origin ke saath configure karo. React frontend CloudFront URL se images load kar sakta hai.
+
+Note: Edge Location ek AWS Region ya Availability Zone ka synonym nahi hai. Edge locations primarily content delivery and other edge services ke liye use hoti hain; exact features service par depend karte hain.
+
+#### 5. Region vs AZ vs Edge Location
+
+| Term | Main role | Easy example |
+|---|---|---|
+| Region | AWS resources deploy karne ka geographic area | Mumbai Region mein EC2 run karna |
+| Availability Zone (AZ) | Region ke andar isolated infrastructure location/group | Multiple AZs mein backend deploy karna |
+| Edge Location | Users ke kareeb content deliver karna | CloudFront se cached images serve karna |
+
+#### 6. Summary Table
+
+| Term | Meaning |
+|---|---|
+| Edge Location | AWS global edge network ka site |
+| Amazon CloudFront | AWS CDN jo content ko users tak efficiently deliver karta hai |
+| Cache HIT | Requested content edge cache mein mil gaya |
+| Cache MISS | Content cache mein nahi mila; configured origin se fetch karna pad sakta hai |
+
+**Yaad rakhne ki trick:** Region = deploy resources; AZ = improve infrastructure resilience; Edge Location = content users ke paas se deliver karna.
+
+---
