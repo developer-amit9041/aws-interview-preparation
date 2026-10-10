@@ -17,11 +17,11 @@ AWS interview questions for MERN / Node.js developers, organized from fundamenta
 - Security and secrets management
 - Production architecture scenarios
 
+## Files
+- [AWS Interview Questions](aws-interview-question.md)
+- [AWS Interview Answers](aws-interview-answer.md)
+
 ## Study approach
-Start with [AWS Interview Questions and Answers](aws-interview-question.md). Practice explaining each answer in this order:
-1. Short definition in English
-2. Explanation in simple Hinglish
-3. Practical example
-4. Production/interview scenario
+Prepare each answer using an English definition, Hindi definition, simple Hinglish explanation, a practical example or command, and a summary table. Use an architecture or workflow when it helps explain the concept.
 
 Questions are a study roadmap, not a guarantee of what any interviewer will ask.
