@@ -2061,3 +2061,85 @@ pm2 save
 **I use PM2 to run the Node.js app as a managed background process. I verify it with `pm2 status`, inspect logs with `pm2 logs`, and configure `pm2 startup` plus `pm2 save` if it must restart after an EC2 reboot.**
 
 ---
+
+### Q33. What is PM2?
+
+#### 1. English Definition
+
+**PM2 is a process manager for Node.js applications that helps run applications in the background, monitor their status, manage logs, and restart them when they crash.**
+
+#### 2. Hindi Definition
+
+PM2 ek process manager hai jo Node.js application ko background mein chalane, uska status aur logs check karne, aur crash hone par use restart karne mein help karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, jab hum AWS EC2 server par Node.js application deploy karte hain, toh humein chahiye ki app terminal band karne ke baad bhi chalti rahe. PM2 application ko manage karta hai, isliye humein terminal khula rakhne ki zaroorat nahi hoti.
+
+PM2 ke important features:
+
+- **Background execution:** SSH logout ke baad bhi managed app run karti reh sakti hai.
+- **Process monitoring:** App online hai, stopped hai ya restart ho rahi hai, check kar sakte hain.
+- **Automatic restart:** App crash hone par PM2 configured restart behavior ke according use restart kar sakta hai.
+- **Log management:** Application ke output aur error logs dekh sakte hain.
+- **Startup integration:** Configuration ke baad server reboot par app ko automatically restore/start kar sakta hai.
+
+#### 4. Practical Example — Node.js on AWS EC2
+
+Suppose tumhari Express application `server.js` se start hoti hai.
+
+```bash
+# Install PM2
+npm install -g pm2
+
+# Start the application
+pm2 start server.js --name my-node-api
+
+# Check running processes
+pm2 status
+
+# View application logs
+pm2 logs my-node-api
+
+# Restart the application
+pm2 restart my-node-api
+
+# Stop the application
+pm2 stop my-node-api
+
+# Remove it from PM2's process list
+pm2 delete my-node-api
+```
+
+**Note:** `pm2 stop` application ko stop karta hai, jabki `pm2 delete` process ko PM2 ki managed list se remove karta hai.
+
+#### 5. Configure PM2 for EC2 Reboots
+
+SSH logout aur EC2 reboot alag situations hain. Reboot ke baad application restore karne ke liye startup integration configure karo:
+
+```bash
+pm2 startup
+```
+
+PM2 jo OS-specific command print kare, use execute karo. Phir current process list save karo:
+
+```bash
+pm2 save
+```
+
+Isse configured startup mechanism reboot ke baad saved process list ko restore kar sakta hai. Apne server par status aur application health verify karna chahiye.
+
+#### 6. PM2 vs `node server.js`
+
+| `node server.js` | PM2 |
+|---|---|
+| Application ko directly start karta hai | Application ko manage karta hai |
+| Process monitoring aur log management built-in PM2 jaisa nahi hota | Status aur logs ke commands deta hai |
+| Terminal/session se tied execution mein disconnect risk ho sakta hai | Managed background execution support karta hai |
+| Crash recovery ke liye extra setup chahiye | Configured restart behavior provide karta hai |
+
+#### 7. Interview Summary
+
+**PM2 is a Node.js process manager used in production to run applications in the background, monitor processes, manage logs, and restart crashed applications. On EC2, I can also configure PM2 startup integration to restore the application after a server reboot.**
+
+---
