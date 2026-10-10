@@ -15255,3 +15255,106 @@ After deployment, check ECS service events, task status, CloudWatch logs, load b
 **Interview-ready answer:** First, I containerize the Node.js application using a Dockerfile. Then I create an ECR repository, build and push the image, and define the container configuration in an ECS task definition. I create an ECS service on Fargate, configure networking and IAM permissions, and optionally attach an Application Load Balancer for HTTP traffic. Finally, I verify task health, service events, and CloudWatch logs.
 
 ---
+
+### Q199. How does ECS work with ALB?
+
+#### 1. English Definition
+
+An **Application Load Balancer (ALB)** distributes incoming HTTP/HTTPS requests across healthy targets, such as ECS tasks. ECS integrates with the ALB through a target group and service configuration, allowing traffic to be routed to the application containers.
+
+#### 2. Hindi Definition
+
+ALB incoming HTTP/HTTPS requests ko healthy ECS tasks tak distribute karta hai. ECS service ko ALB ke target group se connect karte hain, jisse requests application ke running containers tak pahunchti hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js application ke ECS service mein 2 tasks chal rahe hain. Directly har task ka IP user ko dene ke bajaye ALB ko entry point banate hain.
+
+1. User `https://api.example.com` par request bhejta hai.
+2. ALB listener request receive karta hai, usually port 443 par HTTPS.
+3. Listener rule request ko ECS service ke target group tak forward karta hai.
+4. Target group mein ECS tasks ke IP addresses aur application port register hote hain.
+5. ALB health checks se unhealthy tasks ko traffic dena band karta hai.
+6. ECS service tasks scale ya replace karti hai, aur ECS integration target group ke registered targets ko update karti hai.
+
+Isse users ko har container ka IP manually track nahi karna padta.
+
+#### 4. Practical Architecture
+
+```text
+Client / Browser
+       | HTTPS :443
+       v
+Application Load Balancer (ALB)
+       | Listener rule
+       v
+Target Group (HTTP :3000)
+       |                  |
+       v                  v
+ECS Task 1            ECS Task 2
+Node.js :3000         Node.js :3000
+
+ECS Service manages desired task count
+ALB health checks route only to healthy targets
+```
+
+For Fargate tasks using `awsvpc` networking, the target group must use target type `ip`, because each task has its own elastic network interface and IP address. For ECS tasks on EC2, the target type depends on the networking mode; `ip` is also used for `awsvpc` tasks.
+
+#### 5. Practical Configuration
+
+At a high level, configure these resources:
+
+- **ALB:** Place it in suitable subnets and configure a listener, for example HTTPS on port 443.
+- **Target group:** Use HTTP port 3000 for the Node.js app, configure a health-check path such as `/health`, and use target type `ip` for Fargate/`awsvpc` tasks.
+- **ECS service:** Attach the target group and specify the container name and container port that should receive traffic.
+- **Security groups:** Allow inbound HTTPS to the ALB. Allow the application port from the ALB security group to the ECS task security group. Avoid opening the container port to everyone unnecessarily.
+- **Health check endpoint:** Implement an endpoint that returns a successful status when the application is ready.
+
+Example Express health endpoint:
+
+```javascript
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+```
+
+Example ECS service configuration fragment (illustrative):
+
+```json
+{
+  "loadBalancers": [
+    {
+      "targetGroupArn": "<TARGET_GROUP_ARN>",
+      "containerName": "node-api",
+      "containerPort": 3000
+    }
+  ]
+}
+```
+
+The ALB listener must forward to that target group, and the target group's port and health-check settings must match the application. In production, terminate TLS at the ALB with an ACM certificate and keep task networking private where appropriate.
+
+#### 6. ECS + ALB Benefits
+
+| Feature | Benefit |
+|---|---|
+| Traffic distribution | Spreads requests across registered healthy tasks |
+| Health checks | Stops routing to targets that fail checks |
+| Scaling integration | New service tasks can be registered with the target group |
+| Stable entry point | Clients use the ALB DNS name or custom domain rather than task IPs |
+| HTTPS and routing | Supports TLS termination and host/path-based listener rules |
+| High availability | Can route across healthy tasks in multiple Availability Zones when configured appropriately |
+
+#### 7. Summary Table
+
+| Component | Responsibility |
+|---|---|
+| ALB listener | Receives HTTP/HTTPS traffic and evaluates rules |
+| Target group | Tracks targets and performs health checks |
+| ECS service | Maintains desired tasks and integrates them with the target group |
+| ECS task/container | Runs the Node.js application |
+| Security groups | Control which network traffic is allowed |
+
+**Interview-ready answer:** An Application Load Balancer integrates with ECS through a target group. The ALB receives HTTP/HTTPS requests and forwards them to healthy ECS tasks registered in that target group. The ECS service registers and deregisters task targets as tasks are launched or stopped. For Fargate tasks using `awsvpc` networking, I configure the target group with target type `ip`, set a suitable health-check endpoint, and allow traffic from the ALB security group to the task security group.
+
+---
