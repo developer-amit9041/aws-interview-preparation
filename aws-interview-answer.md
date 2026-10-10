@@ -12285,3 +12285,116 @@ Ensure the EC2 instance role grants only the required CloudWatch permissions, an
 **Interview answer:** I monitor EC2 with CloudWatch metrics, status checks, logs, dashboards, and alarms. I use default EC2 metrics for CPU, network, and disk I/O, install the CloudWatch Agent for memory and filesystem metrics and log collection, and configure alarms with SNS notifications for important thresholds or failures.
 
 ---
+
+### Q171. How do you monitor CPU utilization?
+
+#### 1. English Definition
+
+**CPU utilization on an EC2 instance is monitored using the Amazon CloudWatch `CPUUtilization` metric, which reports the percentage of allocated CPU capacity being used over time. You can visualize it and create CloudWatch alarms when it exceeds a configured threshold.**
+
+#### 2. Hindi Definition
+
+EC2 ka CPU utilization monitor karne ke liye CloudWatch ka `CPUUtilization` metric use karte hain. Yeh batata hai ki instance ka CPU kitne percent use ho raha hai. CPU usage limit se zyada hone par CloudWatch Alarm notification bhej sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari Node.js application EC2 par run kar rahi hai. Agar CPU utilization continuously high ho, toh API slow ho sakti hai ya requests handle karne mein problem aa sakti hai.
+
+Monitor karne ka simple process:
+
+1. AWS Console mein **CloudWatch → Metrics → EC2 → Per-Instance Metrics** open karo.
+2. Apni EC2 instance select karke `CPUUtilization` metric dekho.
+3. Time range select karo, jaise last 1 hour ya 24 hours.
+4. CloudWatch Alarm banao, for example CPU utilization 80% se upar 5 minutes tak rahe.
+5. Alarm ko SNS topic se connect karo, taaki configured email ya notification mil sake.
+
+**Important:** EC2 ka basic monitoring interval typically 5 minutes hota hai. Detailed monitoring enable karne par EC2 metrics 1-minute intervals par available ho sakte hain, with additional charges. Alarm period aur evaluation settings ko apne workload ke according configure karo.
+
+#### 4. Practical Example
+
+Suppose your EC2 instance is serving a MERN application:
+
+| CPU utilization | Possible interpretation | What to do |
+|---|---|---|
+| 10–40% | Often normal, depending on workload | Continue monitoring |
+| 60–80% | Increased load | Check traffic and application performance |
+| Above 80% for several periods | Possible sustained CPU pressure | Investigate processes, optimize code, or scale |
+| Near 100% | CPU capacity may be saturated | Check bottlenecks and scaling options |
+
+These are illustrative thresholds, not universal rules. Check sustained trends, request latency, CPU credits for burstable instances, and application metrics before deciding to scale.
+
+#### 5. Architecture Diagram — CPU Monitoring
+
+```text
+       EC2 Instance
+            |
+            v
+   CPUUtilization Metric
+            |
+            v
+      Amazon CloudWatch
+         /         \\
+        v           v
+   Dashboard    CloudWatch Alarm
+                      |
+                      v
+                     SNS
+                      |
+                      v
+              Email / Notification
+```
+
+**Flow:** EC2 publishes CPU metrics → CloudWatch displays the metric → the alarm evaluates the configured threshold → SNS sends a notification when the alarm enters the ALARM state, provided the notification action and subscription are configured.
+
+#### 6. Practical Command / Configuration
+
+**Read recent CPU utilization using AWS CLI:**
+
+Replace the instance ID and time range with your values.
+
+```bash
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/EC2 \
+  --metric-name CPUUtilization \
+  --dimensions Name=InstanceId,Value=i-0123456789abcdef0 \
+  --start-time 2026-10-11T00:00:00Z \
+  --end-time 2026-10-11T01:00:00Z \
+  --period 300 \
+  --statistics Average Maximum
+```
+
+The example uses a one-hour UTC window; change the timestamps to the time range you want to inspect. A 300-second period requests five-minute data points.
+
+**Create a CPU alarm:**
+
+```bash
+aws cloudwatch put-metric-alarm \
+  --alarm-name "EC2-High-CPU" \
+  --namespace AWS/EC2 \
+  --metric-name CPUUtilization \
+  --dimensions Name=InstanceId,Value=i-0123456789abcdef0 \
+  --statistic Average \
+  --period 300 \
+  --evaluation-periods 2 \
+  --datapoints-to-alarm 2 \
+  --threshold 80 \
+  --comparison-operator GreaterThanThreshold
+```
+
+This creates an alarm when the average CPU is above 80% for both evaluated five-minute data points. Add `--alarm-actions <SNS_TOPIC_ARN>` to send notifications through a configured SNS topic.
+
+#### 7. Summary Table
+
+| Item | Details |
+|---|---|
+| Metric | `CPUUtilization` |
+| Namespace | `AWS/EC2` |
+| Default monitoring interval | Typically 5 minutes |
+| Detailed monitoring | 1-minute metric intervals |
+| Visualization | CloudWatch Metrics / Dashboard |
+| Automatic alert | CloudWatch Alarm |
+| Notification | SNS topic and subscription |
+
+**Interview-ready answer:** I monitor EC2 CPU utilization through the CloudWatch `CPUUtilization` metric under the `AWS/EC2` namespace. I view the metric in a dashboard and configure an alarm—for example, average CPU above 80% for two consecutive five-minute periods—with an SNS notification. If usage remains high, I investigate the workload and consider optimization or scaling.
+
+---
