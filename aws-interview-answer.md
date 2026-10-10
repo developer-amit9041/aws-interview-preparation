@@ -12398,3 +12398,127 @@ This creates an alarm when the average CPU is above 80% for both evaluated five-
 **Interview-ready answer:** I monitor EC2 CPU utilization through the CloudWatch `CPUUtilization` metric under the `AWS/EC2` namespace. I view the metric in a dashboard and configure an alarm—for example, average CPU above 80% for two consecutive five-minute periods—with an SNS notification. If usage remains high, I investigate the workload and consider optimization or scaling.
 
 ---
+
+### Q172. How do you monitor application logs?
+
+#### 1. English Definition
+
+**Application logs on EC2 can be monitored using Amazon CloudWatch Logs. The CloudWatch Agent or a supported logging integration collects log files and sends them to log groups and streams, where you can search events, create metric filters, and configure alarms.**
+
+#### 2. Hindi Definition
+
+EC2 par application logs monitor karne ke liye Amazon CloudWatch Logs use karte hain. CloudWatch Agent application ki log files collect karke AWS mein bhejta hai, jahan hum errors search kar sakte hain aur important errors ke liye alerts configure kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application EC2 par deployed hai aur Node.js backend mein error aa raha hai. Server par manually SSH karke har baar log file check karne ke bajaye, logs ko CloudWatch Logs mein centralize kar sakte ho.
+
+Main steps:
+
+1. **Application logs generate karo:** Node.js application errors, warnings aur useful events log kare.
+2. **CloudWatch Agent configure karo:** EC2 se application log files collect karne ke liye agent install/configure karo.
+3. **Log group aur log stream:** CloudWatch Logs mein logs organize hote hain. Log group application/environment ko represent kar sakta hai; log stream ek source ya instance ke logs contain kar sakti hai.
+4. **Search and troubleshoot:** CloudWatch Logs console ya Logs Insights se error messages aur patterns search karo.
+5. **Metric filters and alarms:** Specific patterns, jaise `ERROR`, ko metric mein convert karke threshold-based alarms configure kar sakte ho.
+6. **Permissions and retention:** EC2 instance role ko required permissions do aur log retention period set karo.
+
+Nginx access/error logs aur Node.js logs alag files mein ho sakte hain. Agent configuration mein har required log file ka path include karo. CloudWatch Agent ko log files read karne ki permission bhi honi chahiye.
+
+#### 4. Practical Example
+
+Suppose your Node.js backend writes logs to `/var/log/myapp/app.log`.
+
+Example application log:
+
+```text
+2026-10-11T15:10:00Z INFO  Server started on port 3000
+2026-10-11T15:12:25Z ERROR MongoDB connection failed
+2026-10-11T15:12:26Z WARN  Retry attempt 1
+```
+
+CloudWatch Logs mein tum MongoDB connection failures search kar sakte ho. Agar error count threshold cross kare, toh metric filter aur CloudWatch Alarm ke through SNS notification bhej sakte ho.
+
+#### 5. Architecture Diagram — Application Log Monitoring
+
+```text
+      Node.js / Nginx Application
+                  |
+                  v
+       Local Log Files on EC2
+                  |
+                  v
+          CloudWatch Agent
+                  |
+                  v
+          CloudWatch Logs
+             /         \\
+            v           v
+     Search / Logs     Metric Filter
+        Insights            |
+                            v
+                    CloudWatch Alarm
+                            |
+                            v
+                           SNS
+                            |
+                            v
+                    Email / Notification
+```
+
+**Flow:** Application logs generate karti hai → CloudWatch Agent log files read karke CloudWatch Logs mein bhejta hai → logs search kiye jaate hain ya patterns ko metrics mein convert kiya jata hai → alarm condition meet hone par SNS notification bhej sakta hai.
+
+#### 6. Practical Command / Configuration
+
+**A. Tail logs locally on EC2**
+
+```bash
+sudo tail -f /var/log/myapp/app.log
+```
+
+**B. Read logs from CloudWatch Logs**
+
+Assuming the log group exists and AWS CLI credentials/permissions are configured:
+
+```bash
+aws logs tail "/myapp/production" --since 1h --follow
+```
+
+**C. CloudWatch Agent configuration example**
+
+The following is an example fragment for a Linux EC2 instance. Merge it with your full agent configuration as needed:
+
+```json
+{
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/myapp/app.log",
+            "log_group_name": "/myapp/production",
+            "log_stream_name": "{instance_id}/app"
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+After saving the complete configuration, start or restart the CloudWatch Agent using the appropriate command for your installed agent version and configuration path. Ensure the EC2 instance role has the required CloudWatch Logs permissions and the agent can read the file.
+
+#### 7. Summary Table
+
+| Requirement | AWS feature |
+|---|---|
+| Collect log files from EC2 | CloudWatch Agent |
+| Store and organize logs | CloudWatch Logs log groups/streams |
+| Search errors | CloudWatch Logs / Logs Insights |
+| Count specific log patterns | Metric filters |
+| Alert on error thresholds | CloudWatch Alarms |
+| Send notifications | Amazon SNS |
+| Control storage duration | Log group retention settings |
+
+**Interview-ready answer:** I monitor application logs on EC2 by configuring the CloudWatch Agent to collect application and system log files and send them to CloudWatch Logs. I use Logs Insights to investigate errors, metric filters to track important patterns, and CloudWatch Alarms with SNS notifications to alert the team when configured error thresholds are exceeded.
+
+---
