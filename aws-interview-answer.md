@@ -17726,3 +17726,84 @@ Remember: Secrets Manager and environment variables can work together. Secrets M
 **Interview-ready answer:** Environment variables are a way to pass configuration values to an application at runtime, whereas AWS Secrets Manager is a managed service for securely storing and controlling access to sensitive values. Environment variables are useful for general configuration; Secrets Manager is useful for production credentials because it supports IAM-based access control, encryption at rest, and rotation for supported secrets. They can be used together rather than being mutually exclusive.
 
 ---
+
+### Q227. What is AWS Systems Manager Parameter Store?
+
+#### 1. English Definition
+
+AWS Systems Manager Parameter Store is a capability of AWS Systems Manager that securely stores and manages configuration data and parameters, including plaintext values and encrypted `SecureString` values. Applications and automation can retrieve parameters through AWS APIs with appropriate IAM permissions.
+
+#### 2. Hindi Definition
+
+AWS Systems Manager Parameter Store ek service feature hai jahan hum application ki configuration aur parameters, jaise database host, environment settings aur sensitive values, store aur manage kar sakte hain. Sensitive values ko `SecureString` type mein encrypt karke store kiya ja sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application AWS par deploy hai. Tumhe kuch configuration values manage karni hain, jaise:
+
+- `prod/myapp/PORT` — application port
+- `prod/myapp/DB_HOST` — database host
+- `prod/myapp/DB_PASSWORD` — sensitive password, stored as `SecureString`
+
+Parameter Store values ko names/paths ke through organize karta hai. Application ka IAM role sirf required parameters read kar sakta hai. `String` aur `StringList` ordinary configuration ke liye, aur `SecureString` sensitive values ke liye use hota hai. `SecureString` encryption AWS KMS ke through hoti hai.
+
+#### 4. Practical AWS + Node.js Example
+
+Example parameter names:
+
+```text
+/prod/myapp/DB_HOST
+/prod/myapp/DB_PASSWORD
+```
+
+Install the AWS SDK for JavaScript v3:
+
+```bash
+npm install @aws-sdk/client-ssm
+```
+
+Retrieve a parameter from Node.js:
+
+```js
+import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
+
+const ssm = new SSMClient({ region: process.env.AWS_REGION });
+
+async function getDbPassword() {
+  const response = await ssm.send(
+    new GetParameterCommand({
+      Name: "/prod/myapp/DB_PASSWORD",
+      WithDecryption: true,
+    })
+  );
+
+  return response.Parameter?.Value;
+}
+```
+
+`WithDecryption: true` asks Parameter Store to return the decrypted value for a `SecureString`, assuming the caller has the required IAM and KMS permissions. Never log the returned password. Use an instance profile or task role rather than hardcoded AWS access keys.
+
+#### 5. Parameter Store vs Secrets Manager
+
+| Feature | Parameter Store | AWS Secrets Manager |
+|---|---|---|
+| Main purpose | Configuration parameters and values; can also store secrets | Secrets lifecycle and sensitive credential management |
+| Value types | `String`, `StringList`, `SecureString` | Secret values, commonly strings or JSON |
+| Encryption | `SecureString` uses AWS KMS | Secret values encrypted at rest using AWS KMS |
+| Automatic rotation | Does not provide the same built-in managed secret-rotation workflow as Secrets Manager; custom automation may be used | Supports rotation for supported secrets/configurations |
+| Common use | App settings, configuration paths, encrypted parameters | Database credentials, API keys, secrets needing managed rotation |
+| Cost | Standard parameters have no additional charge within standard tier limits; advanced features may cost extra | Charges can apply for stored secrets and API usage |
+
+Check current AWS pricing and parameter-tier limits before choosing a design, since pricing and service limits can change.
+
+#### 6. Important Points
+
+- Use `String` or `StringList` for non-sensitive configuration.
+- Use `SecureString` for sensitive values and restrict access through IAM and KMS policies.
+- Organize parameters by environment and application path, such as `/dev/myapp/` and `/prod/myapp/`.
+- Grant least-privilege access: only allow the application role to read the parameters it needs.
+- Parameter Store and Secrets Manager can complement each other; select based on whether you need configuration management or managed secret lifecycle/rotation.
+
+**Interview-ready answer:** AWS Systems Manager Parameter Store is a service capability for storing and managing application configuration and parameters. It supports `String`, `StringList`, and encrypted `SecureString` values, which applications can retrieve through AWS APIs using IAM permissions. It is commonly used for centralized configuration and encrypted parameters, while Secrets Manager is often chosen when managed secret rotation and credential lifecycle features are required.
+
+---
