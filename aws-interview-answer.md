@@ -6300,3 +6300,63 @@ Maan lo application ek smaller instance par chal rahi hai aur load badh raha hai
 - Vertical scaling and horizontal scaling can both be used in the same architecture when appropriate.
 
 ---
+
+### Q96. How does ASG work with ALB?
+
+#### 1. English Definition
+
+**An EC2 Auto Scaling Group (ASG) can be attached to an Application Load Balancer's target group so that instances launched by the ASG are registered as targets and instances removed by the ASG are deregistered. The ALB then routes requests to registered, healthy targets.**
+
+#### 2. Hindi Definition
+
+ASG ko ALB ke Target Group ke saath connect kiya ja sakta hai. ASG jab naye EC2 instances launch karta hai, toh woh target group mein register ho sakte hain. Jab instances remove hote hain, toh deregister ho jaate hain. ALB requests ko registered aur healthy targets par route karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application multiple EC2 instances par chal rahi hai. ALB users ki requests receive karta hai, aur ASG EC2 instances ki count manage karta hai.
+
+Dono ko integrate karne ke liye ASG ko ALB ke Target Group ke saath associate karte hain. Phir:
+
+1. ASG Launch Template ke basis par naya EC2 instance launch karta hai.
+2. ASG integration ke through instance target group mein register hota hai.
+3. ALB ka health check verify karta hai ki application target par healthy hai.
+4. Target healthy hone ke baad ALB uspar requests route kar sakta hai.
+5. Agar ASG instance ko remove karta hai, toh woh target group se deregister hota hai; deregistration delay requests ko gracefully drain karne mein help kar sakta hai.
+
+#### 4. Practical Architecture
+
+```text
+Users / Browser
+       |
+       v
+Application Load Balancer (ALB)
+       |
+       v
+Target Group (health checks)
+       |
+       +-------- EC2 #1  <---+
+       +-------- EC2 #2      |  Auto Scaling Group
+       +-------- EC2 #3  <---+
+                    launches/replaces instances
+```
+
+Example: Normal traffic mein ASG 2 EC2 instances maintain karta hai. Traffic badhne par scaling policy third instance launch kar sakti hai. Jab instance launch ho, target group registration aur successful health checks ke baad ALB usse traffic bhej sakta hai.
+
+#### 5. Who Does What?
+
+| Component | Responsibility |
+|---|---|
+| ALB | Incoming HTTP/HTTPS requests receive aur route karta hai. |
+| Target Group | Backend targets ko group karta hai aur health checks configure karta hai. |
+| Auto Scaling Group | EC2 instance capacity manage karta hai, aur configured conditions par instances launch, replace, ya terminate kar sakta hai. |
+| Launch Template | New EC2 instance launch karne ki configuration deta hai. |
+
+#### 6. Important Points
+
+- ASG ko correct ALB Target Group ke saath associate karna zaroori hai.
+- ALB traffic sirf eligible registered targets par route karta hai; newly launched instance ko healthy hone mein time lag sakta hai.
+- ASG capacity manage karta hai, jabki ALB requests distribute karta hai—dono ka role different hai.
+- Security groups ko is tarah configure karo ki ALB se application instances ke required ports par traffic allow ho, aur unnecessary direct public access avoid ho.
+- ASG aur ALB integration availability improve kar sakti hai, lekin application, health checks aur multi-AZ design ko bhi sahi configure karna chahiye.
+
+---
