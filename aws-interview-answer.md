@@ -6416,3 +6416,66 @@ Example: A sudden increase in requests arrives. ALB distributes traffic to healt
 - Test with realistic load before production events and set sensible scaling limits and budgets.
 
 ---\n
+
+### Q98. What is Amazon RDS?
+
+#### 1. English Definition
+
+**Amazon Relational Database Service (Amazon RDS) is a managed AWS service that makes it easier to set up, operate, and scale relational databases in the cloud. AWS manages many routine database administration tasks, such as infrastructure provisioning, backups, and software maintenance options.**
+
+#### 2. Hindi Definition
+
+Amazon RDS AWS ki managed database service hai, jisse cloud mein relational database create, operate aur scale karna aasaan hota hai. AWS infrastructure aur kai routine administrative tasks, jaise backups aur maintenance options, manage karne mein help karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari application ko relational database chahiye, jaise MySQL ya PostgreSQL. Tum database apne EC2 server par khud install aur maintain kar sakte ho, lekin phir database server, backups, patching aur maintenance ki responsibility bhi tumhari hogi.
+
+Amazon RDS use karne par AWS managed database infrastructure provide karta hai. Tum database engine, instance size, storage, network access aur backup settings configure karte ho. AWS kai routine operational tasks simplify karta hai, lekin database security, schema, queries, permissions aur cost configuration ki responsibility tumhari rehti hai.
+
+#### 4. Supported Database Engines
+
+Amazon RDS supported relational engines mein include hain:
+
+- MySQL
+- PostgreSQL
+- MariaDB
+- Oracle
+- Microsoft SQL Server
+- Amazon Aurora (RDS ke saath integrated relational database option)
+
+#### 5. Practical Example: MERN Application
+
+MERN stack traditionally MongoDB use karta hai, jo NoSQL document database hai. **Amazon RDS MongoDB ka direct replacement nahi hai**, kyunki RDS relational database engines ke liye hai.
+
+Agar tumhari Node.js application ko PostgreSQL ya MySQL chahiye, toh architecture aisa ho sakta hai:
+
+```text
+React Frontend
+      |
+      v
+Node.js / Express API on EC2
+      |
+      v
+Amazon RDS (PostgreSQL or MySQL)
+```
+
+Production setup mein RDS ko generally private network access ke saath configure karte hain aur database credentials ko securely store karte hain. Application server ke security group se hi required database port allow karna ek common pattern hai.
+
+#### 6. Benefits of Amazon RDS
+
+- **Managed operations:** Infrastructure provisioning aur common maintenance tasks simplify hote hain.
+- **Automated backups:** Configured retention period ke according backups aur point-in-time recovery options available hote hain, depending on engine and settings.
+- **High availability options:** Multi-AZ deployments supported configurations mein standby-based failover provide kar sakte hain.
+- **Scalability:** Instance class aur storage ko supported methods se adjust kar sakte ho.
+- **Monitoring and security:** AWS monitoring, encryption and access-control integrations provide karta hai; correct configuration phir bhi zaroori hai.
+
+#### 7. Important Points
+
+- RDS is a **managed relational database service**, not a general-purpose EC2 server.
+- RDS reduces database administration work but does not remove all DBA and application responsibilities.
+- Amazon RDS and MongoDB Atlas are different managed database offerings; MongoDB ke liye AWS par Amazon DocumentDB ek separate option hai, with compatibility considerations.
+- RDS ko public internet par expose karne ke bajaye, where possible, private subnets and tightly scoped security groups use karo.
+- High availability, backups, encryption, storage capacity and costs depend on the configuration you choose.
+
+---
