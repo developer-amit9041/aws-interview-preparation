@@ -6072,3 +6072,58 @@ Auto Scaling Group can use the template to launch instances as needed.
 - A Launch Template defines how to launch an instance; it does not itself automatically create or scale instances. EC2 launch actions or an Auto Scaling Group use it.
 
 ---
+
+### Q92. What is Scaling Policy?
+
+#### 1. English Definition
+
+**A scaling policy is a set of rules that tells an Auto Scaling Group when and how to increase or decrease the number of EC2 instances based on metrics, schedules, or predicted demand.**
+
+#### 2. Hindi Definition
+
+Scaling Policy rules ka ek set hai jo Auto Scaling Group ko batata hai ki kab aur kitne EC2 instances add ya remove karne hain. Yeh metrics, schedule ya predicted demand ke basis par kaam kar sakti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, Auto Scaling Group EC2 instances manage karta hai, lekin usse yeh decide karne ke liye rules chahiye hote hain ki instances kab badhane ya ghatane hain. In rules ko **Scaling Policy** kehte hain.
+
+Example: Tumhari MERN application ke liye ASG mein 2 EC2 instances chal rahe hain. Tum Target Tracking policy set karte ho jo average CPU utilization ko 60% ke aas-paas rakhne ki koshish karti hai. Agar workload badhe, toh ASG extra instances add kar sakta hai. Workload kam hone par woh instances reduce kar sakta hai, configured limits aur policy behavior ke according.
+
+#### 4. Practical Example
+
+```text
+CloudWatch metric (e.g., CPU utilization)
+                 |
+                 v
+          Scaling Policy
+                 |
+                 v
+       EC2 Auto Scaling Group
+                 |
+       +---------+---------+
+       |                   |
+   Scale out            Scale in
+  Add instances        Remove instances
+```
+
+Suppose ASG settings are minimum `2`, desired `2`, and maximum `6`. A scaling policy can adjust capacity within those limits based on its configured rules.
+
+#### 5. Types of Scaling Policies
+
+| Policy Type | How it works |
+|---|---|
+| Target Tracking | Tries to keep a metric, such as average CPU utilization, near a configured target. |
+| Step Scaling | Changes capacity by configured step adjustments based on CloudWatch alarm thresholds. |
+| Simple Scaling | Performs a configured capacity adjustment when a CloudWatch alarm triggers; cooldown behavior may apply. |
+| Scheduled Scaling | Changes desired capacity at specified times, useful for predictable traffic patterns. |
+| Predictive Scaling | Uses historical patterns and forecasts to plan capacity for expected future demand. |
+
+#### 6. Important Points
+
+- **Scale out** means increasing capacity; **scale in** means decreasing capacity.
+- A scaling policy defines when and how capacity changes; the Auto Scaling Group manages the EC2 instance group.
+- CloudWatch metrics and alarms are commonly used by dynamic scaling policies.
+- Configure minimum and maximum capacity, health checks, warm-up behavior, and thresholds carefully.
+- Scaling is not always instantaneous; new instances need time to launch and become ready.
+
+---
