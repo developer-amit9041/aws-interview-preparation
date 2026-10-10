@@ -8265,3 +8265,54 @@ Is example mein SDK client handler ke bahar create hota hai, isliye reused execu
 - Measure real workload latency before choosing optimizations; cold starts cannot always be eliminated completely.
 
 ---
+
+### Q128. What is Lambda Timeout?
+
+#### 1. English Definition
+
+**Lambda timeout** is the maximum amount of time an AWS Lambda function is allowed to run before AWS stops the invocation.
+
+#### 2. Hindi Definition
+
+Lambda timeout ka matlab hai function ko execute hone ke liye maximum kitna time diya gaya hai. Agar function us time ke andar complete nahi hota, toh AWS Lambda us invocation ko timeout kar deta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari Lambda function ko database se data fetch karke response dena hai. Tumne timeout **5 seconds** set kiya hai.
+
+- Function 2 seconds mein complete ho gaya → execution successful.
+- Function ko 5 seconds se zyada lage → Lambda timeout ho jayega aur invocation fail ho sakta hai.
+
+Timeout function ki configuration mein set hota hai. AWS Lambda ka maximum configured timeout **900 seconds (15 minutes)** hai. Actual timeout workload aur required response time ke hisaab se set karo; unnecessarily high timeout rakhna har problem ka solution nahi hai.
+
+#### 4. Practical Example
+
+Suppose tumne Node.js Lambda banaya:
+
+```js
+exports.handler = async () => {
+  await new Promise(resolve => setTimeout(resolve, 7000));
+
+  return {
+    statusCode: 200,
+    body: "Task completed"
+  };
+};
+```
+
+Agar is function ka timeout **5 seconds** hai, toh 7-second delay complete hone se pehle invocation timeout ho sakta hai. Timeout ko 10 seconds karoge, toh yeh example normally complete ho jayega, assuming koi aur error nahi hai.
+
+**AWS Console mein timeout set karne ke steps:**
+1. AWS Lambda mein apna function open karo.
+2. **Configuration → General configuration** par jao.
+3. **Edit** click karo.
+4. Timeout set karo, jaise 10 seconds.
+5. Save karo.
+
+#### 5. Important Points
+
+- Timeout aur memory alag settings hain.
+- Timeout badhane se slow code automatically fast nahi hota.
+- Database/API calls ke liye suitable client-side timeout bhi configure karo.
+- Timeout ke baad external side effect already ho chuka ho sakta hai; retries ke case mein duplicate processing se bachne ke liye idempotency consider karo.
+
