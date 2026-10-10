@@ -5705,3 +5705,57 @@ For Application Load Balancer, AWS supports load-balancer-generated cookies and 
 - Authentication tokens such as JWT do not automatically require sticky sessions if the application is designed to be stateless.
 
 ---
+
+### Q86. How does SSL/TLS work with ALB?
+
+#### 1. English Definition
+
+**With an HTTPS listener, an Application Load Balancer (ALB) uses a TLS certificate to establish an encrypted connection with the client and can decrypt the traffic at the ALB before forwarding the request to the configured targets.**
+
+#### 2. Hindi Definition
+
+ALB ke HTTPS listener par TLS certificate use hota hai, jisse user aur Load Balancer ke beech encrypted connection establish hota hai. ALB TLS connection terminate karke request ko configured backend targets tak forward kar sakta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, jab user `https://example.com` open karta hai, browser aur ALB ke beech TLS handshake hota hai. ALB apna configured certificate present karta hai, browser certificate aur hostname validate karta hai, aur dono encrypted connection establish karte hain.
+
+ALB HTTPS traffic ko decrypt kar sakta hai, HTTP request ko listener rules ke basis par route kar sakta hai, aur phir backend target ko forward karta hai. Backend connection HTTP ya HTTPS dono ho sakta hai, depending on Target Group configuration. Agar backend tak bhi encryption chahiye, toh HTTPS backend protocol configure karo.
+
+#### 4. Practical Example
+
+```text
+User Browser
+    |
+    | HTTPS / TLS (encrypted)
+    v
+Application Load Balancer
+    |  HTTPS Listener : 443
+    |  TLS certificate (commonly from ACM)
+    |  TLS termination
+    |
+    | HTTP : 3000  (example; not encrypted)
+    v
+Node.js EC2 Target
+```
+
+Is example mein browser-to-ALB traffic encrypted hai, lekin ALB-to-EC2 connection HTTP hai. Agar end-to-end encryption requirement hai, toh ALB se EC2 tak HTTPS configure karo aur certificate/hostname validation requirements ko appropriately manage karo.
+
+#### 5. How to Configure SSL/TLS with ALB
+
+1. Obtain a valid certificate for your domain, commonly through AWS Certificate Manager (ACM).
+2. Associate the certificate with an ALB HTTPS listener on port `443`.
+3. Configure the listener default action or rules to forward requests to the appropriate Target Group.
+4. Choose the Target Group protocol deliberately: HTTP for unencrypted backend traffic or HTTPS when backend encryption is required and supported by the target setup.
+5. Optionally create an HTTP listener on port `80` that redirects requests to HTTPS `443`.
+6. Configure Security Groups to allow client traffic to the ALB and only required ALB-to-backend traffic to the targets.
+
+#### 6. Important Points
+
+- TLS is the modern protocol; “SSL certificate” is a common phrase, but modern HTTPS uses TLS.
+- A certificate helps the client verify the server's identity and supports encrypted communication.
+- TLS termination at ALB means the client TLS connection ends at ALB; it does not automatically encrypt the separate connection from ALB to the backend.
+- Use a suitable security policy and keep certificates renewed and valid.
+- Do not confuse HTTPS encryption with application authentication or authorization; those controls are still required.
+
+---
