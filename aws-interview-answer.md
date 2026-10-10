@@ -9817,3 +9817,95 @@ AWS CLI use karne ke liye credentials aur required IAM permissions configured ho
 **Remember:** CDN content ko users ke kareeb locations se deliver karta hai. Amazon CloudFront AWS ka CDN hai, jo latency aur origin load reduce karne mein help kar sakta hai.
 
 ---
+
+### Q147. CloudFront vs S3?
+
+#### 1. English Definition
+
+**Amazon S3 is an object storage service used to store and retrieve files, while Amazon CloudFront is a content delivery network (CDN) used to deliver content to users with low latency by caching it at edge locations. They can be used together.**
+
+#### 2. Hindi Definition
+
+Amazon S3 files aur data ko store karne ki service hai. Amazon CloudFront content ko users tak fast deliver karne wali CDN service hai. Dono ko saath use kar sakte hain: S3 content store karta hai aur CloudFront us content ko efficiently deliver karne mein help karta hai.
+
+#### 3. Hinglish Explanation
+
+S3 aur CloudFront ka kaam alag hai:
+
+- **S3:** Tumhari images, videos, documents aur React build files ko objects ke roop mein store karta hai.
+- **CloudFront:** S3 ya kisi doosre configured origin se content lekar edge locations par cache kar sakta hai aur users ko deliver karta hai.
+
+Easy example: **S3 ek storage room hai; CloudFront content ko users tak pahunchane ka delivery network hai.**
+
+CloudFront use karne ke liye S3 mandatory nahi hai. CloudFront ALB ya supported custom HTTP origin se bhi content deliver kar sakta hai. Isi tarah, S3 ko CloudFront ke bina bhi access kiya ja sakta hai, agar bucket permissions aur access configuration allow kare.
+
+#### 4. Practical Example
+
+MERN e-commerce application mein product images S3 bucket mein store hain. CloudFront ko S3 origin ke saath configure karne par images ko edge locations se deliver kiya ja sakta hai.
+
+- S3 image ko store karta hai.
+- CloudFront request handle karta hai aur valid cached image available hone par use serve kar sakta hai.
+- Cache miss par CloudFront configured origin se image fetch kar sakta hai.
+
+#### 5. Architecture Diagram — Request Flow
+
+```text
+User / Browser
+      |
+      v
+CloudFront
+      |
+      v
+Check edge cache
+   |         |
+Cache hit  Cache miss
+   |         |
+   |         v
+   |      Amazon S3
+   |      (stores image)
+   |         |
+   +<--------+
+      |
+      v
+Image delivered to user
+```
+
+**Flow:** User image request karta hai → CloudFront cache check karta hai → cache hit par cached image serve hoti hai → cache miss par S3 origin se image fetch ho sakti hai → response user ko milta hai.
+
+#### 6. Practical Command / Configuration
+
+**S3 buckets list karne ke liye:**
+
+```bash
+aws s3 ls
+```
+
+**CloudFront distributions list karne ke liye:**
+
+```bash
+aws cloudfront list-distributions
+```
+
+Typical configuration:
+1. S3 bucket mein static files upload karo.
+2. CloudFront distribution create karo aur S3 bucket ko origin set karo.
+3. Suitable cache policy aur TTL configure karo.
+4. Private S3 content ke liye Origin Access Control (OAC) configure karo aur bucket policy ko restrict karo.
+5. HTTPS aur custom domain configure karo, agar required ho.
+
+Commands ke liye AWS CLI credentials aur required IAM permissions configured honi chahiye.
+
+#### 7. Summary Table
+
+| Feature | Amazon S3 | Amazon CloudFront |
+|---|---|---|
+| Main purpose | Object storage | Content delivery (CDN) |
+| Stores files | Yes | Not as primary storage |
+| Caches at edge locations | No, S3 is not a CDN | Yes, based on cache configuration |
+| Common use | Images, documents, backups, static assets | Faster delivery of images, static assets, and supported dynamic/API traffic |
+| Works independently | Yes, with suitable access configuration | Yes, with a configured supported origin |
+| Can work together | Stores the origin content | Delivers/caches S3 content |
+
+**Remember:** S3 stores the content; CloudFront helps deliver it efficiently. Together, they are a common choice for hosting and delivering static website assets.
+
+---
