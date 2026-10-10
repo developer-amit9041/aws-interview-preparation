@@ -15563,3 +15563,75 @@ Replace `<ACCOUNT_ID>` with your AWS account ID. The AWS CLI must be configured 
 **Interview-ready answer:** Amazon ECR is AWS's managed container image registry. I use it to store and manage Docker images for my applications. After building an image, I tag and push it to an ECR repository. ECS or EKS can then pull that image to deploy and run containers, with access controlled through IAM permissions.
 
 ---
+
+### Q202. Why use ECR?
+
+#### 1. English Definition
+
+Amazon ECR is used to securely store, manage, version, and distribute container images so services such as ECS, EKS, and deployment pipelines can retrieve the correct image to run an application.
+
+#### 2. Hindi Definition
+
+Hum ECR ka use Docker images ko securely store karne, unke versions manage karne, aur ECS/EKS jaise services ko deployment ke time images provide karne ke liye karte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumne Node.js application ki Docker image apne laptop par banayi. Agar tum ECS par deploy karna chahte ho, toh ECS ko image kahin se pull karni hogi. ECR wahi AWS registry hai jahan tum image upload kar dete ho.
+
+ECR use karne ke main reasons:
+
+1. **Central storage:** Team aur deployment systems ko images ek central repository se milti hain.
+2. **Private access control:** IAM permissions se control kar sakte ho ki kaun image push ya pull kar sakta hai.
+3. **AWS integration:** ECS, EKS aur CI/CD pipelines ke saath use kar sakte ho.
+4. **Version management:** Tags ya image digests se release versions identify kar sakte ho.
+5. **Security features:** Image scanning options aur lifecycle policies image management aur cleanup mein help karte hain.
+6. **Reliable deployments:** Deployment ko specific image version ya digest se link kar sakte ho.
+
+Important: ECR application ko run nahi karta. ECR images store karta hai; ECS/EKS jaise orchestration services un images se containers run karte hain.
+
+#### 4. Practical Example
+
+```text
+Developer updates Node.js code
+          |
+          v
+Build Docker image: node-api:v1.0.0
+          |
+          v
+Push image to Amazon ECR
+          |
+          v
+ECS task definition references ECR image
+          |
+          v
+ECS/Fargate pulls image and runs container
+```
+
+Suppose tum `node-api:v1.0.0` deploy karte ho aur baad mein `v1.0.1` release karte ho. ECR dono image versions store kar sakta hai, subject to your repository and lifecycle configuration, so you can deploy the intended version.
+
+#### 5. Practical Commands
+
+After creating the `node-api` ECR repository and authenticating Docker to ECR:
+
+```bash
+docker build -t node-api:v1.0.0 .
+docker tag node-api:v1.0.0 <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:v1.0.0
+docker push <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:v1.0.0
+```
+
+ECS task definition mein isi image URI ko use kar sakte ho. Ensure the ECS task execution role has permission to pull the image. In production, prefer versioned tags or digests, and configure appropriate repository access, scanning, and lifecycle policies.
+
+#### 6. Summary Table
+
+| Reason | Benefit |
+|---|---|
+| Central image registry | Images team aur pipeline ke liye accessible hoti hain |
+| IAM integration | Push/pull access control |
+| Version tags/digests | Intended release identify karna easier |
+| ECS/EKS integration | Deployments image pull kar sakte hain |
+| Image scanning options | Image vulnerabilities assess karne mein help |
+| Lifecycle policies | Old images cleanup automate kar sakte hain |
+
+**Interview-ready answer:** We use Amazon ECR as a managed registry for storing and managing container images. It provides centralized storage, IAM-based access control, image versioning, security and lifecycle-management capabilities, and integration with ECS, EKS, and CI/CD pipelines. ECR stores the images, while ECS or EKS runs containers from those images.
+
+---
