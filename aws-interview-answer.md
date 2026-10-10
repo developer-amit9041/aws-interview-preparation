@@ -1238,3 +1238,85 @@ MERN project mein tum custom AMI se multiple EC2 instances launch kar sakte ho, 
 **Yaad rakhne ki trick:** AMI = Naksha, EC2 = Bana hua ghar.
 
 ---\n
+
+### Q20. What is an Instance Type?
+
+#### 1. English Definition
+
+**An EC2 instance type defines the hardware resources available to an instance, including its vCPUs, memory, storage capabilities, and network performance.**
+
+#### 2. Hindi Definition
+
+EC2 instance type batata hai ki virtual server ko kitni CPU power, RAM, storage capabilities aur network performance milegi.
+
+#### 3. Hinglish Explanation
+
+Bhai, EC2 launch karte waqt sirf operating system choose nahi karte; humein server ki capacity bhi select karni hoti hai. Isi capacity/configuration ko instance type kehte hain.
+
+Example: chhoti testing API ke liye kam resources wala instance kaafi ho sakta hai, jabki heavy traffic ya memory-intensive application ko zyada CPU/RAM chahiye ho sakti hai. Instance choose karte waqt workload, cost aur required performance compare karo.
+
+#### 4. Example
+
+```text
+EC2 Instance Type: t3.small
+        |
+        +-- vCPU: 2
+        +-- Memory: 2 GiB
+```
+
+*Note: This is an example specification; availability and specifications can vary by region and platform. Always verify the current AWS details before launching.*
+
+#### 5. What does an instance type determine?
+
+| Resource | Meaning |
+|---|---|
+| vCPU | Processing capacity |
+| Memory (RAM) | Memory available to applications |
+| Storage | Local instance storage capabilities, if provided; EBS can also be attached |
+| Network performance | Available networking bandwidth/performance characteristics |
+
+**Yaad rakhne ki trick:** Instance type = EC2 server ki capacity/configuration.
+
+---
+
+### Q21. What are EC2 instance families?
+
+#### 1. English Definition
+
+**EC2 instance families are groups of instance types designed for different workload requirements, such as general-purpose computing, CPU-intensive processing, memory-intensive applications, storage-intensive workloads, or accelerated computing.**
+
+#### 2. Hindi Definition
+
+EC2 instance families, instance types ke groups hote hain jo alag-alag workload ke liye design kiye gaye hain—jaise balanced workloads, high CPU, high memory, fast storage, ya GPU-based processing.
+
+#### 3. Hinglish Explanation
+
+Bhai, har application ko same resources ki zaroorat nahi hoti. Kisi app ko CPU zyada chahiye, kisi ko RAM, aur kisi ko GPU. Isliye AWS ne EC2 instances ko different families mein group kiya hai.
+
+#### 4. Common EC2 Instance Families
+
+| Family | Designed for | Example use case |
+|---|---|---|
+| General purpose (T, M) | CPU, memory aur networking ka balanced mix | Web servers, development, small/medium application servers |
+| Compute optimized (C) | High CPU performance | Batch processing, CPU-heavy APIs, scientific modelling |
+| Memory optimized (R, X, U and others) | Large memory capacity | In-memory databases, analytics, memory-heavy workloads |
+| Storage optimized (I, D, H and others) | High local storage performance/capacity, depending on family | Data-intensive workloads, distributed databases, data warehousing |
+| Accelerated computing (P, G, Inf, Trn and others) | GPUs or specialized accelerators | Machine learning, AI training/inference, graphics and HPC workloads |
+
+*Family letters and available generations vary. Check the AWS EC2 instance-type documentation for the exact current options and specifications in your Region.*
+
+#### 5. Practical MERN Example
+
+- Development ya light traffic wala MERN backend: general-purpose T family consider kar sakte ho.
+- CPU-heavy processing service: compute-optimized C family evaluate kar sakte ho.
+- RAM-heavy caching/analytics workload: memory-optimized family consider kar sakte ho.
+
+Final selection actual CPU/RAM needs, traffic, pricing, architecture compatibility and benchmarks par depend karega; family name alone se performance guarantee nahi hoti.
+
+#### 6. Interview Summary
+
+**Instance type tells you the resources of one EC2 configuration; instance family groups configurations by the kind of workload they are designed for.**
+
+**Yaad rakhne ki trick:** T/M = balanced, C = compute, R/X = memory, I/D/H = storage, P/G/Inf/Trn = accelerators.
+
+---
