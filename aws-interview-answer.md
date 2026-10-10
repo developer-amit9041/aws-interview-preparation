@@ -15358,3 +15358,117 @@ The ALB listener must forward to that target group, and the target group's port 
 **Interview-ready answer:** An Application Load Balancer integrates with ECS through a target group. The ALB receives HTTP/HTTPS requests and forwards them to healthy ECS tasks registered in that target group. The ECS service registers and deregisters task targets as tasks are launched or stopped. For Fargate tasks using `awsvpc` networking, I configure the target group with target type `ip`, set a suitable health-check endpoint, and allow traffic from the ALB security group to the task security group.
 
 ---
+
+### Q200. ECS vs Kubernetes/EKS?
+
+#### 1. English Definition
+
+**Amazon ECS** is AWS's managed container orchestration service. **Kubernetes** is an open-source container orchestration platform, and **Amazon EKS** is AWS's managed Kubernetes service that runs Kubernetes control-plane components for you.
+
+#### 2. Hindi Definition
+
+ECS AWS ka container orchestration service hai. Kubernetes ek open-source platform hai, jabki EKS AWS ki managed Kubernetes service hai, jisme AWS Kubernetes control plane manage karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, teeno ka purpose containers ko deploy aur manage karna hai, lekin inka ecosystem aur management model alag hai.
+
+- **ECS:** AWS-native service; ECS tasks, services aur task definitions use karta hai. Fargate ya EC2 capacity par run kar sakta hai.
+- **Kubernetes:** Open-source orchestration platform; pods, deployments, services aur declarative manifests use karta hai. Isse different cloud providers ya apne infrastructure par run kar sakte ho.
+- **EKS:** AWS par Kubernetes use karne ka managed option. AWS control plane manage karta hai, lekin worker compute, networking, permissions, upgrades aur cluster operations ki kuch responsibilities configuration ke hisaab se tumhari rehti hain.
+
+Example: Agar tumhari MERN application AWS par hai aur simple AWS-native container setup chahiye, ECS ka operational model seedha ho sakta hai. Agar team Kubernetes ecosystem, Kubernetes APIs, portability ya existing Kubernetes tooling par depend karti hai, toh EKS fit ho sakta hai.
+
+#### 4. Practical Architecture
+
+```text
+Option A: Amazon ECS
+Docker image -> ECR -> ECS Task Definition -> ECS Service
+                                            |
+                                      Fargate or EC2
+
+Option B: Amazon EKS
+Container image -> ECR -> Kubernetes Deployment
+                              |
+                        Kubernetes Pods
+                              |
+                      Kubernetes Service / Ingress
+                              |
+                    EKS managed control plane
+```
+
+ECS uses ECS-specific resource definitions and APIs. EKS uses standard Kubernetes objects such as Deployments, Pods, Services, ConfigMaps, and Ingress or Gateway resources, depending on the chosen setup.
+
+#### 5. Practical Configuration
+
+**ECS task definition (illustrative fragment):**
+
+```json
+{
+  "family": "node-api",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "node-api",
+      "image": "<ECR_IMAGE_URI>",
+      "essential": true
+    }
+  ]
+}
+```
+
+**Kubernetes Deployment for EKS (illustrative fragment):**
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: node-api
+  template:
+    metadata:
+      labels:
+        app: node-api
+    spec:
+      containers:
+        - name: node-api
+          image: <ECR_IMAGE_URI>
+          ports:
+            - containerPort: 3000
+```
+
+Both examples assume the image has been built and pushed to ECR and that the required IAM, network access, and runtime permissions are configured.
+
+#### 6. ECS vs Kubernetes/EKS
+
+| Feature | ECS | Kubernetes / EKS |
+|---|---|---|
+| Orchestration | AWS-native ECS model | Kubernetes API and ecosystem |
+| Main concepts | Tasks, task definitions, services | Pods, Deployments, Services, manifests |
+| AWS integration | Direct AWS-native integration | AWS integration through EKS and related components |
+| Portability | More AWS-specific | Kubernetes workloads can be portable, subject to dependencies and configuration |
+| Learning/operations | Often fewer Kubernetes concepts to manage | Broader ecosystem and more concepts to operate |
+| Compute | Fargate or EC2 | EKS supports Fargate for supported workloads and EC2 worker nodes; options depend on architecture |
+| Customization | ECS-specific features and integrations | Broad Kubernetes extensions and ecosystem |
+| Suitable when | AWS-native container orchestration meets requirements | Kubernetes compatibility, ecosystem, or portability is important |
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| ECS | AWS container orchestration service |
+| Kubernetes | Open-source container orchestration platform |
+| EKS | AWS managed Kubernetes service |
+| ECS task | A running instance of an ECS task definition |
+| Kubernetes Pod | Smallest deployable unit in Kubernetes |
+
+**Interview-ready answer:** Amazon ECS is an AWS-native container orchestration service that uses task definitions and services. Kubernetes is an open-source orchestration platform, and Amazon EKS is AWS's managed Kubernetes service. ECS can offer a simpler AWS-specific operating model, while EKS provides Kubernetes APIs and ecosystem compatibility. I would choose based on the team's Kubernetes expertise, portability needs, AWS integration, and operational requirements rather than assuming one is always better.
+
+---
