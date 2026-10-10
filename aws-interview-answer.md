@@ -14102,3 +14102,73 @@ The SQS queue's resource policy must allow the SNS topic to call `sqs:SendMessag
 **Interview-ready answer:** Amazon SNS is a fully managed publish/subscribe messaging service. A publisher sends a message to an SNS topic, and SNS delivers it to subscribed endpoints such as SQS queues, Lambda functions, HTTP/S endpoints, email, or SMS. It is useful for event notifications and fan-out to multiple services.
 
 ---
+
+### Q187. SNS vs SQS?
+
+#### 1. English Definition
+
+**Amazon SNS** is a publish/subscribe notification service that pushes messages from a topic to its subscribers. **Amazon SQS** is a message-queue service that stores messages until consumers retrieve and process them.
+
+#### 2. Hindi Definition
+
+SNS ek notification service hai jo ek message ko multiple subscribers tak bhej sakti hai. SQS ek queue service hai jo messages ko store karti hai, taaki consumer unhe baad mein receive aur process kar sake.
+
+#### 3. Hinglish Explanation
+
+Bhai, simple difference yaad rakho:
+
+- **SNS = Broadcast / Push:** Ek event ko multiple services tak pahunchana.
+- **SQS = Queue / Store:** Messages ko queue mein rakhna, taaki consumer apni speed se process kare.
+
+Example: MERN e-commerce app mein order place hota hai. Node.js backend SNS topic par `OrderPlaced` publish karta hai. SNS message ko invoice queue aur analytics queue, dono tak deliver kar sakta hai. Har SQS queue apne worker ko message store karke deti hai jab worker poll karta hai.
+
+Is design se order service ko har downstream service ko directly call karne ki zaroorat nahi hoti. Consumers independently process kar sakte hain.
+
+#### 4. Practical Example / Architecture
+
+```text
+                 Node.js Order Service
+                          |
+                          v
+                       SNS Topic
+                       /       \
+                      v         v
+                Invoice SQS   Analytics SQS
+                      |         |
+                 Invoice Worker Analytics Worker
+```
+
+Yahan SNS fan-out karta hai aur SQS har subscriber ke liye messages ko buffer/store karta hai. Agar worker temporarily down ho, toh SQS message ko retain kar sakta hai until it is processed or expires.
+
+#### 5. Summary Table
+
+| Feature | SNS | SQS |
+|---|---|---|
+| Main purpose | Notifications and pub/sub | Message queuing and buffering |
+| Messaging model | Push to subscribers | Consumers poll for messages |
+| Message storage | Not a durable work queue; delivery/retry behavior depends on endpoint and configuration | Stores messages until received/deleted or retention expires |
+| Consumers | Multiple subscribers can receive a published event | One message is normally processed by one competing consumer at a time; visibility timeout allows retry after failure |
+| Fan-out | Native topic-to-many-subscribers pattern | Usually one queue per work stream; combine with SNS for fan-out |
+| Common use | Event notifications, alerts, broadcasting | Background jobs, workload buffering, decoupling workers |
+| Example | Notify invoice, analytics, and alerting systems | Queue invoice-generation jobs for workers |
+
+#### 6. When to Use Which?
+
+**Use SNS when:**
+- You want to broadcast an event to multiple independent subscribers.
+- You need push-style notifications to supported endpoints.
+
+**Use SQS when:**
+- You need to buffer background jobs.
+- Consumers should process messages at their own pace.
+- You want queue-based decoupling and retry handling.
+
+**Use SNS + SQS together when:**
+- One event must reach multiple systems, and each system needs its own durable queue.
+- Example: `OrderPlaced` goes to separate invoice, inventory, and analytics queues.
+
+#### 7. Interview-Ready Answer
+
+Amazon SNS and Amazon SQS are both messaging services, but they solve different problems. SNS is a pub/sub service that pushes notifications to multiple subscribers, while SQS is a queue that stores messages for consumers to poll and process. In production systems, SNS is often combined with multiple SQS queues to fan out an event while allowing each service to process it independently and reliably.
+
+---
