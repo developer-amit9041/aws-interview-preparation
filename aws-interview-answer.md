@@ -17854,3 +17854,83 @@ Use an IAM role for the application and grant access only to required names/path
 **Interview-ready answer:** Secrets Manager is focused on secure secret lifecycle management and supports automatic rotation for supported credentials. Parameter Store is focused on hierarchical configuration storage and supports encrypted `SecureString` parameters. I would typically use Parameter Store for application configuration and Secrets Manager for sensitive production credentials when managed rotation or secret lifecycle features are needed.
 
 ---
+
+### Q229. How do you securely store MongoDB credentials?
+
+#### 1. English Definition
+
+MongoDB credentials should be stored outside source code in a secure configuration or secrets-management system, with access restricted to the application that needs them. In AWS production, AWS Secrets Manager or Systems Manager Parameter Store (with SecureString) can be used, together with least-privilege IAM permissions and encrypted transport.
+
+#### 2. Hindi Definition
+
+MongoDB ka username, password aur connection string source code mein hardcode nahi karna chahiye. Inhe secure jagah store karna chahiye, access sirf authorized application ko dena chahiye, aur credentials ko GitHub par commit nahi karna chahiye.
+
+#### 3. Hinglish Explanation
+
+Maan lo MERN application ka backend MongoDB Atlas se connect hota hai. Connection string mein username aur password ho sakta hai. Agar ise code mein likh diya ya GitHub par push kar diya, toh koi unauthorized person database access kar sakta hai.
+
+**Local development:** `.env` file use karo aur `.env` ko `.gitignore` mein add karo.
+
+**AWS production:** MongoDB URI/credentials ko AWS Secrets Manager ya Systems Manager Parameter Store ke `SecureString` mein store kar sakte ho. EC2 instance profile ya ECS task role ko sirf required secret read karne ki permission do. Backend AWS SDK se value retrieve kare.
+
+#### 4. Practical MERN Example
+
+Local `.env` file:
+
+```env
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>/<database>
+```
+
+Add this to `.gitignore`:
+
+```gitignore
+.env
+.env.*
+!.env.example
+```
+
+An `.env.example` file can show the required variable without containing a real credential:
+
+```env
+MONGODB_URI=
+```
+
+Example Node.js connection code:
+
+```js
+import mongoose from "mongoose";
+
+const uri = process.env.MONGODB_URI;
+
+if (!uri) {
+  throw new Error("MONGODB_URI is not configured");
+}
+
+await mongoose.connect(uri);
+```
+
+Production best practice: do not commit the real URI. Retrieve it from Secrets Manager or Parameter Store using the application's IAM role, or use a deployment platform's secure secret-injection mechanism. If you retrieve it from AWS at runtime, ensure the role has only the necessary read permission and handle caching/rotation intentionally.
+
+#### 5. Security Checklist
+
+- Never hardcode credentials in source code or commit them to GitHub.
+- Use a dedicated MongoDB database user with only the permissions the application needs; avoid admin/root credentials.
+- Restrict MongoDB network access, such as Atlas IP access lists or private networking where applicable.
+- Use TLS/encrypted connections and a strong, unique password.
+- Grant AWS IAM least privilege to the exact secret or parameter; avoid long-lived AWS access keys in the application.
+- Rotate credentials when required and update the application safely.
+- Never print connection strings or passwords in application logs, error messages, screenshots, or CI output.
+- If a credential is exposed, revoke/rotate it immediately; deleting it from the latest commit alone does not remove it from Git history or copies.
+
+#### 6. Summary Table
+
+| Environment | Recommended approach |
+|---|---|
+| Local development | `.env` excluded from Git, with appropriate file access controls |
+| AWS production | Secrets Manager or Parameter Store `SecureString`, accessed using an IAM role |
+| Git repository | Keep only placeholders in `.env.example`; no real credentials |
+| MongoDB permissions | Dedicated least-privilege database user and restricted network access |
+
+**Interview-ready answer:** I never hardcode MongoDB credentials in source code or commit them to GitHub. For local development, I use a `.env` file excluded through `.gitignore`. In AWS production, I store the connection string in Secrets Manager or Parameter Store SecureString and allow the application to retrieve it through a least-privilege IAM role. I also use a restricted MongoDB user, TLS, network access controls, and credential rotation, and I never log the secret.
+
+---
