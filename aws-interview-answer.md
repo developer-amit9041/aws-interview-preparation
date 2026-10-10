@@ -10396,3 +10396,102 @@ Configuration notes:
 **Remember:** CloudFront invalidation selected cached objects ko normal expiry se pehle remove karne ki request hai. Targeted paths use karo, status check karo, aur frequently changing assets ke liye versioned filenames consider karo.
 
 ---
+
+### Q153. CloudFront + S3 kaise work karta hai?
+
+#### 1. English Definition
+
+**Amazon S3 stores static files as objects, while Amazon CloudFront delivers those files through a CDN by caching eligible content at edge locations and fetching cache misses from the S3 origin.**
+
+#### 2. Hindi Definition
+
+Amazon S3 files ko store karta hai, jabki CloudFront un files ko CDN ke through users tak deliver karta hai. CloudFront cache mein file available na hone par S3 origin se file fetch kar sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari React application build karke S3 bucket mein upload ki gayi hai. Tum chahte ho ki India, USA aur Europe ke users website ko efficiently access kar sakein.
+
+Is setup mein:
+- **S3** React ki HTML, CSS, JavaScript aur image files store karta hai.
+- **CloudFront** S3 ko origin ke roop mein use karta hai.
+- User request karta hai toh CloudFront pehle apna cache check karta hai.
+- Valid cache hit par content edge location se serve hota hai.
+- Cache miss par CloudFront S3 se content fetch karke response deta hai aur caching rules ke according copy cache kar sakta hai.
+
+Private S3 content ke liye aam taur par Origin Access Control (OAC) aur suitable bucket policy configure karte hain, taaki users CloudFront ke through access karein aur bucket ko public karna zaroori na ho.
+
+#### 4. Practical Example
+
+React app ki build files S3 bucket mein upload hain, jaise `index.html`, JavaScript bundles aur images. CloudFront distribution ka origin us S3 bucket ko point karta hai.
+
+Jab user website kholta hai:
+1. Browser CloudFront domain ko request bhejta hai.
+2. CloudFront cache check karta hai.
+3. Cache miss par CloudFront S3 se requested file fetch karta hai.
+4. Response browser ko milta hai; eligible content cache policy ke according cache ho sakta hai.
+
+#### 5. Architecture Diagram — Request Flow
+
+```text
+Developer
+   |
+   | Upload React build files
+   v
+Amazon S3 Bucket (Origin)
+   ^
+   | Fetch on cache miss
+   |
+CloudFront Distribution
+   ^
+   | HTTPS request
+   |
+User / Browser
+   |
+   | Next eligible request may be a cache hit
+   v
+CloudFront Edge Cache
+   |
+   v
+Content delivered to user
+```
+
+**Request flow:** User → CloudFront → cache check → cache miss par S3 origin → response CloudFront ke through user ko → caching policy allow kare toh content edge cache mein store ho sakta hai.
+
+#### 6. Practical Command / Configuration
+
+**Upload React build files to S3** (example for a typical build output folder):
+
+```bash
+aws s3 sync ./build/ s3://YOUR_BUCKET_NAME/
+```
+
+**List CloudFront distributions:**
+
+```bash
+aws cloudfront list-distributions
+```
+
+**Important configuration steps:**
+1. React build files S3 bucket mein upload karo.
+2. CloudFront distribution create karo aur S3 bucket ko origin set karo.
+3. Private origin ke liye Origin Access Control (OAC) configure karo; CloudFront ko read access dene wali bucket policy set karo.
+4. Suitable cache policy/TTL aur HTTPS configure karo.
+5. Distribution deploy hone ke baad CloudFront domain se website test karo.
+6. New deployment ke baad HTML ya changed files ke liye required invalidation create karo, ya versioned asset filenames use karo.
+
+Note: CRA projects commonly `build/` folder use karte hain; Vite projects usually `dist/` use karte hain. Folder ko apne project ke output ke according choose karo. AWS CLI commands ke liye credentials aur required IAM permissions chahiye.
+
+#### 7. Summary Table
+
+| Component | Responsibility |
+|---|---|
+| Amazon S3 | React files, images aur other static assets store karta hai |
+| CloudFront distribution | Origin, routing, cache aur delivery rules configure karti hai |
+| Edge cache | Eligible content ki cached copy rakhta hai |
+| Origin Access Control (OAC) | Private S3 origin ko CloudFront ke through securely access karne mein help karta hai |
+| Cache policy / TTL | Decide karte hain content kaise aur kitni der cache hoga |
+| Invalidation / versioning | Updated content users tak pahunchane mein help karta hai |
+
+**Remember:** S3 stores the files; CloudFront caches and delivers eligible content. Private S3 + CloudFront setup mein OAC aur correct bucket policy use karna important hai.
+
+---
