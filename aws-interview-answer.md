@@ -9098,3 +9098,92 @@ A REST-style API should use HTTP methods and status codes appropriately. Not eve
 | DELETE | `DELETE /users/1` | Delete a user |
 
 ---
+
+### Q139. What is HTTP API?
+
+#### 1. English Definition
+
+**An HTTP API is an API that communicates using the HTTP protocol. In Amazon API Gateway, an HTTP API is a specific API type designed to provide lower-latency, cost-effective HTTP-based API integrations, including integrations with AWS Lambda and HTTP backends.**
+
+#### 2. Hindi Definition
+
+HTTP API aisa API hai jo HTTP protocol ke through client aur backend ke beech communication karta hai. AWS API Gateway mein HTTP API ek specific API type hai, jo Lambda aur HTTP backends ke saath comparatively simple aur cost-effective integrations provide karta hai.
+
+#### 3. Hinglish Explanation
+
+HTTP API ko do meanings mein samajh sakte ho:
+
+1. **General meaning:** Koi bhi API jo HTTP requests aur responses use karti hai.
+2. **Amazon API Gateway HTTP API:** AWS API Gateway ka ek specific API type, jo commonly Lambda ya HTTP backend ko expose karne ke liye use hota hai.
+
+Maan lo tumhari React application ko Node.js Lambda se data lena hai. React `GET /users` request API Gateway HTTP API ko bhejta hai. API Gateway configured route ke through Lambda ko invoke karta hai, aur response frontend ko mil jata hai.
+
+#### 4. Practical Example — API Gateway HTTP API with Lambda
+
+Example route:
+
+```text
+GET /users
+      |
+      v
+API Gateway HTTP API
+      |
+      v
+Lambda (Node.js)
+      |
+      v
+JSON response
+```
+
+Example Lambda handler:
+
+```javascript
+exports.handler = async () => {
+  return {
+    statusCode: 200,
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      users: ["Amit", "Rahul"]
+    })
+  };
+};
+```
+
+After configuring a `GET /users` route and connecting it to this Lambda, a client can call the API's invoke URL. The exact event and response format depends on the selected integration payload version and configuration.
+
+#### 5. HTTP API vs REST API in Amazon API Gateway
+
+| Feature | HTTP API | REST API |
+|---|---|---|
+| Main goal | Simpler, lower-cost HTTP API needs | More extensive API management features |
+| Pricing | Generally lower for comparable usage; verify current pricing | Generally higher for comparable usage |
+| Lambda integration | Supported | Supported |
+| Authorization options | Includes IAM, JWT authorizers, and Lambda authorizers | Includes IAM, Cognito user pools, Lambda authorizers, and other REST API capabilities |
+| API keys and usage plans | Does not provide REST API-style API keys and usage plans | Supports API keys and usage plans |
+| Request/response transformation | More limited feature set | More extensive transformation and API management features |
+| Best fit | Many typical web and serverless APIs | APIs requiring REST API-specific features |
+
+Feature availability can change; check current AWS documentation for the exact API type and Region before choosing.
+
+#### 6. Important Points
+
+- HTTP is the communication protocol; JSON is a common data format, but not mandatory.
+- In API Gateway, **HTTP API and REST API are distinct API types**. “HTTP API” can also be used as a generic term outside AWS.
+- HTTP APIs support route-based integrations with Lambda and HTTP backends.
+- Select HTTP API when its feature set meets your requirements; choose REST API if you specifically need capabilities such as API keys and usage plans or richer request/response transformation.
+- Configure authentication, authorization, CORS, logging, and monitoring according to the application's needs.
+
+#### 7. Summary Table
+
+| Topic | Easy Meaning |
+|---|---|
+| HTTP API (general) | HTTP protocol se communicate karne wala API |
+| API Gateway HTTP API | AWS ka specific, streamlined API Gateway type |
+| Common integration | Lambda or HTTP backend |
+| Data format | Often JSON |
+| Main advantage | Simple setup and generally cost-effective |
+| Key limitation vs REST API | Some advanced API management features are not available |
+
+---
