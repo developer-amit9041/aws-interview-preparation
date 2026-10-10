@@ -15635,3 +15635,78 @@ ECS task definition mein isi image URI ko use kar sakte ho. Ensure the ECS task 
 **Interview-ready answer:** We use Amazon ECR as a managed registry for storing and managing container images. It provides centralized storage, IAM-based access control, image versioning, security and lifecycle-management capabilities, and integration with ECS, EKS, and CI/CD pipelines. ECR stores the images, while ECS or EKS runs containers from those images.
 
 ---
+
+### Q203. ECR vs Docker Hub?
+
+#### 1. English Definition
+
+**Amazon ECR** is AWS's managed container registry, designed to integrate with AWS services and IAM. **Docker Hub** is a widely used hosted container registry for publishing, discovering, and distributing container images, including public images and private repositories.
+
+#### 2. Hindi Definition
+
+ECR AWS ki container image registry hai jo AWS services ke saath closely integrate hoti hai. Docker Hub ek hosted registry hai jahan developers Docker images publish, share aur download kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, dono ka kaam Docker/container images ko store aur distribute karna hai. Difference unke ecosystem aur use case mein hai.
+
+- **ECR:** Jab tum AWS ECS/EKS par application deploy kar rahe ho, ECR AWS IAM aur deployment workflow ke saath convenient integration deta hai.
+- **Docker Hub:** Public images discover aur pull karne ke liye bahut common hai; teams apni images bhi publish kar sakti hain.
+
+Example: Tum Node.js app ki image build karte ho. Agar deployment AWS ECS par hai, toh ECR mein image push karke ECS task definition mein ECR URI use kar sakte ho. Agar tum public reusable image share karna chahte ho ya community images pull karni hain, Docker Hub useful ho sakta hai.
+
+#### 4. Practical Architecture
+
+```text
+Build Docker image
+       |
+       +----> Amazon ECR ----> ECS / EKS on AWS
+       |
+       +----> Docker Hub ----> Local Docker / CI/CD / cloud platforms
+```
+
+Dono registries image tags aur private image storage support karte hain, subject to their plan and configuration. Registry choose karte waqt access control, network path, image pull limits/quotas, cost, security scanning, and deployment platform consider karo.
+
+#### 5. Practical Commands
+
+**Push an image to Amazon ECR** (after creating the repository and authenticating to ECR):
+
+```bash
+docker tag node-api:v1.0.0 <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:v1.0.0
+docker push <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:v1.0.0
+```
+
+**Push an image to Docker Hub** (after creating a repository and logging in):
+
+```bash
+docker login
+docker tag node-api:v1.0.0 <DOCKERHUB_USERNAME>/node-api:v1.0.0
+docker push <DOCKERHUB_USERNAME>/node-api:v1.0.0
+```
+
+The image can be pulled with the matching registry URI. For production, use versioned tags or immutable digests, restrict private-image access, and avoid putting credentials in Dockerfiles.
+
+#### 6. ECR vs Docker Hub
+
+| Feature | Amazon ECR | Docker Hub |
+|---|---|---|
+| Provider | AWS | Docker |
+| Main strength | AWS ecosystem integration | Public image discovery and broad ecosystem use |
+| AWS IAM integration | Native integration | Uses Docker Hub authentication/access controls |
+| Public images | ECR Public is available | Public repositories are a core use case |
+| Private repositories | Supported | Supported, subject to plan and limits |
+| Typical use | Store images for AWS deployments | Share images and access public/community images |
+| Image pull considerations | AWS quotas, permissions, networking, and pricing apply | Plan-based limits and pull policies may apply |
+
+#### 7. Summary Table
+
+| Situation | Common choice |
+|---|---|
+| Deploying an app to ECS/EKS on AWS | ECR is often convenient |
+| Pulling popular public base images | Docker Hub is commonly used |
+| Sharing a public image with the Docker community | Docker Hub or ECR Public, depending on needs |
+| Private team images | Either; compare permissions, cost, limits, and workflow |
+
+**Interview-ready answer:** Amazon ECR and Docker Hub are both container registries. ECR is AWS's managed registry and integrates closely with IAM, ECS, and EKS, making it convenient for AWS deployments. Docker Hub is a widely used registry for discovering and sharing public images and hosting private images. I choose based on the deployment platform, access-control requirements, image distribution needs, limits, and cost.
+
+---
