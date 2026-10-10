@@ -2536,3 +2536,62 @@ Jab tum instance dobara start karte ho, EC2 virtual server boot karta hai. Lekin
 **When an EC2 instance is stopped, it shuts down and no longer serves application traffic. EBS-backed data is normally retained, and instance compute charges generally stop, although storage and other associated resources may still incur charges. The instance can be started again, but its auto-assigned public IPv4 address may change.**
 
 ---
+
+### Q38. What is the difference between Stop vs Terminate vs Reboot?
+
+#### 1. English Definition
+
+- **Stop:** Shuts down an EC2 instance temporarily so it can be started again later.
+- **Terminate:** Permanently deletes an EC2 instance; the terminated instance cannot be restarted.
+- **Reboot:** Restarts the operating system of an EC2 instance while keeping the instance allocated.
+
+#### 2. Hindi Definition
+
+- **Stop:** Server ko temporarily band karna, taaki baad mein dobara start kar sakein.
+- **Terminate:** Server instance ko permanently delete karna.
+- **Reboot:** Server ko restart karna, jaise apne computer ko restart karte hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application AWS EC2 par chal rahi hai:
+
+- Application ko kuch samay ke liye band karna hai aur baad mein use karna hai — **Stop**.
+- Instance ki ab zaroorat nahi hai aur use permanently remove karna hai — **Terminate**.
+- Server ya operating system ko restart karna hai, lekin instance ko delete nahi karna — **Reboot**.
+
+#### 4. Comparison Table
+
+| Feature | Stop | Terminate | Reboot |
+|---|---|---|---|
+| Instance state | Stopped | Terminated/deleted | Running after restart |
+| Can use instance again? | Yes, start it | No, terminated instance cannot be restarted | Yes, same instance continues |
+| OS/application | Shut down | Removed with the instance | Restarted; services come back according to startup configuration |
+| EBS data | EBS volumes are generally retained | Root EBS volume may be deleted based on its DeleteOnTermination setting; other volumes depend on their settings | EBS data is retained |
+| EC2 compute billing | Generally stops while stopped | Stops after termination | Continues; instance remains running |
+| Public IPv4 | Auto-assigned public IPv4 may change on start | Instance is deleted | Generally unchanged by reboot |
+| Typical use | Temporarily stop a development server | Remove an instance no longer needed | Apply a restart or recover a temporarily unresponsive OS |
+
+#### 5. Practical Example
+
+For a development EC2 server:
+
+```text
+Stop       -> Shut down now; start it again later
+Terminate  -> Delete the instance permanently
+Reboot     -> Restart the OS while keeping the instance
+```
+
+If you reboot a server running Node.js, PM2 and Nginx, those services restart only if their startup configuration is set up correctly. A reboot can briefly interrupt application traffic.
+
+#### 6. Important Interview Points
+
+- **Stop** and **Terminate** are not the same. Always check the root volume's `DeleteOnTermination` setting before termination if you need to preserve data.
+- A normal EC2 reboot keeps the instance allocated and usually preserves its public IPv4 address.
+- Stopping an instance generally stops instance compute charges, but EBS storage and some associated resources can still incur charges.
+- Some instance types or configurations do not support stopping; behavior can depend on the instance configuration.
+
+#### 7. Interview Summary
+
+**Stop temporarily shuts down an EC2 instance and usually preserves its EBS volumes. Terminate permanently deletes the instance, and its root EBS volume may also be deleted depending on its settings. Reboot restarts the operating system while keeping the same instance allocated. Stop generally stops compute charges, whereas reboot does not.**
+
+---
