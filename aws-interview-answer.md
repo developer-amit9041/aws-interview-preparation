@@ -4614,3 +4614,59 @@ Yahan VPC ka larger address range `10.0.0.0/16` hai, aur har subnet ko uske anda
 - CIDR IP range batata hai; woh khud internet access ya security permissions define nahi karta.
 
 ---
+
+### Q68. What is VPC Peering?
+
+#### 1. English Definition
+
+**VPC Peering is a networking connection between two VPCs that allows resources in them to communicate using private IP addresses, subject to routing and security configuration.**
+
+#### 2. Hindi Definition
+
+VPC Peering do VPCs ke beech ek private networking connection hota hai, jisse dono VPCs ke resources private IP addresses ke through communicate kar sakte hain, agar routing aur security rules sahi hon.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo AWS mein tumhare paas do alag VPCs hain:
+
+- **VPC A:** Frontend aur application services
+- **VPC B:** Internal service ya database-related resources
+
+By default, alag VPCs ke resources ek-doosre ke private IP addresses par automatically communicate nahi karte. VPC Peering connection bana kar, aur dono taraf ki route tables aur security rules configure karke, unke beech private network communication enable kar sakte ho.
+
+VPC Peering connection same AWS account ya different AWS accounts ke VPCs ke beech ho sakta hai, aur supported cases mein different Regions ke VPCs ko bhi peer kiya ja sakta hai.
+
+#### 4. How VPC Peering Works
+
+```text
+VPC A: 10.0.0.0/16
+  App EC2
+      |
+      | Route to 10.1.0.0/16
+      v
+  VPC Peering Connection
+      ^
+      | Route to 10.0.0.0/16
+      |
+VPC B: 10.1.0.0/16
+  Internal Service EC2
+```
+
+Example mein VPC A ki route table mein VPC B ke CIDR (`10.1.0.0/16`) ko peering connection par route karna hoga. VPC B ki route table mein bhi VPC A ke CIDR (`10.0.0.0/16`) ke liye reverse route chahiye. Security Groups aur Network ACLs ko required traffic allow karna hoga.
+
+#### 5. Important Limitations
+
+- **CIDR ranges must not overlap** for the VPCs being peered.
+- VPC Peering is **not transitive**. Agar VPC A, VPC B se peer hai aur VPC B, VPC C se peer hai, toh A automatically C se communicate nahi kar sakta through B.
+- Peering connection create karna alone enough nahi; routes aur security rules bhi configure karne hote hain.
+- VPC Peering connection internet gateway ya VPN ka replacement nahi hai; yeh VPCs ke beech private connectivity ke liye hai.
+
+#### 6. VPC Peering vs Internet Gateway
+
+| VPC Peering | Internet Gateway |
+|---|---|
+| Do VPCs ke beech private connectivity | VPC aur internet ke beech connectivity path |
+| Private IP ranges ke through communication | Internet connectivity ke liye routing and suitable IP/security configuration |
+| Non-transitive | VPC internet connectivity component; VPC-to-VPC transit routing service nahi |
+
+---
