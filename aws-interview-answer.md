@@ -13775,3 +13775,136 @@ FIFO queue ke liye messages bhejte waqt `MessageGroupId` required hota hai. Upar
 | Best use case | Notifications, scalable background jobs | Ordered workflows, sequential events |
 
 ---
+
+### Q184. What is Visibility Timeout?
+
+#### 1. English Definition
+
+**Visibility Timeout in Amazon SQS is the period during which a message becomes temporarily invisible to other consumers after one consumer receives it. This gives the consumer time to process the message before it becomes available for another receive attempt.**
+
+#### 2. Hindi Definition
+
+Visibility Timeout woh time period hai jiske dauran consumer ke message receive karne ke baad woh message doosre consumers ko temporarily visible nahi hota. Is time mein pehla consumer message process kar sakta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application mein SQS queue se order-processing worker ek message receive karta hai.
+
+- SQS message ko doosre consumers se temporarily hide kar deta hai.
+- Worker is time mein order process karta hai.
+- Agar worker successfully process karke message delete kar deta hai, toh message queue se remove ho jata hai.
+- Agar worker timeout ke andar message delete nahi karta, toh visibility timeout expire hone ke baad message dobara receive kiya ja sakta hai.
+
+**Important:** Visibility Timeout message ko delete nahi karta; sirf temporarily hide karta hai. Agar processing time zyada ho, toh timeout ko suitable value par set karo ya processing ke dauran `ChangeMessageVisibility` se extend karo. Duplicate processing ka risk phir bhi handle karna chahiye.
+
+#### 4. Practical Example / Code
+
+Suppose worker ko order process karne mein 2 minutes lagte hain. Queue ka visibility timeout 30 seconds hai, toh message 30 seconds baad dobara available ho sakta hai, jabki pehla worker abhi processing kar raha ho. Isse duplicate work ho sakta hai.
+
+Node.js AWS SDK se receive karne ka example:
+
+```javascript
+import {
+  SQSClient,
+  ReceiveMessageCommand,
+  DeleteMessageCommand,
+} from "@aws-sdk/client-sqs";
+
+const sqs = new SQSClient({ region: "ap-south-1" });
+const queueUrl = process.env.SQS_QUEUE_URL;
+
+const result = await sqs.send(new ReceiveMessageCommand({
+  QueueUrl: queueUrl,
+  MaxNumberOfMessages: 1,
+  VisibilityTimeout: 120, // seconds
+}));
+
+for (const message of result.Messages ?? []) {
+  try {
+    const order = JSON.parse(message.Body ?? "{}");
+    await processOrder(order); // Your application function
+
+    await sqs.send(new DeleteMessageCommand({
+      QueueUrl: queueUrl,
+      ReceiptHandle: message.ReceiptHandle,
+    }));
+  } catch (error) {
+    console.error("Order processing failed:", error);
+    // Don't delete the message; it can become visible again
+    // after the visibility timeout expires.
+  }
+}
+```
+
+`VisibilityTimeout: 120` sets the visibility period for messages received by this request to 120 seconds. Replace `processOrder()` with your actual processing logic. Production code should also handle missing receipt handles, retries, idempotency, and dead-letter queue configuration.
+
+#### 5. Architecture Diagram
+
+```text
+          Amazon SQS Queue
+                 |
+                 v
+        Worker receives message
+                 |
+                 v
+     Message temporarily invisible
+                 |
+          +------+------+
+          |             |
+          v             v
+   Processing succeeds  Processing fails / takes too long
+          |             |
+          v             v
+   Delete message    Timeout expires
+          |             |
+          v             v
+   Removed from      Message becomes visible
+   the queue         for another receive
+```
+
+#### 6. Practical Command / Configuration
+
+**A. Set visibility timeout when creating a queue (30 seconds):**
+
+```bash
+aws sqs create-queue \
+  --queue-name order-processing \
+  --attributes VisibilityTimeout=30 \
+  --region ap-south-1
+```
+
+**B. Change the timeout for an existing queue (120 seconds):**
+
+```bash
+aws sqs set-queue-attributes \
+  --queue-url "<SQS_QUEUE_URL>" \
+  --attributes VisibilityTimeout=120 \
+  --region ap-south-1
+```
+
+**C. Extend visibility for one received message:**
+
+```bash
+aws sqs change-message-visibility \
+  --queue-url "<SQS_QUEUE_URL>" \
+  --receipt-handle "<RECEIPT_HANDLE>" \
+  --visibility-timeout 120 \
+  --region ap-south-1
+```
+
+Replace placeholders with the actual queue URL and receipt handle. The visibility timeout can be configured up to 12 hours; extensions are subject to SQS's overall 12-hour limit from when the message was first received.
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| Visibility Timeout | Message temporarily hidden after being received |
+| Message deleted | Successfully processed message is removed from the queue |
+| Timeout expires | Message can become visible and be received again |
+| Timeout too short | Another worker may receive the message while it is still processing |
+| Timeout too long | Failed messages may take longer to become available again |
+| Best practice | Set a suitable timeout, extend if needed, and make processing idempotent |
+
+**Interview-ready answer:** Visibility Timeout is the period for which an SQS message remains hidden from other consumers after being received. If the consumer processes and deletes the message within that period, it is removed from the queue. Otherwise, the message can become visible again after the timeout, so the timeout should match the processing duration and consumers should handle duplicate processing safely.
+
+---
