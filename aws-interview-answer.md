@@ -4373,3 +4373,67 @@ and suitable security rules
 - IGW AWS-managed, redundant infrastructure hai; ise EC2 server ki tarah manage nahi karna padta.
 
 ---
+
+### Q64. What is a NAT Gateway?
+
+#### 1. English Definition
+
+**A NAT Gateway is an AWS-managed network service that allows resources in a private subnet to initiate outbound connections to the internet, while preventing unsolicited inbound connections from the internet from being initiated through that NAT Gateway.**
+
+#### 2. Hindi Definition
+
+NAT Gateway AWS ki managed service hai jo private subnet ke resources ko internet par outbound connections banane deti hai, lekin internet se un resources tak unsolicited inbound connections initiate karne ka raasta provide nahi karti.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhara Node.js backend EC2 instance private subnet mein hai. Tum chahte ho ki woh internet se software updates ya required packages download kar sake, lekin internet users us EC2 ko directly access na kar saken.
+
+Is situation mein NAT Gateway use kar sakte ho.
+
+- Private EC2 outbound request bhejta hai.
+- Private subnet ki route table traffic ko NAT Gateway par bhejti hai.
+- NAT Gateway public subnet mein hota hai aur uske paas Elastic IP hota hai for public IPv4 internet connectivity.
+- Public subnet ki route table NAT Gateway ke internet traffic ko Internet Gateway ki taraf route karti hai.
+- Response existing outbound connection ke through wapas aata hai.
+
+NAT Gateway unsolicited inbound connections allow karne ke liye design nahi kiya gaya. Agar tumhe inbound application traffic chahiye, toh load balancer, bastion/VPN ya koi suitable controlled access pattern use karo.
+
+#### 4. How NAT Gateway Works
+
+```text
+                 Internet
+                    |
+                    v
+            Internet Gateway
+                    |
+                    v
+          Public Subnet: NAT Gateway
+                    ^
+                    |
+          Private Subnet Route Table
+          0.0.0.0/0 -> NAT Gateway
+                    ^
+                    |
+          Private EC2 (Node.js)
+```
+
+For this common public NAT Gateway setup, the NAT Gateway is placed in a public subnet, has an Elastic IP, and uses the Internet Gateway for internet connectivity. The private subnet routes outbound IPv4 traffic to it.
+
+#### 5. NAT Gateway vs Internet Gateway
+
+| Feature | NAT Gateway | Internet Gateway |
+|---|---|---|
+| Main purpose | Outbound IPv4 internet access for private-subnet resources | Internet connectivity for appropriately configured VPC resources |
+| Typical placement | Public subnet for a public NAT Gateway | Attached to the VPC |
+| Elastic IP | Public NAT Gateway uses an Elastic IP | Does not itself require an Elastic IP |
+| Unsolicited inbound internet connections | Does not allow them to be initiated through NAT Gateway | Reachability depends on routing, IP addressing, and security rules |
+
+#### 6. Important Points
+
+- NAT Gateway is managed by AWS; you do not install it on your EC2 instance.
+- A public NAT Gateway needs a route to an Internet Gateway to access the public internet.
+- Private subnet route tables commonly use `0.0.0.0/0 -> NAT Gateway` for outbound IPv4 internet access.
+- NAT Gateway is not a replacement for Security Groups, Network ACLs, or an Internet Gateway.
+- NAT Gateway has hourly and data-processing charges, so production designs should consider availability and cost. For resilient designs, teams commonly use NAT Gateways across multiple Availability Zones and route each private subnet to a NAT Gateway in its own AZ.
+
+---
