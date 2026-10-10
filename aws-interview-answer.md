@@ -4260,3 +4260,58 @@ Ye conceptual example hai. Real deployment mein high availability ke liye aam ta
 - Route tables traffic routing control karti hain, aur security groups/NACLs traffic ko filter karne mein help karte hain.
 
 ---
+
+### Q62. Public Subnet vs Private Subnet?
+
+#### 1. English Definition
+
+**A public subnet has a route to an Internet Gateway, while a private subnet does not have a direct route to an Internet Gateway. This routing difference determines how the subnet can communicate with the internet, along with IP addressing and security configuration.**
+
+#### 2. Hindi Definition
+
+Public subnet ki route table mein Internet Gateway tak route hota hai, jabki private subnet mein Internet Gateway tak direct route nahi hota. Internet se actual connectivity ke liye IP configuration aur security rules bhi sahi hone chahiye.
+
+#### 3. Hinglish Explanation
+
+Bhai, dono subnets VPC ke andar hote hain. Difference mainly internet traffic ke route ka hai.
+
+- **Public Subnet:** Iski route table mein generally `0.0.0.0/0 → Internet Gateway` route hota hai. Internet-facing load balancer, bastion host ya public web server yahan rakha ja sakta hai. Internet se direct IPv4 connection ke liye resource ke paas suitable public IPv4 address aur allowed security rules bhi hone chahiye.
+- **Private Subnet:** Iski route table mein Internet Gateway tak direct route nahi hota. Backend servers aur databases ko aksar yahan rakhte hain. Agar private resource ko outbound IPv4 internet access chahiye, toh route table ke through NAT Gateway ka route configure kiya ja sakta hai.
+
+#### 4. Difference Table
+
+| Feature | Public Subnet | Private Subnet |
+|---|---|---|
+| Route to Internet Gateway | Usually present | No direct IGW route |
+| Direct inbound internet access | Possible if public IP/endpoint and security rules allow | Not through a direct IGW route |
+| Typical use | Internet-facing load balancer, public web tier, bastion host | Application backend, internal services, databases |
+| Outbound internet access | Through IGW when resource and routing are configured | Often through NAT Gateway for IPv4, if required |
+| Security | Still needs correct security rules | Still needs correct security rules; private does not mean automatically secure |
+
+#### 5. MERN Application Example
+
+```text
+Internet Users
+      |
+      v
+Public Subnet
+  Load Balancer / Nginx
+      |
+      v
+Private Subnet
+  Node.js Backend (EC2)
+      |
+      v
+Private Database
+```
+
+Is example mein load balancer internet traffic receive karta hai. Backend ko sirf load balancer se required application port par traffic allow kiya ja sakta hai, aur database ko sirf backend se required database port par access diya jata hai.
+
+#### 6. Important Points
+
+- Public/private subnet ka main distinction route table aur Internet Gateway route hai—not just the subnet name.
+- Public subnet mein hone ka matlab yeh nahi ki har resource automatically internet se accessible hai.
+- Private subnet mein resource ko outbound internet access dena ho toh NAT Gateway jaise option use ho sakte hain; NAT Gateway unsolicited inbound connections allow karne ke liye nahi hota.
+- Dono subnet types mein Security Groups, Network ACLs aur least-privilege rules configure karna important hai.
+
+---
