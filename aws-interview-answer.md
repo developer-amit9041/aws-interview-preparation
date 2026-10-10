@@ -14635,3 +14635,84 @@ User / Event -> API Gateway or S3 Event -> Lambda Function -> Result
 ECS runs and orchestrates containerized applications, making it suitable for long-running APIs, workers, and microservices. Lambda runs code in response to events without server management and is well suited to short-lived, event-driven tasks. I would choose ECS when I need a continuously running container service or more control over the runtime, and Lambda for event-triggered work with execution that fits Lambda's limits.
 
 ---
+
+### Q193. What is ECS Cluster?
+
+#### 1. English Definition
+
+An **Amazon ECS cluster** is a logical grouping of infrastructure and workloads where Amazon ECS runs and manages tasks and services. Depending on the capacity provider or launch type, tasks can run on AWS Fargate or on EC2 instances registered with the cluster.
+
+#### 2. Hindi Definition
+
+ECS Cluster ek logical grouping hai jahan Amazon ECS ke tasks aur services run hote hain. Workload Fargate par ya cluster ke saath registered EC2 instances par run ho sakta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application mein teen containerized services hain: Node.js API, background worker aur notification service. ECS cluster ko ek logical environment samjho jahan tum in services ke tasks organize aur run karte ho.
+
+Cluster khud Docker image nahi hota aur na hi ek single container hota hai. Yeh ECS resources aur compute capacity ko organize karne mein help karta hai.
+
+- **Cluster:** Tasks aur services ke liye logical grouping.
+- **Task definition:** Container ka blueprint.
+- **Task:** Task definition ka running instance.
+- **Service:** Desired number of tasks ko maintain karti hai.
+- **Capacity:** Fargate ya registered EC2 instances se mil sakti hai.
+
+#### 4. Practical Architecture
+
+```text
+Amazon ECS Cluster
+   |
+   +-- ECS Service: Node.js API
+   |      +-- Task 1
+   |      +-- Task 2
+   |
+   +-- ECS Service: Background Worker
+          +-- Task 1
+          +-- Task 2
+
+Compute capacity: Fargate OR ECS-registered EC2 instances
+```
+
+Example: Node.js API service ko 2 tasks aur background worker ko 1 task ke saath same cluster mein run kar sakte ho. ECS cluster un workloads ko organize karta hai; actual placement and available compute depend on the chosen capacity configuration.
+
+#### 5. Practical AWS CLI Commands
+
+Create a cluster:
+
+```bash
+aws ecs create-cluster \
+  --cluster-name mern-production-cluster \
+  --region ap-south-1
+```
+
+List clusters:
+
+```bash
+aws ecs list-clusters --region ap-south-1
+```
+
+Describe a cluster:
+
+```bash
+aws ecs describe-clusters \
+  --clusters mern-production-cluster \
+  --region ap-south-1
+```
+
+Creating a cluster alone does not deploy an application. You still need a task definition and usually a service or a task run command, plus appropriate IAM roles, networking, and compute configuration.
+
+#### 6. Summary Table
+
+| ECS Concept | Meaning |
+|---|---|
+| Cluster | Logical grouping for ECS workloads and capacity |
+| Task definition | Blueprint describing containers and their settings |
+| Task | Running instance of a task definition |
+| Service | Maintains the desired number of tasks |
+| Fargate | Serverless compute capacity for tasks |
+| EC2 capacity | EC2 instances registered with ECS to run tasks |
+
+**Interview-ready answer:** An ECS cluster is a logical grouping used to organize and run ECS tasks and services. Tasks can use Fargate capacity or EC2 instances registered with the cluster. The cluster is not itself a container; task definitions describe the workload, tasks run it, and services maintain the desired number of running tasks.
+
+---
