@@ -11498,3 +11498,136 @@ Route 53 console mein:
 **Interview answer:** Route 53 Failover routing uses primary and secondary DNS records. Route 53 normally returns the primary endpoint and can return the secondary endpoint when the primary is unhealthy according to the configured failover and health-check setup. DNS caching means failover may not be immediate for every client.
 
 ---
+
+### Q164. How do you connect a domain to an EC2 server?
+
+#### 1. English Definition
+
+**To connect a domain to an EC2 server, configure DNS records in a DNS provider such as Amazon Route 53 so the domain resolves to the server's reachable public endpoint. For production, pointing the domain to an Elastic IP or an Application Load Balancer is often preferable to using a changing EC2 public IP.**
+
+#### 2. Hindi Definition
+
+Domain ko EC2 server se connect karne ke liye DNS provider, jaise Route 53, mein records configure karte hain. Ye records domain ko EC2 ke public endpoint tak resolve karte hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari Node.js/Express application EC2 instance par chal rahi hai aur tum chahte ho ki user `myapp.com` open karke application access kare.
+
+High-level steps:
+1. Domain register karo, aur DNS manage karne ke liye Route 53 ya apne registrar ka DNS use karo.
+2. EC2 par application run karo aur required ports configure karo.
+3. Stable endpoint choose karo: direct EC2 access ke liye Elastic IP, ya production setup mein Application Load Balancer (ALB).
+4. DNS record configure karo:
+   - Elastic IP ke liye Route 53 mein A record.
+   - ALB ke liye commonly Route 53 Alias record.
+5. HTTPS ke liye TLS certificate configure karo. ALB use kar rahe ho toh ACM certificate ALB listener par attach kar sakte ho.
+6. DNS resolution aur application connectivity test karo.
+
+**Important:** EC2 ka auto-assigned public IPv4 address stop/start ke baad change ho sakta hai. Direct EC2 mapping ke liye Elastic IP use karo, ya stable ALB endpoint choose karo. DNS record create karne se security group, application port, Nginx, ya HTTPS automatically configure nahi hote.
+
+#### 4. Practical Example
+
+Example domain: `myapp.com`
+
+**Option A — Domain directly to EC2 Elastic IP**
+
+| Setting | Value |
+|---|---|
+| EC2 application | Node.js app |
+| Public endpoint | Elastic IP, e.g. `203.0.113.10` (illustrative only) |
+| Route 53 record | A |
+| Record value | Elastic IP |
+
+**Option B — Domain to Application Load Balancer (recommended for many production apps)**
+
+| Setting | Value |
+|---|---|
+| Domain | `myapp.com` |
+| Route 53 record | A-type Alias |
+| Alias target | Application Load Balancer |
+| TLS certificate | ACM certificate on ALB HTTPS listener |
+
+For a MERN deployment, a common setup is: domain → Route 53 → ALB or Nginx on EC2 → Node.js/Express API. React/Next.js hosting may have a separate frontend endpoint.
+
+#### 5. Architecture Diagram — Domain to EC2
+
+```text
+User enters myapp.com
+          |
+          v
+     DNS Resolver
+          |
+          v
+   Route 53 DNS Record
+          |
+          v
+Elastic IP or ALB endpoint
+          |
+          v
+  EC2 Security Group
+          |
+          v
+ Nginx / Application
+          |
+          v
+ Node.js / Express API
+```
+
+**Flow:** User domain open karta hai → DNS endpoint resolve hota hai → connection Elastic IP ya ALB tak jaata hai → security group/network rules connection allow karte hain → Nginx/app request handle karti hai.
+
+#### 6. Practical Command / Configuration
+
+**Step 1: Check your EC2 instance's public IP and state**
+
+AWS Console mein EC2 → Instances → instance details check karo. Production mein Elastic IP associate karne ya ALB use karne par consider karo.
+
+**Step 2: Configure the security group**
+
+Only required inbound traffic allow karo. Typical public web setup:
+- HTTP: TCP 80, if serving HTTP or redirecting to HTTPS.
+- HTTPS: TCP 443.
+- SSH: TCP 22 restricted to your trusted IP; public internet se unrestricted SSH avoid karo.
+
+Node.js port, jaise 3000, ko public internet par open karna zaroori nahi hota agar Nginx/ALB us tak internally traffic forward karta hai.
+
+**Step 3: Create the DNS record**
+
+Route 53 console mein:
+- Elastic IP: record type `A`, value = Elastic IP.
+- ALB: record type `A`, Alias = Yes, target = ALB.
+
+**Step 4: Test DNS**
+
+```bash
+nslookup myapp.com
+```
+
+Or:
+
+```bash
+dig myapp.com A
+```
+
+**Step 5: Test HTTPS**
+
+```bash
+curl -I https://myapp.com
+```
+
+DNS propagation, TLS certificate validity, security group rules, and web-server configuration should all be checked if the domain does not work.
+
+#### 7. Summary Table
+
+| Step | What to do |
+|---|---|
+| 1 | Register domain and choose DNS provider |
+| 2 | Run app on EC2 |
+| 3 | Choose Elastic IP or ALB |
+| 4 | Configure Route 53 A record or Alias |
+| 5 | Allow required ports in security group |
+| 6 | Configure Nginx/app and HTTPS certificate |
+| 7 | Verify DNS and HTTPS |
+
+**Interview answer:** I connect a domain to EC2 by configuring DNS in Route 53. For a simple setup, I point an A record to an Elastic IP. For a production setup, I often point a Route 53 Alias record to an Application Load Balancer, configure HTTPS, and ensure security groups allow only the required traffic.
+
+---
