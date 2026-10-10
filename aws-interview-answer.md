@@ -9909,3 +9909,93 @@ Commands ke liye AWS CLI credentials aur required IAM permissions configured hon
 **Remember:** S3 stores the content; CloudFront helps deliver it efficiently. Together, they are a common choice for hosting and delivering static website assets.
 
 ---
+
+### Q148. How does CloudFront improve performance?
+
+#### 1. English Definition
+
+**Amazon CloudFront improves performance by serving cacheable content from edge locations closer to users, reducing repeated requests to the origin, and supporting optimized delivery of static and dynamic content.**
+
+#### 2. Hindi Definition
+
+CloudFront users ke kareeb edge locations se cacheable content deliver karke, origin server tak baar-baar jaane wali requests ko kam karke, aur content delivery optimize karke performance improve karta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari website ka origin server India mein hai aur koi user USA se website access karta hai. Origin se har baar images aur CSS download karna slow ho sakta hai.
+
+CloudFront performance ko mainly is tarah improve karta hai:
+
+- **Edge caching:** Cacheable files user ke kareeb edge location se serve ho sakti hain.
+- **Fewer origin requests:** Cache hit hone par har request S3 ya web server tak nahi jaati.
+- **Lower latency:** User aur content ke beech network travel kam ho sakta hai.
+- **Efficient content delivery:** Compression aur suitable cache policies jaise options delivery ko optimize kar sakte hain, jab supported aur correctly configured hon.
+- **Origin capacity protection:** Repeated cached requests origin ka load kam kar sakti hain.
+
+Important: CloudFront har request ko automatically cache nahi karta. Dynamic ya personalized content ke liye cache policy carefully configure karni hoti hai.
+
+#### 4. Practical Example
+
+MERN e-commerce app mein product images S3 bucket mein hain. Bina CDN ke users directly origin se images fetch kar sakte hain. CloudFront add karne par popular images edge locations par cache ho sakti hain. Repeat requests cache se serve ho sakti hain, jisse loading time aur origin requests reduce ho sakte hain.
+
+#### 5. Architecture Diagram — Request Flow
+
+```text
+User requests product image
+           |
+           v
+CloudFront Edge Location
+           |
+           v
+      Cache check
+       /       \
+      /         \
+ Cache hit    Cache miss
+    |             |
+    v             v
+Serve cached   Fetch from origin
+content        (e.g. Amazon S3)
+    |             |
+    |         Response returned
+    |         and may be cached
+    |             |
+    +------<------+
+           |
+           v
+      Content to user
+```
+
+**Request flow:** User request karta hai → CloudFront cache check karta hai → cache hit par edge se content serve hota hai → cache miss par origin se content fetch hota hai → response user ko milta hai.
+
+#### 6. Practical Command / Configuration
+
+CloudFront distribution details dekhne ke liye:
+
+```bash
+aws cloudfront get-distribution --id YOUR_DISTRIBUTION_ID
+```
+
+**Performance optimize karne ke practical steps:**
+- Static assets ke liye appropriate cache policy aur TTL set karo.
+- Versioned filenames use karo, jaise `app.v2.js`, taaki content updates manage karna easier ho.
+- Frequently changed content ke liye TTL aur invalidation strategy plan karo.
+- Compression support aur HTTPS settings ko use case ke hisaab se configure karo.
+- Personalized API responses ko shared cache mein store hone se bachao.
+- Cache hit ratio aur origin latency jaise metrics monitor karo.
+
+Command ke liye AWS CLI credentials aur required IAM permissions configured honi chahiye.
+
+#### 7. Summary Table
+
+| Performance mechanism | How it helps |
+|---|---|
+| Edge caching | Content user ke kareeb se serve ho sakta hai |
+| Cache hits | Origin requests kam hoti hain |
+| Lower latency | Content delivery faster ho sakti hai |
+| Compression | Supported content transfer size reduce ho sakta hai |
+| Origin offload | Origin server ka workload kam ho sakta hai |
+| Cache policies and TTL | Content freshness aur caching behavior control hota hai |
+
+**Remember:** CloudFront performance ko mainly edge caching, reduced origin traffic, and optimized content delivery ke through improve karta hai. Actual improvement content type, cache configuration, and user location par depend karti hai.
+
+---
