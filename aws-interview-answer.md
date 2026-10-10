@@ -18185,3 +18185,65 @@ Best practices:
 **Interview-ready answer:** Encryption at Rest protects stored data by encrypting it on storage systems, databases, disks, and backups. The data generally requires the appropriate key and authorization to be decrypted. In AWS, services such as S3, EBS, RDS, and Secrets Manager support encryption at rest, often using AWS KMS. It should be combined with encryption in transit and proper access controls.
 
 ---
+
+### Q234. What is Encryption in Transit?
+
+#### 1. English Definition
+
+Encryption in Transit protects data while it moves across a network between clients, servers, APIs, databases, or other systems. TLS (commonly used by HTTPS) encrypts network communication so that an attacker intercepting the connection cannot easily read or modify the data.
+
+#### 2. Hindi Definition
+
+Encryption in Transit ka matlab hai jab data network ke through ek jagah se doosri jagah ja raha ho, tab us data ko encrypt karke protect karna. HTTPS mein TLS ka use browser aur server ke beech communication ko secure karne ke liye hota hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo user tumhari MERN application par login karta hai aur email/password submit karta hai. Agar connection HTTPS/TLS se protected nahi hai, toh insecure network par data intercept hone ka risk badh sakta hai.
+
+HTTPS/TLS data ko transmission ke dauran encrypt karta hai. Isse network par traffic capture karne wala unauthorized person normally request ka readable content nahi dekh sakta. TLS server identity ko certificate ke through verify karne mein bhi madad karta hai.
+
+Encryption in Transit sirf browser se frontend tak nahi: backend-to-backend API calls aur application-to-database connections ko bhi secure karna chahiye, jahan supported ho.
+
+#### 4. Practical MERN + AWS Example
+
+```text
+Browser
+   | HTTPS / TLS
+   v
+AWS Application Load Balancer
+   | HTTPS / TLS (if configured)
+   v
+Node.js / Express backend
+   | TLS-enabled database connection
+   v
+MongoDB / managed database
+```
+
+Typical steps:
+
+1. Use HTTPS for the public application and API endpoints.
+2. Configure a valid TLS certificate, for example with AWS Certificate Manager and an Application Load Balancer.
+3. If traffic from the load balancer to the backend must also be encrypted, configure HTTPS/TLS on that connection and validate the certificate as appropriate.
+4. Enable TLS for database connections where supported; for MongoDB, use the driver's TLS options and the provider's recommended certificate validation.
+5. Avoid sending passwords, tokens, or other sensitive data over plain HTTP.
+
+#### 5. Encryption at Rest vs Encryption in Transit
+
+| Feature | Encryption at Rest | Encryption in Transit |
+|---|---|---|
+| Protects | Data stored on disks, databases, object storage, and backups | Data moving across a network |
+| Example | Encrypting an RDS database or S3 object | HTTPS/TLS between browser and API |
+| AWS examples | KMS-backed encryption for supported storage services | TLS certificates and HTTPS endpoints |
+| Main concern | Unauthorized access to stored data | Interception or tampering during transmission |
+
+#### 6. Important Points
+
+- Use modern TLS configurations and valid certificates.
+- Encryption in Transit does not replace authentication, authorization, or secure application code.
+- Do not disable certificate validation to work around TLS errors.
+- HTTPS protects data between the endpoints of that TLS connection; if TLS terminates at a load balancer, traffic from the load balancer to the backend needs separate consideration.
+- Use Encryption at Rest and Encryption in Transit together for layered protection.
+
+**Interview-ready answer:** Encryption in Transit protects data while it travels between systems over a network. HTTPS uses TLS to encrypt communication between a browser and a web server, reducing the risk of data interception or tampering. In AWS, I configure TLS certificates for public endpoints and also secure internal service and database connections where supported. Encryption in Transit should be combined with Encryption at Rest and proper access controls.
+
+---
