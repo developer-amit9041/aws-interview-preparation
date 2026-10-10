@@ -2989,3 +2989,83 @@ Is example mein specified IAM role ko bucket ke objects read karne ki permission
 - `s3:ListBucket` bucket-level permission hai; `s3:GetObject` object-level permission hai, isliye resources alag hote hain.
 
 ---
+
+### Q46. What is the difference between an IAM Policy and a Bucket Policy?
+
+#### 1. English Definition
+
+- **IAM Policy:** An identity-based policy attached to an IAM user, group, or role that defines what actions that identity is allowed or denied to perform on specified resources.
+- **S3 Bucket Policy:** A resource-based JSON policy attached directly to an S3 bucket that defines which principals can or cannot perform specified actions on the bucket and its objects.
+
+#### 2. Hindi Definition
+
+- **IAM Policy:** Ye IAM user, group ya role ko batati hai ki woh kin AWS resources par kaunse actions kar sakta hai.
+- **Bucket Policy:** Ye S3 bucket par attach hoti hai aur batati hai ki kaun bucket ya uske objects ko kis tarah access kar sakta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, main difference policy kahan attach hoti hai aur permissions ka perspective kya hai:
+
+- IAM Policy identity ke saath attach hoti hai: “Ye role kya kar sakta hai?”
+- Bucket Policy resource ke saath attach hoti hai: “Is bucket ko kaun access kar sakta hai?”
+
+MERN example: tumhari Node.js API EC2 par chalti hai. EC2 ke IAM role ko S3 objects upload karne ki IAM policy de sakte ho. Bucket par bucket policy laga kar specified role ya account ko bucket access allow kar sakte ho, ya required access restrict kar sakte ho.
+
+#### 4. Difference Table
+
+| Feature | IAM Policy | S3 Bucket Policy |
+|---|---|---|
+| Policy type | Identity-based | Resource-based |
+| Attached to | IAM user, group, or role | S3 bucket |
+| Main question | Identity kya kar sakti hai? | Resource ko kaun access kar sakta hai? |
+| Scope | Different AWS services/resources | Specific S3 bucket and its objects |
+| Cross-account access | Identity permissions alone usually aren't enough for another account's resource | Can grant cross-account access when the required identity-side permissions and other controls are also correct |
+| Format | JSON | JSON |
+
+#### 5. Practical Example
+
+**IAM policy attached to the EC2 application's IAM role:**
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject"],
+      "Resource": "arn:aws:s3:::my-mern-app-uploads/*"
+    }
+  ]
+}
+```
+
+This grants the role object read/write permissions on the specified bucket objects, subject to other applicable controls. Add only the actions the application needs.
+
+**Bucket policy attached to the S3 bucket:**
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowSpecificRoleToReadObjects",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::123456789012:role/MernAppRole"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::my-mern-app-uploads/*"
+    }
+  ]
+}
+```
+
+Replace the example account ID and role name with the real values. The bucket policy grants the specified role read access to objects, but the role trust relationship, identity permissions, and other AWS controls must also be correct.
+
+#### 6. Important Points
+
+- Both policies can affect access to the same S3 object; permissions must be evaluated together with explicit denies and applicable organization-level controls.
+- Avoid broad permissions and public access unless specifically required.
+- Follow least privilege: grant only the necessary actions and resources.
+
+---
