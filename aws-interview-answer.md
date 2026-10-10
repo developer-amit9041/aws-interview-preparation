@@ -4067,3 +4067,88 @@ If the bucket is private, keep it private and have the backend authorize the use
 - If replacing an old image, plan cleanup of the previous S3 object after the new upload and database update succeed.
 
 ---
+
+## 4. VPC & Networking
+
+### Q59. What is VPC?
+
+#### 1. English Definition
+
+**Amazon VPC (Virtual Private Cloud) is a logically isolated virtual network in AWS where you can launch resources such as EC2 instances and control their IP addressing, subnets, routing, and network access.**
+
+#### 2. Hindi Definition
+
+VPC AWS ke andar ek logically isolated virtual network hota hai, jisme hum EC2 jaise resources launch kar sakte hain aur IP addresses, subnets, routing aur network access control kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tum apni MERN application AWS par deploy kar rahe ho. Tum chahte ho ki frontend users internet se website access kar saken, lekin MongoDB ya private backend resources directly internet se accessible na hon.
+
+VPC tumhe AWS mein apna network setup karne deta hai. Ismein tum:
+
+- IP address range (CIDR block) choose karte ho.
+- Network ko public aur private subnets mein divide karte ho.
+- Route tables se traffic ka route control karte ho.
+- Security groups aur network ACLs se network traffic control karte ho.
+- Zaroorat ke mutabik Internet Gateway aur NAT Gateway configure karte ho.
+
+#### 4. VPC Architecture Example
+
+```text
+                    Internet
+                       |
+                Internet Gateway
+                       |
+        +--------------------------------+
+        |              VPC               |
+        |                                |
+        |   Public Subnet                |
+        |   Load Balancer / Nginx        |
+        |             |                  |
+        |   Private Subnet               |
+        |   Node.js Backend (EC2)         |
+        |             |                  |
+        |   Private Database Subnet      |
+        |   Database                     |
+        +--------------------------------+
+```
+
+Yeh ek illustrative architecture hai. Exact design tumhari application, database service aur security requirements par depend karega. Public subnet ka matlab sirf public IP hona nahi hai; subnet ki route table mein internet gateway ka route bhi hona chahiye. Resource ko internet se reachable banane ke liye uski own configuration aur security rules bhi sahi hone chahiye.
+
+#### 5. Main Components of a VPC
+
+| Component | Purpose |
+|---|---|
+| CIDR block | VPC ke private IP address range ko define karta hai |
+| Subnet | VPC ke IP range ka smaller segment; ek Availability Zone se associated hota hai |
+| Route table | Traffic ko next destination tak route karti hai |
+| Internet Gateway | VPC ke resources ko internet se communicate karne ka path provide karta hai, subject to routing and security configuration |
+| NAT Gateway | Private subnet ke resources ko generally outbound IPv4 internet access deta hai without allowing unsolicited inbound internet connections |
+| Security Group | Resource/network interface level par stateful traffic rules apply karta hai |
+| Network ACL | Subnet level par stateless inbound/outbound traffic rules apply karta hai |
+
+#### 6. Practical MERN Example
+
+```text
+Internet users
+      |
+      v
+Public Load Balancer / Nginx
+      |
+      v
+Private Node.js API (EC2)
+      |
+      v
+Private database
+```
+
+Is design mein public entry point internet traffic receive karta hai, backend ko restricted network placement aur security rules milte hain, aur database ko direct public access dene ki zaroorat nahi hoti.
+
+#### 7. Important Points
+
+- VPC AWS mein logically isolated network provide karta hai; yeh automatically har resource ko private ya secure nahi bana deta.
+- Subnets VPC ke andar hote hain aur each subnet ek Availability Zone mein reside karta hai.
+- Routing, IP addressing, security groups, NACLs, and gateways milkar connectivity determine karte hain.
+- VPC ke resources ko internet se access karwana ho toh routing, public IP/endpoint, security rules, aur resource configuration sab compatible hone chahiye.
+
+---
