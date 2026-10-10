@@ -16898,3 +16898,63 @@ This is a simplified EC2/on-premises AppSpec example; the actual file layout, pe
 **Interview-ready answer:** AWS CodeDeploy is a deployment automation service for releasing application updates to supported targets such as EC2 instances, on-premises servers, Lambda, and ECS. It uses target-specific deployment configuration and strategies to automate releases and track deployment progress. In a CI/CD workflow, CodePipeline can orchestrate the release and invoke CodeDeploy for the deployment stage.
 
 ---
+
+### Q217. CodeBuild vs CodeDeploy?
+
+#### 1. English Definition
+
+AWS CodeBuild is a managed build service that compiles code, runs tests, and creates artifacts or container images. AWS CodeDeploy is a deployment automation service that releases application revisions to supported targets such as EC2, on-premises servers, Lambda, and ECS.
+
+#### 2. Hindi Definition
+
+CodeBuild ka use application ka build banane aur tests run karne ke liye hota hai. CodeDeploy ka use application ke naye version ko supported server ya service par deploy karne ke liye hota hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, simple difference yaad rakho:
+
+- **CodeBuild = Build and Test**
+- **CodeDeploy = Deploy**
+
+Maan lo tumhari Node.js application GitHub par hai. CodeBuild dependencies install karega, tests run karega aur build output ya Docker image bana sakta hai. Uske baad deployment workflow CodeDeploy ko invoke kar sakta hai, agar target CodeDeploy-supported ho, jaise EC2, Lambda ya ECS.
+
+CodeDeploy khud general-purpose code compilation aur testing service nahi hai; uska main purpose deployment ko automate karna hai.
+
+#### 4. Comparison Table
+
+| Feature | AWS CodeBuild | AWS CodeDeploy |
+|---|---|---|
+| Main purpose | Build and test code | Deploy application revisions |
+| Typical work | Install dependencies, run tests, compile/build, create artifacts or images | Release application updates to supported targets |
+| Configuration | Commonly uses `buildspec.yml` | Uses target-specific deployment configuration, such as `appspec.yml` for EC2/on-premises and supported Lambda/ECS deployment configurations |
+| Output / result | Build artifacts, test results, or container image | Application revision deployed to a target |
+| Common targets | Managed build environment | EC2, on-premises, Lambda, ECS |
+| Pipeline role | Build stage | Deployment stage |
+
+#### 5. Practical Example
+
+```text
+Developer pushes Node.js code
+          |
+          v
+AWS CodePipeline
+          |
+          v
+CodeBuild
+  - npm ci
+  - npm test
+  - build package or Docker image
+          |
+          v
+Deployment stage
+  - CodeDeploy for supported targets (e.g. EC2 / Lambda / ECS)
+  - Or another suitable deployment action for the target
+```
+
+For an EKS workload, use an EKS-compatible deployment action or tooling to update Kubernetes resources; CodeDeploy is not the default general-purpose EKS deployment mechanism.
+
+#### 6. Summary
+
+**Interview-ready answer:** AWS CodeBuild is used to build and test source code and generate artifacts or container images. AWS CodeDeploy automates releasing application updates to supported targets such as EC2, Lambda, and ECS. In a CI/CD pipeline, CodeBuild prepares and validates the application, while CodeDeploy handles the deployment stage for supported targets.
+
+---
