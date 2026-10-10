@@ -7177,3 +7177,50 @@ Example: E-commerce application mein users, products, orders aur payments ko rel
 - Choose Aurora based on workload, availability needs, compatibility, operational requirements, and cost—not only because it is an AWS service.
 
 ---
+
+### Q110. RDS vs Aurora?
+
+#### 1. English Definition
+
+**Amazon RDS is a managed relational database service that supports multiple database engines, while Amazon Aurora is a specific AWS-managed relational database engine compatible with MySQL and PostgreSQL and available through RDS.**
+
+#### 2. Hindi Definition
+
+Amazon RDS ek managed service hai jo multiple relational database engines ko support karti hai. Amazon Aurora AWS ka specific relational database engine hai jo MySQL aur PostgreSQL ke saath compatible hai aur RDS ke through available hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, sabse pehle ek important point: **RDS aur Aurora exact alternatives nahi hain. Aurora khud Amazon RDS ke through milne wala ek database engine hai.**
+
+Amazon RDS mein tum MySQL, PostgreSQL, MariaDB, Oracle, SQL Server aur Aurora jaise supported engines choose kar sakte ho. Agar tum Aurora choose karte ho, toh tum AWS ka Aurora-specific storage architecture aur uske supported scaling/availability features use karte ho.
+
+Simple example: Tumhe AWS par managed MySQL chahiye toh RDS for MySQL choose kar sakte ho. Agar workload, compatibility, availability requirements aur cost Aurora ko suit karte hain, toh Aurora MySQL-compatible choose kar sakte ho.
+
+#### 4. Difference Table
+
+| Basis | Amazon RDS (general) | Amazon Aurora |
+|---|---|---|
+| Meaning | Managed relational database service | Specific managed relational database engine available through RDS |
+| Engine choice | MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, and Aurora (availability varies) | Aurora MySQL-compatible or Aurora PostgreSQL-compatible |
+| Storage architecture | Depends on selected engine | Aurora's distributed cloud storage architecture |
+| Performance | Depends on engine, instance, queries, and configuration | Designed for cloud performance; actual results depend on workload and configuration |
+| Availability/scaling | Features vary by engine and configuration | Aurora-specific replica, failover, and scaling options |
+| Cost | Depends on engine, instance, storage, licensing, and usage | Depends on capacity, storage, I/O, and chosen configuration |
+| Best fit | Broad choice of managed relational engines | Workloads that benefit from Aurora's compatibility and architecture |
+
+#### 5. Practical MERN Example
+
+Suppose your Node.js backend needs a relational database for users, products, orders, and payments:
+
+- Choose **RDS for MySQL** if standard MySQL compatibility and its cost/feature profile meet your needs.
+- Consider **Aurora MySQL-compatible** if its availability, scaling, and performance characteristics fit your workload and budget.
+- If your app uses MongoDB-specific features and document data modeling, neither MySQL nor Aurora is a direct MongoDB replacement; evaluate a suitable document database instead.
+
+#### 6. Important Points
+
+- RDS is the managed database service; Aurora is one of the database engines available through it.
+- Aurora supports MySQL-compatible and PostgreSQL-compatible editions; compatibility is not identical to every upstream feature.
+- Aurora is not always faster or cheaper for every workload. Benchmark representative queries and compare total costs.
+- Select based on engine compatibility, workload, high-availability requirements, operational needs, and budget.
+
+---
