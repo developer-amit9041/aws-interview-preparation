@@ -1869,3 +1869,114 @@ Run commands / deploy application
 **Linux EC2 instances are commonly accessed using SSH, Windows EC2 instances using RDP, and supported instances can also be accessed using EC2 Instance Connect or Systems Manager Session Manager. The required network and IAM configuration must be in place.**
 
 ---
+
+### Q31. How do you deploy a Node.js application on EC2?
+
+#### 1. English Definition
+
+**To deploy a Node.js application on EC2, launch and configure an EC2 instance, install Node.js and required dependencies, transfer the application code, configure environment variables, run the application with a process manager, and expose it securely through a web server or load balancer.**
+
+#### 2. Hindi Definition
+
+Node.js application ko EC2 par deploy karne ke liye pehle EC2 server launch karte hain, Node.js install karte hain, code server par transfer karte hain, environment variables configure karte hain, application run karte hain aur zaroorat ke hisaab se Nginx aur Security Group configure karte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhare paas Node.js + Express backend hai jo local machine par chal raha hai. Ab tum chahte ho ki ye internet par 24/7 accessible rahe. Iske liye EC2 cloud server par app deploy karte hain.
+
+Typical flow:
+1. EC2 instance launch karo (for example, a supported Amazon Linux or Ubuntu AMI).
+2. Security Group mein SSH ko sirf trusted IP se allow karo; public web traffic ke liye required HTTP/HTTPS ports configure karo.
+3. SSH, EC2 Instance Connect ya Session Manager se server par connect karo.
+4. Node.js LTS version install karo using the current official instructions for your OS.
+5. Git se repository clone karo ya secure deployment method se application files transfer karo.
+6. `npm ci` run karo (agar project mein `package-lock.json` hai), phir required environment variables configure karo.
+7. App ko test karne ke liye `node server.js` ya project ka appropriate start command run karo.
+8. Production mein app ko PM2 ya another suitable process manager se run karo, taaki process management aur restart handling ho.
+9. Nginx ko reverse proxy ke roop mein configure karke public HTTP/HTTPS requests ko app ke internal port par forward karo. HTTPS ke liye certificate configure karo.
+10. Logs, monitoring, updates aur deployment rollback ka plan rakho.
+
+#### 4. Practical Example — Express Backend
+
+Assume app ka entry point `server.js` hai aur Express app port `3000` par listen karti hai. App ko `0.0.0.0` par bind karna chahiye taaki Nginx/host networking se access ho sake; public internet ke liye port 3000 ko directly open karna zaroori nahi.
+
+Example commands (Ubuntu-like server; package installation steps OS/version ke hisaab se official Node.js instructions se verify karo):
+
+```bash
+# Connect to your instance from your computer
+ssh -i my-key.pem ubuntu@<EC2-PUBLIC-IP>
+
+# On the EC2 instance, install Git and other prerequisites
+sudo apt update
+sudo apt install -y git nginx
+
+# Install a supported Node.js LTS release using official instructions for your OS,
+# then verify the installation
+node -v
+npm -v
+
+# Get the application code
+ git clone <YOUR-REPOSITORY-URL>
+ cd <YOUR-APP-DIRECTORY>
+ npm ci
+
+# Test the app (replace with the actual start command)
+npm start
+```
+
+For a real deployment, configure secrets such as `MONGODB_URI`, `JWT_SECRET`, and payment credentials via a secure environment/configuration mechanism. Do not commit `.env` or secrets to GitHub. Use least-privilege IAM and restrict file permissions.
+
+Example PM2 process management after installing PM2 through your chosen Node.js package manager:
+
+```bash
+pm2 start server.js --name my-node-api
+pm2 status
+pm2 logs my-node-api
+pm2 save
+```
+
+Nginx can listen on ports 80/443 and proxy requests to `http://127.0.0.1:3000`. Configure HTTPS and certificate renewal for production. PM2 startup integration may also be needed so the app comes back after reboot.
+
+#### 5. Architecture Flow
+
+```text
+User / Browser
+      |
+      | HTTPS (443)
+      v
+Security Group
+      |
+      v
+Nginx (80/443)
+      |
+      | Reverse proxy to localhost:3000
+      v
+Node.js + Express (PM2)
+      |
+      v
+MongoDB Atlas / other database endpoint
+```
+
+MongoDB Atlas or another managed database must allow the EC2 application's network path and credentials. Prefer a secure network configuration and avoid exposing the database publicly to all IPs.
+
+#### 6. Deployment Checklist
+
+| Step | What to verify |
+|---|---|
+| EC2 | Instance running, suitable size and OS |
+| Access | SSH/Session Manager configured securely |
+| Node.js | Supported LTS version installed |
+| Code | Repository/files deployed and dependencies installed |
+| Configuration | Environment variables and secrets set securely |
+| Process | App runs under PM2 or another process manager |
+| Networking | Security Group allows only required ports |
+| Reverse proxy | Nginx forwards requests to the correct local app port |
+| HTTPS | Valid TLS certificate and renewal plan configured |
+| Database | EC2 can securely reach MongoDB or the selected database |
+| Operations | Logs, monitoring, backups where relevant, and rollback plan |
+
+#### 7. Interview Summary
+
+**Deploying Node.js on EC2 involves launching the instance, installing Node.js, transferring code, configuring dependencies and environment variables, running the app with a process manager, and using Nginx/HTTPS plus secure networking for production access.**
+
+---
