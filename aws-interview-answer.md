@@ -10495,3 +10495,99 @@ Note: CRA projects commonly `build/` folder use karte hain; Vite projects usuall
 **Remember:** S3 stores the files; CloudFront caches and delivers eligible content. Private S3 + CloudFront setup mein OAC aur correct bucket policy use karna important hai.
 
 ---
+
+## 12. Route 53 & DNS
+
+### Q154. What is Route 53?
+
+#### 1. English Definition
+
+**Amazon Route 53 is a scalable and highly available Domain Name System (DNS) web service that routes domain-name queries to resources such as websites, load balancers, and other endpoints. It also supports domain registration and health-check-based routing.**
+
+#### 2. Hindi Definition
+
+Amazon Route 53 AWS ki DNS service hai. Yeh domain name, jaise `example.com`, ko uske destination tak route karne mein help karti hai. Isse domain registration, DNS records manage karna aur health checks ke basis par routing karna bhi possible hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application AWS par deployed hai aur tum chahte ho ki users `myapp.com` type karke website open kar sakein.
+
+Browser ko domain ke liye DNS lookup karna hota hai. Route 53 DNS records manage karta hai aur configured record ke according request ko correct destination—jaise CloudFront distribution, load balancer, ya server IP—tak resolve karne mein help karta hai.
+
+**Simple words mein:** Route 53 domain name ko internet par sahi destination tak pahunchane ke liye DNS service provide karta hai.
+
+Route 53 khud React ya Node.js application host nahi karta; yeh DNS queries ka jawab deta hai aur supported routing features provide karta hai.
+
+#### 4. Practical Example
+
+Maan lo:
+- React frontend CloudFront ke through serve ho raha hai.
+- Node.js backend Application Load Balancer (ALB) ke peeche hai.
+- Tumhara domain `myapp.com` hai.
+
+Route 53 mein records configure kar sakte ho:
+- `myapp.com` → CloudFront distribution.
+- `api.myapp.com` → ALB.
+
+Isse users frontend aur API ko apne domain names se access kar sakte hain.
+
+#### 5. Architecture Diagram — DNS Request Flow
+
+```text
+User enters myapp.com
+         |
+         v
+     DNS Resolver
+         |
+         v
+   Amazon Route 53
+   Looks up DNS record
+         |
+         +------> myapp.com -----> CloudFront
+         |
+         +------> api.myapp.com -> Application Load Balancer
+                                      |
+                                      v
+                               Node.js / Express API
+```
+
+**Flow:** User domain enter karta hai → DNS resolver Route 53 se record resolve karta hai → correct destination return hota hai → browser us destination se website/API access karta hai.
+
+#### 6. Practical Command / Configuration
+
+Route 53 hosted zones list karne ke liye AWS CLI:
+
+```bash
+aws route53 list-hosted-zones
+```
+
+Hosted zone ke records dekhne ke liye:
+
+```bash
+aws route53 list-resource-record-sets \
+  --hosted-zone-id YOUR_HOSTED_ZONE_ID
+```
+
+**Configuration steps:**
+1. Domain register karo ya existing domain ko Route 53 ke saath use karo.
+2. Hosted zone create karo.
+3. DNS records configure karo—for example, an Alias record pointing to CloudFront or an ALB where supported.
+4. Existing domain ke liye registrar par correct Route 53 name servers set karo.
+5. DNS propagation aur records ko verify karo.
+
+CLI commands ke liye AWS credentials aur required IAM permissions configured honi chahiye. DNS changes ko resolvers par update hone mein time lag sakta hai, depending on TTL and caching.
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| Route 53 | AWS DNS web service |
+| DNS | Domain names ko IP addresses ya other destinations se resolve karne wala system |
+| Hosted zone | Domain ke DNS records ka container |
+| DNS record | Domain/subdomain aur destination ke beech mapping |
+| Alias record | Supported AWS resources, jaise CloudFront ya ALB, ko point karne wala Route 53 record |
+| Health check | Configured endpoint ki health monitor karne ka feature |
+
+**Remember:** Route 53 DNS queries ko configured destinations tak resolve karta hai. CloudFront content deliver karta hai; Route 53 domain name ko CloudFront ya kisi aur endpoint se map kar sakta hai.
+
+---
