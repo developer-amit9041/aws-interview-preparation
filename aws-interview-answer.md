@@ -4205,3 +4205,58 @@ AWS kai services ke liye default VPC provide kar sakta hai, isliye iska matlab y
 - VPC ka purpose sirf internet access dena nahi, balki network ko organize, isolate aur control karna bhi hai.
 
 ---
+
+### Q61. What is a Subnet?
+
+#### 1. English Definition
+
+**A subnet is a subdivision of a VPC’s IP address range that lets you group AWS resources within a specific network segment. In AWS, each subnet belongs to one Availability Zone.**
+
+#### 2. Hindi Definition
+
+Subnet, VPC ke IP address range ka ek chhota hissa hota hai. Iski madad se hum resources ko alag network segments mein organize kar sakte hain. AWS mein har subnet ek Availability Zone se associated hota hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari VPC ka IP range `10.0.0.0/16` hai. Is range ko tum smaller ranges mein divide kar sakte ho, jaise:
+
+- `10.0.1.0/24` — public subnet
+- `10.0.2.0/24` — private application subnet
+- `10.0.3.0/24` — private database subnet
+
+Isse tum resources ko logically alag rakh sakte ho aur har subnet ke liye suitable route table aur network ACL configure kar sakte ho. Subnet ko public ya private banane mein uski route table ka role hota hai; sirf naam ya CIDR range se woh public/private nahi banta.
+
+#### 4. VPC and Subnet Example
+
+```text
+VPC: 10.0.0.0/16
+|
+|-- Public Subnet:          10.0.1.0/24
+|   `-- Internet-facing Load Balancer
+|
+|-- Private App Subnet:     10.0.2.0/24
+|   `-- Node.js EC2 instance
+|
+`-- Private Database Subnet: 10.0.3.0/24
+    `-- Database resources
+```
+
+Ye conceptual example hai. Real deployment mein high availability ke liye aam taur par har required subnet type ko multiple Availability Zones mein create kiya jata hai.
+
+#### 5. Public Subnet vs Private Subnet
+
+| Public Subnet | Private Subnet |
+|---|---|
+| Route table mein Internet Gateway tak route hota hai | Direct internet route via Internet Gateway nahi hota |
+| Internet-facing resources host kar sakta hai, if IP and security configuration allow | Internal resources jaise application servers ya databases ke liye common choice |
+| Internet se reachability ke liye public IP/endpoint aur suitable security rules bhi zaroori hain | Outbound internet access ki zaroorat ho toh NAT Gateway jaise option use kiye ja sakte hain |
+
+#### 6. Important Points
+
+- Subnet VPC ke andar hota hai.
+- Har subnet ek Availability Zone mein hota hai; ek subnet multiple AZs mein span nahi karta.
+- Subnet ka CIDR block VPC ke address range ke andar hona chahiye aur VPC ke doosre subnet ranges se overlap nahi karna chahiye.
+- AWS IPv4 subnet mein kuch IP addresses reserve karta hai, isliye subnet ke saare addresses resources ko assign nahi kiye ja sakte.
+- Route tables traffic routing control karti hain, aur security groups/NACLs traffic ko filter karne mein help karte hain.
+
+---
