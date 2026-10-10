@@ -8867,3 +8867,116 @@ Lekin har application ko dono services ki zaroorat nahi hoti. Architecture aur r
 - **Dono use karo** jab API management aur backend load balancing dono ki clear requirement ho.
 
 ---
+
+### Q137. How does API Gateway work with Lambda?
+
+#### 1. English Definition
+
+**Amazon API Gateway integrates with AWS Lambda to expose Lambda functions as API endpoints. API Gateway receives HTTP requests, invokes the configured Lambda function, and returns the function's response to the client.**
+
+#### 2. Hindi Definition
+
+API Gateway aur Lambda milkar HTTP APIs bana sakte hain. API Gateway client ki request receive karke configured Lambda function ko invoke karta hai, phir Lambda ka response client ko return karta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari React application mein login API hai aur backend code AWS Lambda par run hota hai.
+
+1. User React frontend par login button click karta hai.
+2. Frontend API Gateway ke endpoint par HTTP request bhejta hai.
+3. API Gateway configured route aur method ke according Lambda function invoke karta hai.
+4. Lambda Node.js code execute karta hai, zaroorat ke hisaab se database ya doosri services ko call karta hai.
+5. Lambda response return karta hai.
+6. API Gateway response ko HTTP response ke roop mein client ko bhej deta hai.
+
+**Easy words mein:** API Gateway request receive aur route karta hai; Lambda backend logic execute karta hai.
+
+#### 4. Practical Example — Node.js Lambda
+
+Example Lambda handler:
+
+```javascript
+exports.handler = async (event) => {
+  const body = {
+    message: "Hello from Lambda!",
+    path: event.rawPath ?? event.path ?? "/"
+  };
+
+  return {
+    statusCode: 200,
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify(body)
+  };
+};
+```
+
+Agar API Gateway ka route is Lambda function se configured hai, client request bhej sakta hai:
+
+```http
+GET https://your-api-id.execute-api.region.amazonaws.com/hello
+```
+
+Example response:
+
+```json
+{
+  "message": "Hello from Lambda!",
+  "path": "/hello"
+}
+```
+
+Yeh example HTTP API ke payload format 2.0 ke event shape ko dhyan mein rakhkar likha gaya hai; API Gateway ke integration type aur payload format ke mutabiq event/response format different ho sakta hai.
+
+#### 5. Architecture Diagram
+
+```text
+React / Browser / Mobile App
+            |
+            | HTTPS request
+            v
+     Amazon API Gateway
+       (route + method)
+            |
+            | Invoke Lambda
+            v
+      AWS Lambda Function
+         (Node.js code)
+            |
+            v
+   Database / Other Services
+            |
+            v
+      Lambda response
+            |
+            v
+     Amazon API Gateway
+            |
+            | HTTP response
+            v
+       Client receives data
+```
+
+#### 6. Important Configuration Points
+
+- **Route and method:** Configure a route such as `GET /hello` or `POST /login` and connect it to the intended Lambda integration.
+- **Lambda permissions:** API Gateway must have permission to invoke the function. The integration setup can configure the required resource-based permission.
+- **Response format:** Return the expected status code, headers, and body for the selected integration and payload format.
+- **Authentication:** Configure a suitable authorization method if the endpoint is protected. A public endpoint should not be assumed secure just because it uses API Gateway.
+- **CORS:** If a browser frontend calls the API from a different origin, configure CORS appropriately.
+- **Errors and logs:** Check API Gateway logs/metrics and Lambda CloudWatch logs when requests fail.
+- **Costs and limits:** API Gateway requests and Lambda invocations have their own pricing and service limits.
+
+#### 7. Summary Table
+
+| Step | What happens |
+|---|---|
+| 1 | Client sends an HTTP request |
+| 2 | API Gateway matches the configured route |
+| 3 | API Gateway invokes Lambda |
+| 4 | Lambda executes backend logic |
+| 5 | Lambda returns a result |
+| 6 | API Gateway sends the HTTP response to the client |
+
+---
