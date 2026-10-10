@@ -10782,3 +10782,107 @@ AWS CLI ke liye credentials aur required IAM permissions configured honi chahiye
 **Remember:** Hosted zone records ko organize aur serve karne ka DNS container hai. Public zone internet-facing DNS ke liye hoti hai; private zone associated VPCs ke internal DNS ke liye.
 
 ---
+
+### Q157. What is an A Record?
+
+#### 1. English Definition
+
+**An A record (Address record) is a DNS record that maps a domain name or hostname to an IPv4 address.**
+
+#### 2. Hindi Definition
+
+A Record ek DNS record hota hai jo domain name ya hostname ko IPv4 address se map karta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhare paas `api.myapp.com` domain hai aur tumhara server IPv4 address `203.0.113.10` par available hai. A record DNS ko batata hai ki `api.myapp.com` ke liye kaunsa IPv4 address return karna hai.
+
+Example:
+
+```text
+api.myapp.com  ->  203.0.113.10
+```
+
+Yaad rakho:
+- **A record:** IPv4 address ke liye.
+- **AAAA record:** IPv6 address ke liye.
+- **CNAME record:** Ek hostname ko doosre hostname se map karta hai.
+
+AWS Route 53 mein alias record bhi use kar sakte ho, jaise domain ko CloudFront distribution ya supported AWS resource par point karne ke liye. Alias record standard A record ke same nahi hai, lekin Route 53 mein A-type alias record common configuration hai.
+
+#### 4. Practical Example
+
+Maan lo tumhari Node.js API EC2 instance par chal rahi hai aur uska public IPv4 address `203.0.113.10` hai. Route 53 Hosted Zone mein record bana sakte ho:
+
+| Field | Value |
+|---|---|
+| Record name | `api.myapp.com` |
+| Record type | `A` |
+| Value | `203.0.113.10` |
+| TTL | `300` seconds |
+
+`203.0.113.10` documentation ke liye reserved example IP hai. Real deployment mein apna actual IPv4 address use karna. Production mein EC2 ke changing public IP ke bajay stable endpoint, jaise ALB DNS name ke saath Route 53 alias, aksar better choice hoti hai.
+
+#### 5. Architecture Diagram — DNS Request Flow
+
+```text
+Browser
+   |
+   | api.myapp.com ki DNS query
+   v
+DNS Resolver
+   |
+   v
+Route 53 Hosted Zone
+   |
+   | A record returns IPv4 address
+   v
+203.0.113.10
+   |
+   v
+Server / API endpoint
+```
+
+**Flow:** Browser hostname resolve karwata hai → DNS resolver authoritative DNS answer leta hai → A record IPv4 address return karta hai → browser us address par connection establish karta hai.
+
+#### 6. Practical Command / Configuration
+
+**DNS lookup:**
+
+```bash
+nslookup api.myapp.com
+```
+
+Linux/macOS par:
+
+```bash
+dig api.myapp.com A
+```
+
+**Route 53 record check karne ke liye:**
+
+```bash
+aws route53 list-resource-record-sets \
+  --hosted-zone-id YOUR_HOSTED_ZONE_ID
+```
+
+Route 53 console mein:
+1. Hosted Zone open karo.
+2. **Create record** select karo.
+3. Record name set karo, jaise `api`.
+4. Record type `A` select karo.
+5. IPv4 address enter karo aur record create karo.
+
+#### 7. Summary Table
+
+| Record type | Purpose | Example |
+|---|---|---|
+| A | Hostname → IPv4 | `api.myapp.com → 203.0.113.10` |
+| AAAA | Hostname → IPv6 | Hostname → IPv6 address |
+| CNAME | Hostname → another hostname | `www.myapp.com → myapp.com` |
+| MX | Mail servers identify karta hai | Email routing |
+| TXT | Text-based DNS data | Domain verification, SPF |
+
+**Remember:** A record domain/hostname ko IPv4 address se map karta hai; IPv6 ke liye AAAA record use hota hai.
+
+---
