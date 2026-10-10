@@ -16958,3 +16958,77 @@ For an EKS workload, use an EKS-compatible deployment action or tooling to updat
 **Interview-ready answer:** AWS CodeBuild is used to build and test source code and generate artifacts or container images. AWS CodeDeploy automates releasing application updates to supported targets such as EC2, Lambda, and ECS. In a CI/CD pipeline, CodeBuild prepares and validates the application, while CodeDeploy handles the deployment stage for supported targets.
 
 ---
+
+### Q218. CodePipeline kaise work karta hai?
+
+#### 1. English Definition
+
+AWS CodePipeline is a managed continuous delivery service that orchestrates a sequence of source, build, test, approval, and deployment actions to automate software releases.
+
+#### 2. Hindi Definition
+
+AWS CodePipeline ek managed service hai jo code source se lekar build, testing, approval aur deployment tak ke steps ko ek automated workflow mein connect aur execute karti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application GitHub par hai. Tum `main` branch par code push karte ho. CodePipeline configured source change detect kar sakti hai aur pipeline ke stages ko order mein run karwati hai.
+
+1. **Source stage:** GitHub ya configured source provider se code/artifact aata hai.
+2. **Build stage:** CodeBuild dependencies install karta hai, tests run karta hai aur build output ya Docker image create kar sakta hai.
+3. **Artifact handoff:** Ek stage ka output next stage ko diya ja sakta hai; pipeline artifacts ko commonly Amazon S3 mein store kiya jata hai.
+4. **Approval stage (optional):** Production deployment se pehle authorized person approval de sakta hai.
+5. **Deploy stage:** Configured deployment action validated output ko target environment mein release karta hai.
+
+CodePipeline khud usually application compile ya test commands execute nahi karta; woh stages aur actions ko orchestrate karta hai. Build commands CodeBuild mein aur deployment target ke hisaab se deployment service/action mein execute hote hain.
+
+#### 4. Practical MERN Pipeline
+
+```text
+Developer pushes code to GitHub
+            |
+            v
+       Source stage
+            |
+            v
+       Build stage
+       (CodeBuild)
+            |
+            v
+   Tests + build / Docker image
+            |
+            v
+   Artifact or image handoff
+            |
+            v
+   Optional manual approval
+            |
+            v
+      Deploy stage
+     (ECS / EKS tooling)
+            |
+            v
+     Application updated
+```
+
+For an ECS deployment, a supported ECS deployment action or CodeDeploy strategy may be used. For EKS, configure an EKS-compatible action/tooling that securely updates Kubernetes resources. Exact actions depend on the target architecture.
+
+#### 5. Main CodePipeline Concepts
+
+| Concept | Meaning |
+|---|---|
+| Pipeline | Complete automated release workflow |
+| Stage | A phase such as Source, Build, or Deploy |
+| Action | A task executed within a stage |
+| Artifact | Output passed between actions |
+| Transition | Movement from one stage to the next |
+| Approval action | Optional manual approval gate |
+
+#### 6. Practical Example
+
+Suppose a Node.js developer pushes a change to GitHub. The pipeline obtains the source, invokes CodeBuild to run `npm ci` and tests, and then proceeds only if the build action succeeds. It can then push a container image to ECR and run the configured deployment action. If a manual approval stage is included, the pipeline waits for approval before continuing.
+
+#### 7. Summary
+
+**Interview-ready answer:** AWS CodePipeline works by connecting stages such as Source, Build, optional Approval, and Deploy. When a configured source change triggers the pipeline, it passes source and artifacts between actions, invokes services such as CodeBuild for testing and building, and runs a configured deployment action. This automates software releases and provides visibility into each stage's status.
+
+---
