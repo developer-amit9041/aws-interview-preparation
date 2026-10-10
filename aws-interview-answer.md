@@ -78,6 +78,7 @@ Ye command configured AWS credentials se associated AWS account aur identity ki 
 
 **Yaad rakhne ki trick:** AWS ek platform hai, aur EC2, S3 aur IAM uski alag-alag services hain.
 
+---
 
 ### Q2. Why do we use AWS?
 
