@@ -16829,3 +16829,72 @@ Deployment stage (ECS / EKS / other target)
 **Interview-ready answer:** AWS CodeBuild is a fully managed build service that compiles code, runs automated tests, and generates build artifacts or container images. It uses a `buildspec.yml` file to define build phases and commands. In a CI/CD pipeline, CodePipeline can invoke CodeBuild for testing and building, then pass the resulting artifacts to a deployment stage.
 
 ---
+
+### Q216. What is AWS CodeDeploy?
+
+#### 1. English Definition
+
+AWS CodeDeploy is a deployment automation service that helps release application updates to supported compute targets, including Amazon EC2 instances, on-premises servers, AWS Lambda, and Amazon ECS.
+
+#### 2. Hindi Definition
+
+AWS CodeDeploy ek deployment automation service hai jo application ke naye versions ko supported servers aur compute services par automatically deploy karne mein help karti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js application EC2 par chal rahi hai. Har release par manually files copy karna, services update karna aur deployment steps repeat karna time-consuming ho sakta hai.
+
+CodeDeploy deployment process automate karne mein help karta hai. Tum deployment instructions aur configuration define karte ho, phir CodeDeploy supported target par application revision release karta hai.
+
+**Common targets:**
+
+- **EC2 / on-premises:** CodeDeploy agent aur deployment instructions ke through supported deployments.
+- **AWS Lambda:** Supported traffic-shifting strategies ke saath new function versions deploy karna.
+- **Amazon ECS:** ECS blue/green deployment patterns ko coordinate karna.
+
+Important: CodeDeploy ka use target type ke according different hota hai. EKS deployment automatically CodeDeploy ka default behavior nahi hai; EKS ke liye Kubernetes manifests apply karne ya compatible deployment tooling/action configure karne ki zaroorat hoti hai.
+
+#### 4. Practical Node.js Example
+
+For an EC2-based Node.js application, a deployment revision can contain application files and an `appspec.yml` file. For example:
+
+```yaml
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /var/www/node-api
+hooks:
+  ApplicationStop:
+    - location: scripts/stop.sh
+      timeout: 60
+      runas: root
+  ApplicationStart:
+    - location: scripts/start.sh
+      timeout: 60
+      runas: root
+```
+
+This is a simplified EC2/on-premises AppSpec example; the actual file layout, permissions, lifecycle hooks, and scripts must match the application. The CodeDeploy agent must be installed and configured on target EC2 instances.
+
+#### 5. CodePipeline vs CodeBuild vs CodeDeploy
+
+| Service | Main responsibility |
+|---|---|
+| CodePipeline | Orchestrates source, build, approval, and deployment stages |
+| CodeBuild | Builds and tests source code; can create artifacts or container images |
+| CodeDeploy | Automates deployments to supported targets such as EC2, Lambda, and ECS |
+
+#### 6. Benefits
+
+- Automates repeatable deployments.
+- Supports deployment lifecycle hooks and configured strategies for supported targets.
+- Helps track deployment status and failures.
+- Integrates with CodePipeline for end-to-end release workflows.
+- Reduces manual steps and deployment errors.
+
+#### 7. Summary
+
+**Interview-ready answer:** AWS CodeDeploy is a deployment automation service for releasing application updates to supported targets such as EC2 instances, on-premises servers, Lambda, and ECS. It uses target-specific deployment configuration and strategies to automate releases and track deployment progress. In a CI/CD workflow, CodePipeline can orchestrate the release and invoke CodeDeploy for the deployment stage.
+
+---
