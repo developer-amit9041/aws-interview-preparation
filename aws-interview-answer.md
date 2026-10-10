@@ -17476,3 +17476,65 @@ ALB-based traffic switching is one possible implementation; ECS, CodeDeploy, or 
 **Interview-ready answer:** Blue-Green Deployment is a deployment strategy where two production-like environments are maintained. The current version runs in Blue, while the new version is deployed and tested in Green. Once Green passes health checks, traffic is switched to it. If a problem occurs, traffic can be routed back to Blue, provided the old environment and data changes remain compatible.
 
 ---
+
+### Q223. Rolling Deployment kya hota hai?
+
+#### 1. English Definition
+
+Rolling Deployment is a deployment strategy in which application instances are updated gradually in batches, while the remaining instances continue serving traffic. This reduces downtime and avoids replacing the entire fleet at once.
+
+#### 2. Hindi Definition
+
+Rolling Deployment mein application ke sabhi servers ek saath update nahi hote. Kuch servers ko pehle new version par update kiya jata hai, jabki baaki servers users ki requests handle karte rehte hain. Phir baaki servers ko update kiya jata hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari Node.js application 4 EC2 instances par chal rahi hai aur sab par v1 installed hai.
+
+- Pehle 1 ya 2 instances ko v2 par update karo.
+- Health checks pass hone par un instances ko traffic serve karne do.
+- Phir next batch ko v2 par update karo.
+- Aise karke sabhi instances v2 par aa jayenge.
+
+Iska benefit hai ki poori application ko ek saath stop karne ki zaroorat nahi hoti. Lekin deployment ke dauran v1 aur v2 kuch time ke liye saath chal sakte hain, isliye dono versions ko shared APIs aur database schema ke saath compatible rakhna important hai.
+
+#### 4. Practical AWS Example
+
+Example: An Application Load Balancer (ALB) sends traffic to four EC2 instances running a Node.js app.
+
+```text
+Before deployment:
+EC2-1: v1   EC2-2: v1   EC2-3: v1   EC2-4: v1
+
+Batch 1:
+EC2-1: v2   EC2-2: v1   EC2-3: v1   EC2-4: v1
+
+Batch 2:
+EC2-1: v2   EC2-2: v2   EC2-3: v1   EC2-4: v1
+
+Final:
+EC2-1: v2   EC2-2: v2   EC2-3: v2   EC2-4: v2
+```
+
+During each batch, deployment tooling should drain connections or remove instances from traffic as needed, update them, and wait for health checks before continuing. Exact behavior depends on the deployment platform and configuration.
+
+#### 5. Important Points
+
+- **Batch size:** Controls how many instances update at a time.
+- **Health checks:** Confirm updated instances are ready before proceeding.
+- **Availability:** Keep enough healthy instances running to handle traffic.
+- **Rollback:** Failed deployments may require restoring the previous version; rollback is not always an automatic instant switch.
+- **Database compatibility:** Use backward-compatible migrations when old and new application versions run simultaneously.
+
+#### 6. Blue-Green vs Rolling Deployment
+
+| Feature | Blue-Green | Rolling |
+|---|---|---|
+| Approach | Two separate environments | Update instances in batches |
+| Traffic change | Switch traffic to the new environment | Traffic continues through healthy instances as batches update |
+| Extra infrastructure | Often needs capacity for both environments | Usually needs less additional capacity |
+| Rollback | Can be fast by switching back if old environment is ready | Depends on restoring the old version across updated instances |
+
+**Interview-ready answer:** Rolling Deployment is a strategy in which application instances are updated gradually in batches instead of updating all instances at once. The remaining healthy instances continue serving traffic, helping reduce downtime. Health checks, suitable batch sizes, and backward-compatible database changes are important for a safe rollout.
+
+---
