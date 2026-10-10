@@ -14035,3 +14035,70 @@ aws sqs set-queue-attributes \
 **Interview-ready answer:** A Dead Letter Queue is a separate SQS queue used to isolate messages that fail processing repeatedly. A redrive policy specifies the DLQ and `maxReceiveCount`; once the receive-attempt limit is reached, SQS moves the message to the DLQ so it can be investigated without repeatedly interfering with normal message processing.
 
 ---
+
+#### 4. Practical Example / Code
+
+```text
+Node.js Order Service
+          | publish
+          v
+       SNS Topic
+       /   |   \
+      v    v    v
+    SQS A SQS B Lambda
+   Invoice Analytics Notifications
+```
+
+Using AWS SDK for JavaScript v3:
+
+```javascript
+import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
+
+const sns = new SNSClient({ region: "ap-south-1" });
+
+export async function publishOrderPlaced(order) {
+  await sns.send(new PublishCommand({
+    TopicArn: process.env.ORDER_TOPIC_ARN,
+    Subject: "Order placed",
+    Message: JSON.stringify({ event: "OrderPlaced", orderId: order.id }),
+  }));
+}
+```
+
+Install with `npm install @aws-sdk/client-sns`. The application's IAM role needs `sns:Publish` permission for the topic. Store the topic ARN in an environment variable and do not hard-code credentials.
+
+#### 5. Practical Command / Configuration
+
+Create a topic:
+
+```bash
+aws sns create-topic --name order-events --region ap-south-1
+```
+
+Subscribe an SQS queue to the topic:
+
+```bash
+aws sns subscribe \
+  --topic-arn "<SNS_TOPIC_ARN>" \
+  --protocol sqs \
+  --notification-endpoint "<SQS_QUEUE_ARN>" \
+  --region ap-south-1
+```
+
+The SQS queue's resource policy must allow the SNS topic to call `sqs:SendMessage`. Email subscriptions require the recipient to confirm the subscription.
+
+#### 6. Summary Table
+
+| Term | Meaning |
+|---|---|
+| SNS | Managed pub/sub notification service |
+| Topic | Named channel publishers send messages to |
+| Publisher | Application or service sending a message |
+| Subscriber | Endpoint receiving topic messages |
+| Fan-out | One published message delivered to multiple subscribers |
+| Integrations | SQS, Lambda, HTTP/S, email, SMS |
+| SNS vs SQS | SNS pushes notifications; SQS stores messages for consumers to poll |
+
+**Interview-ready answer:** Amazon SNS is a fully managed publish/subscribe messaging service. A publisher sends a message to an SNS topic, and SNS delivers it to subscribed endpoints such as SQS queues, Lambda functions, HTTP/S endpoints, email, or SMS. It is useful for event notifications and fan-out to multiple services.
+
+---
