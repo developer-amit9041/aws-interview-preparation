@@ -369,3 +369,72 @@ Note: Sirf do AZs mein servers create karna enough nahi hai. Load balancing, dat
 **Yaad rakhne ki trick:** Region = bada geographic area; AZ = us Region ke andar isolated location. Multiple AZs = single-location failure ka risk kam.
 
 ---
+
+---
+
+### Q6. Region vs Availability Zone?
+
+#### 1. English Definition
+
+**An AWS Region is a separate geographic area where AWS operates its cloud infrastructure, while an Availability Zone (AZ) is an isolated location within a Region. A Region contains multiple AZs.**
+
+#### 2. Hindi Definition
+
+AWS Region ek bada geographical area hota hai jahan AWS infrastructure operate karta hai. Availability Zone (AZ), us Region ke andar ek alag aur isolated location hoti hai. Ek Region mein multiple AZs hoti hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, isko city aur alag-alag buildings ke example se samjho:
+
+- **Region = Geographic area:** Jaise Asia Pacific (Mumbai), jiska code `ap-south-1` hai.
+- **Availability Zone = Us Region ke andar isolated infrastructure location:** AWS resources ko alag AZs mein deploy karne se ek location ki failure ka impact kam kiya ja sakta hai.
+
+Maan lo tumhari MERN application Mumbai Region mein hai. Agar tum backend ko sirf ek AZ mein deploy karte ho, toh us AZ ki failure se backend down ho sakta hai. Agar tum multiple AZs mein backend instances aur Load Balancer configure karte ho, toh doosri AZ traffic serve kar sakti hai—agar woh healthy ho aur enough capacity available ho.
+
+#### 4. Architecture Example
+
+```text
+AWS Region: Mumbai (ap-south-1)
+                   |
+          +--------+--------+
+          |                 |
+        AZ-a               AZ-b
+          |                 |
+      EC2 #1             EC2 #2
+   Node.js Backend    Node.js Backend
+          \                 /
+           +--- Load Balancer ---+
+                    |
+                  Users
+```
+
+Yeh conceptual diagram hai: actual setup mein Load Balancer ko dono AZs ke healthy targets ke saath configure kiya jata hai.
+
+#### 5. Key Differences
+
+| Feature | AWS Region | Availability Zone (AZ) |
+|---|---|---|
+| Meaning | Geographic area | Region ke andar isolated location/group |
+| Scope | Bada geographic level | Region ka part |
+| Example | Mumbai (`ap-south-1`) | Mumbai Region ki AZs |
+| Main decision | Application kis geographic area mein host hogi | Resources ko kitni AZs mein distribute karna hai |
+| Availability impact | Different Regions mein deploy karna regional failure ke against resilience de sakta hai | Multiple AZs mein deploy karna AZ-level failure ke against resilience improve karta hai |
+
+#### 6. Interview Example
+
+**Interviewer:** Agar EC2 instance Mumbai Region ki ek AZ mein fail ho jaaye, toh kya doosri AZ ka EC2 automatically request handle karega?
+
+**Answer:** Automatically nahi. Backend instances, Load Balancer health checks, routing, application dependencies aur sufficient capacity properly configure honi chahiye. Tab traffic healthy AZ ke instance tak route kiya ja sakta hai.
+
+#### 7. Summary Table
+
+| Term | Yaad rakhne wali baat |
+|---|---|
+| Region | Geographic area |
+| AZ | Region ke andar isolated infrastructure location/group |
+| Multi-AZ | Ek Region ke multiple AZs mein resources deploy karna |
+| Multi-Region | Multiple geographic Regions mein resources deploy karna |
+
+**Yaad rakhne ki trick:** Region batata hai *kahan* deploy karna hai; AZ batata hai us Region ke andar resources ko *kaise alag locations mein distribute* karna hai.
+
+---
