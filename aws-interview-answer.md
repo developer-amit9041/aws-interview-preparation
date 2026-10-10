@@ -3069,3 +3069,129 @@ Replace the example account ID and role name with the real values. The bucket po
 - Follow least privilege: grant only the necessary actions and resources.
 
 ---
+
+### Q47. How do you upload files to S3 using Node.js?
+
+#### 1. English Definition
+
+**You can upload files to Amazon S3 from Node.js using the AWS SDK for JavaScript, typically by creating an S3 client and sending a `PutObject` or `Upload` request with the bucket name, object key, and file data.**
+
+#### 2. Hindi Definition
+
+Node.js se S3 par file upload karne ke liye hum AWS SDK use karte hain. Ismein bucket name, object key aur file data provide karke file cloud storage mein upload karte hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein user profile image upload karta hai. React frontend file ko Express backend bhejta hai, aur backend AWS SDK ke through image ko S3 bucket mein upload karta hai.
+
+Flow:
+
+```text
+React Frontend -> Express API -> AWS SDK -> S3 Bucket
+```
+
+Is example mein `multer` multipart form upload parse karega aur AWS SDK v3 ka `PutObjectCommand` S3 par object upload karega.
+
+#### 4. Practical Example — Express + Multer + AWS SDK v3
+
+**Step 1: Install packages**
+
+```bash
+npm install @aws-sdk/client-s3 multer
+```
+
+**Step 2: Configure AWS credentials securely**
+
+For local development, configure credentials using an AWS profile, for example with `aws configure`, or another supported credential provider. On EC2, attach an IAM role with only the required S3 permissions; the SDK can obtain temporary credentials from the role. Do not hardcode AWS access keys in source code or frontend code.
+
+Set the bucket and region in environment configuration:
+
+```env
+AWS_REGION=ap-south-1
+S3_BUCKET_NAME=my-mern-app-uploads
+```
+
+**Step 3: Create an upload route**
+
+```js
+const express = require('express');
+const multer = require('multer');
+const { randomUUID } = require('crypto');
+const {
+  S3Client,
+  PutObjectCommand,
+} = require('@aws-sdk/client-s3');
+
+const app = express();
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
+});
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+});
+
+app.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'File is required' });
+    }
+
+    // Validate allowed file types/content for your application before upload.
+    const key = `uploads/${randomUUID()}`;
+
+    await s3.send(new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: key,
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype,
+    }));
+
+    return res.status(201).json({
+      message: 'File uploaded successfully',
+      key,
+    });
+  } catch (error) {
+    console.error('S3 upload failed:', error);
+    return res.status(500).json({ message: 'Upload failed' });
+  }
+});
+
+app.listen(5000, () => {
+  console.log('Server listening on port 5000');
+});
+```
+
+This is a minimal teaching example. In production, authenticate and authorize the user, validate file content (not only the supplied MIME type), enforce size/type limits, add rate limiting, and use an IAM role with only the required permissions. Memory storage holds the upload in RAM, so use a streaming/multipart strategy for larger files or high traffic.
+
+**Step 4: Send a file from the frontend**
+
+```js
+const formData = new FormData();
+formData.append('file', selectedFile);
+
+const response = await fetch('/upload', {
+  method: 'POST',
+  body: formData,
+});
+
+const result = await response.json();
+console.log(result.key);
+```
+
+Browser mein `Content-Type: multipart/form-data` manually set mat karo; browser boundary automatically add karta hai.
+
+#### 5. Required AWS Permissions
+
+The application's IAM role typically needs `s3:PutObject` on the target object ARN, for example `arn:aws:s3:::my-mern-app-uploads/uploads/*`. Add other permissions only if the application needs them. The bucket can remain private; the API can return the object key and use an authorized retrieval flow such as a presigned URL when a user needs to download the file.
+
+#### 6. Important Points
+
+- Use AWS SDK for JavaScript v3 (`@aws-sdk/client-s3`) for new Node.js implementations.
+- Keep credentials out of source code and the React frontend; prefer an EC2 IAM role in AWS.
+- Store the object key in MongoDB if the application needs a reference to the uploaded file.
+- Do not assume the object is public or return a public URL unless access is intentionally configured.
+- Validate file type, size, and user permissions before upload.
+
+---
