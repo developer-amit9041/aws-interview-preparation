@@ -8567,3 +8567,100 @@ Example: 20 requests/second × 3 seconds average duration ≈ 60 concurrent exec
 - **Account concurrency quota:** Account/Region mein functions ki total available concurrency ko limit karti hai.
 - Concurrency planning ke liye request rate, execution duration, downstream database/API capacity, and throttling metrics monitor karo.
 - Concurrency increase karne se downstream database par load bhi badh sakta hai, isliye sirf limit badhana hamesha sahi solution nahi hota.
+
+### Q134. What is Provisioned Concurrency?
+
+#### 1. English Definition
+
+**Provisioned Concurrency is an AWS Lambda feature that keeps a specified number of execution environments initialized and ready to handle incoming requests. It reduces cold-start latency and helps applications deliver more predictable response times.**
+
+#### 2. Hindi Definition
+
+Provisioned Concurrency AWS Lambda ka ek feature hai, jo specified number mein execution environments ko pehle se initialize karke ready rakhta hai. Isse cold-start latency kam hoti hai aur application ka response time zyada predictable hota hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumne Node.js mein ek API banayi hai aur use AWS Lambda par deploy kiya hai. Normally, jab request aati hai, toh Lambda ko execution environment initialize karna pad sakta hai. Is process mein extra time lag sakta hai, jise **Cold Start** kehte hain.
+
+Provisioned Concurrency mein hum Lambda ke kuch environments ko pehle se ready rakhte hain, taaki request aane par initialization ke liye wait kam karna pade.
+
+**Simple words mein:** Lambda ke execution environments ko pehle se ready rakhna hi Provisioned Concurrency hai.
+
+#### 4. Practical Example — MERN Application
+
+Maan lo tumhari e-commerce application mein payment API hai:
+
+- **Frontend:** React.js
+- **API routing:** Amazon API Gateway
+- **Backend logic:** AWS Lambda (Node.js)
+- **Payment processing:** Payment provider API
+
+Agar tum Lambda ke liye Provisioned Concurrency `5` configure karte ho, toh AWS paanch execution environments ko initialize karke ready rakhega. Incoming requests in ready environments par process ho sakti hain, jab tak provisioned capacity available hai.
+
+#### 5. Architecture Diagram
+
+```text
+       React.js Frontend / User
+                 |
+                 | Payment API request
+                 v
+         Amazon API Gateway
+                 |
+                 v
+            AWS Lambda
+     Provisioned Concurrency = 5
+                 |
+      +----------+----------+
+      |          |          |
+      v          v          v
+  Ready env 1  Ready env 2 ... Ready env 5
+      |
+      v
+ Payment API logic
+      |
+      v
+Payment provider / Database
+      |
+      v
+  API response to user
+```
+
+**Working flow:**
+
+1. User React frontend se payment request bhejta hai.
+2. API Gateway request ko Lambda tak route karta hai.
+3. Lambda available pre-initialized environment use karta hai.
+4. Backend payment logic execute karta hai aur required services se communicate karta hai.
+5. Response user ko return hota hai.
+
+**Important:** Provisioned Concurrency payment process nahi karta; yeh Lambda environments ko ready rakhta hai. Payment verification aur database updates backend logic ki responsibility hain. Agar traffic provisioned capacity se zyada ho, toh additional requests cold starts experience kar sakti hain.
+
+#### 6. Practical Command — AWS CLI
+
+Provisioned Concurrency configure karne ke liye:
+
+```bash
+aws lambda put-provisioned-concurrency-config \
+  --function-name my-function \
+  --qualifier prod \
+  --provisioned-concurrent-executions 5
+```
+
+- `my-function`: Lambda function ka naam.
+- `prod`: Published version ya alias ka naam.
+- `5`: Provisioned concurrency capacity.
+
+**Note:** Provisioned Concurrency ko `$LATEST` ke bajaye published version ya alias par configure kiya jata hai. AWS ko environments initialize karne mein kuch samay lag sakta hai. Is feature ke liye additional charges apply hote hain.
+
+#### 7. Summary Table
+
+| Topic | Easy Meaning |
+|---|---|
+| Provisioned Concurrency | Lambda environments pehle se ready rakhna |
+| Main purpose | Cold-start latency reduce karna |
+| Configuration | Required concurrency capacity set karna |
+| Cost | Additional charges apply hote hain |
+| Use case | Payment APIs, login APIs, latency-sensitive applications |
+| Limitation | Provisioned capacity se zyada traffic par additional requests ko cold starts face karne pad sakte hain |
+
+---
