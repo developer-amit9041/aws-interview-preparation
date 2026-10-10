@@ -1494,4 +1494,63 @@ Actual connectivity dono layers ke rules ke saath route tables, internet gateway
 
 **Yaad rakhne ki trick:** SG = Server ka Gate; NACL = Network/Subnet ka Gate.
 
+---
+
+### Q25. What is Elastic IP?
+
+#### 1. English Definition
+
+**An Elastic IP address is a static public IPv4 address allocated to your AWS account that you can associate with supported AWS resources, such as an EC2 instance, and re-associate when needed.**
+
+#### 2. Hindi Definition
+
+Elastic IP AWS ka static public IPv4 address hota hai, jise tum apne AWS account mein allocate karke EC2 jaise supported resource ke saath associate kar sakte ho. Zaroorat padne par ise doosre supported resource ke saath re-associate bhi kiya ja sakta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, normal EC2 public IPv4 address instance stop/start ya lifecycle changes ke baad change ho sakta hai. Agar tumhe ek fixed public IPv4 address chahiye, toh Elastic IP useful ho sakta hai.
+
+Example: tumhari MERN application ka backend EC2 par chal raha hai aur tum chahte ho ki external integration ya DNS setup ke liye same public IPv4 address use ho. Elastic IP ko EC2 ke saath associate kar sakte ho; zaroorat par supported resource par re-associate bhi kar sakte ho.
+
+Elastic IP har application ke liye zaroori nahi hai. DNS ke liye aam taur par stable domain name use karna better hota hai; architecture ke hisaab se load balancer ya other AWS networking services bhi suitable ho sakti hain.
+
+#### 4. Practical Flow
+
+```text
+Allocate Elastic IP in AWS
+          |
+          v
+Associate it with EC2
+          |
+          v
+EC2 uses a stable public IPv4 address
+          |
+          v
+If required, disassociate and re-associate
+with another supported resource
+```
+
+#### 5. Important Points
+
+- Elastic IP is a **static public IPv4 address**; it is not a DNS name.
+- It is allocated to your AWS account and can be re-associated when needed, subject to AWS limits and configuration.
+- AWS charges can apply to public IPv4 addresses, including Elastic IPs; check current AWS pricing and avoid leaving addresses allocated but unused.
+- An Elastic IP does not automatically make an EC2 instance highly available. You still need appropriate failover, health checks, and application/network design.
+- For many architectures, a load balancer or DNS-based design may be preferable to assigning an Elastic IP directly to each application server.
+
+#### 6. Elastic IP vs Dynamic Public IP
+
+| Feature | Elastic IP | Automatically assigned public IPv4 |
+|---|---|---|
+| Address stability | Static while retained and associated as configured | Can change after certain instance lifecycle events, such as stop/start |
+| Re-association | Can be moved to another supported resource | Not a portable address in the same way |
+| Cost | Public IPv4 pricing may apply | Public IPv4 pricing may also apply |
+| Typical use | Fixed public IPv4 requirement | Simple instances that do not need a reserved address |
+
+#### 7. Interview Summary
+
+**Elastic IP is a static public IPv4 address that can be associated with an EC2 instance or another supported AWS resource, helping maintain a consistent public IP when reassociation is needed.**
+
+**Yaad rakhne ki trick:** Elastic IP = AWS ka fixed public IPv4 address.
+
 ---\n
