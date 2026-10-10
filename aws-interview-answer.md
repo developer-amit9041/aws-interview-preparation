@@ -8432,3 +8432,49 @@ Ensure the AWS SDK v3 package is included in your deployment package or otherwis
 - If the bucket uses SSE-KMS encryption, the role may also need appropriate KMS permissions.
 - If access still fails, check the bucket policy, KMS key policy, and any organization-level restrictions as well as the IAM role.
 
+### Q131. How does Lambda work with API Gateway?
+
+#### 1. English Definition
+
+Amazon API Gateway exposes HTTP APIs and can invoke an AWS Lambda function as the backend to process requests and return responses.
+
+#### 2. Hindi Definition
+
+API Gateway client ki HTTP request receive karta hai aur configured integration ke through Lambda function ko invoke karta hai. Lambda request process karke response return karti hai, jise API Gateway client ko bhej deta hai.
+
+#### 3. Hinglish Explanation
+
+MERN application mein frontend ko backend API chahiye hoti hai. Traditional setup mein request Express/Node.js server par ja sakti hai. Serverless setup mein API Gateway HTTP endpoint provide karta hai aur us endpoint ko Lambda function ke saath connect kar dete hain.
+
+Flow:
+
+**Frontend → API Gateway endpoint → Lambda function → (optional database/S3) → API Gateway → Frontend**
+
+Example: frontend `GET /users` call karta hai. API Gateway request Lambda ko bhejta hai. Lambda users fetch karti hai aur response return karti hai. API Gateway response browser ko send karta hai.
+
+#### 4. Practical Node.js Example
+
+Lambda function:
+
+```js
+exports.handler = async (event) => {
+  const name = event.queryStringParameters?.name || "Guest";
+
+  return {
+    statusCode: 200,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: `Hello, ${name}!` })
+  };
+};
+```
+
+API Gateway mein HTTP API create karke Lambda integration select karo, route jaise `GET /hello` configure karo, aur route ko deploy karo. Phir frontend is endpoint ko request bhej sakta hai, for example `GET /hello?name=Amit`.
+
+#### 5. Important Points
+
+- API Gateway public HTTP endpoint, routing, and optional authorization/throttling provide kar sakta hai.
+- Lambda business logic execute karti hai; API Gateway request ko Lambda tak pahunchata hai.
+- API Gateway integration ke liye Lambda invocation permission bhi configured honi chahiye; console usually required permission add kar sakta hai.
+- Lambda proxy integration mein response format important hota hai: `statusCode`, optional `headers`, and `body`.
+- CORS configure karna pad sakta hai jab browser-based frontend kisi different origin se API call kare.
+- API Gateway aur Lambda dono ki pricing, quotas, timeout limits, and monitoring ko consider karo.
