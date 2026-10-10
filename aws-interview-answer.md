@@ -2777,3 +2777,49 @@ Keep the bucket private by default unless public access is explicitly required. 
 | Accessed through S3 APIs/HTTP-based methods | Attached to EC2 and accessed through the operating system filesystem |
 
 ---
+
+### Q42. What is an S3 Bucket?
+
+#### 1. English Definition
+
+**An Amazon S3 bucket is a container used to store and organize objects, such as images, documents, videos, and backups, in Amazon S3.**
+
+#### 2. Hindi Definition
+
+S3 bucket ek container hota hai jisme hum Amazon S3 par files aur data objects ke roop mein store karte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, S3 ko cloud storage samjho aur bucket ko us storage ke andar ek container. Jaise tumhari MERN application mein users profile photos aur product images upload karte hain, tum in files ko ek S3 bucket mein rakh sakte ho.
+
+Example:
+
+```text
+Bucket: my-mern-app-uploads
+  ├── users/123/profile.jpg
+  ├── products/shoes.png
+  └── documents/invoice.pdf
+```
+
+Yahan `my-mern-app-uploads` bucket ka naam hai. Baaki entries objects ke keys hain. `/` se folder jaisa structure dikh sakta hai, lekin S3 object keys use karta hai; ye normal disk filesystem jaisa nahi hai.
+
+#### 4. Practical Example — MERN Application
+
+1. AWS Console mein S3 open karke bucket create karo, jaise `my-mern-app-uploads`.
+2. Bucket name globally unique hona chahiye within the applicable AWS partition; lowercase naming rules follow karo.
+3. Region select karo jahan data store karna hai.
+4. Public access ko default mein blocked/private rakho, jab tak public access ki specific need na ho.
+5. Backend ko appropriate IAM role permissions do, taaki woh required objects upload/read kar sake.
+6. Upload ke baad MongoDB mein object key, jaise `users/123/profile.jpg`, save kar sakte ho.
+
+Application files ko authorized users ko serve karne ke liye presigned URLs ya carefully configured CloudFront/access policies use kar sakti hai. AWS credentials React frontend mein kabhi expose mat karo.
+
+#### 5. Important Points
+
+- A bucket stores objects; each object consists of data, metadata, and a key.
+- Bucket names must follow S3 naming rules and generally must be unique within the AWS partition.
+- A bucket is created in a specific AWS Region.
+- Bucket policies and IAM policies control access; a bucket is not public automatically.
+- S3 storage and requests can incur charges depending on usage and storage class.
+
+---
