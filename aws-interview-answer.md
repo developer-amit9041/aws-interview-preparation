@@ -3683,3 +3683,53 @@ await s3.send(new PutObjectCommand({
 - Compare total cost, including requests, retrieval, transition and minimum-duration charges—not just the per-GB storage rate.
 
 ---
+
+### Q54. S3 Standard vs Glacier?
+
+#### 1. English Definition
+
+**S3 Standard is designed for frequently accessed data with low-latency access, while S3 Glacier storage classes are designed for long-term archival data that is accessed infrequently and may have retrieval delays or additional retrieval costs.**
+
+#### 2. Hindi Definition
+
+S3 Standard un files ke liye hai jinhe frequently aur quickly access karna hota hai. S3 Glacier classes un files ko long-term archive karne ke liye hain jinhe bahut kam access kiya jaata hai aur jinhe retrieve karne mein delay ho sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein product images aur purane compliance reports S3 mein stored hain.
+
+- Product images users baar-baar dekhte hain, isliye S3 Standard suitable ho sakta hai.
+- Purane reports ko saalon tak store karna hai, lekin rarely download karna hai, toh suitable Glacier class cost-effective ho sakti hai.
+
+Glacier ek single storage class nahi, balki archival storage classes ka family hai. Glacier Instant Retrieval milliseconds mein access de sakta hai; Glacier Flexible Retrieval aur Deep Archive mein selected retrieval option ke hisaab se minutes se hours ya longer wait karna pad sakta hai.
+
+#### 4. Difference Table
+
+| Feature | S3 Standard | S3 Glacier classes |
+|---|---|---|
+| Main purpose | Frequently accessed data | Long-term, infrequently accessed archive data |
+| Access speed | Millisecond access | Class aur retrieval option ke hisaab se milliseconds se hours tak |
+| Storage cost | Generally higher per GB | Generally lower archive storage cost |
+| Retrieval charges | Standard ke liye Glacier-style retrieval fees nahi; request/data transfer charges may still apply | Retrieval and request charges may apply depending on class and retrieval option |
+| Minimum storage duration | No minimum storage duration charge like Glacier archive classes | Minimum storage duration applies to relevant Glacier classes; varies by class |
+| Common use | Website assets, active product images, frequently read files | Old records, backups, compliance archives |
+
+Actual pricing and terms depend on AWS Region and current pricing. Compare total costs, not just per-GB storage price.
+
+#### 5. Practical MERN Example
+
+```text
+Frequently viewed product images -> S3 Standard
+Old compliance PDFs, rarely retrieved -> S3 Glacier class
+```
+
+If a report must be available immediately, choose an appropriate class such as Glacier Instant Retrieval or keep it in an online class, based on cost and requirements. If hours of retrieval delay is acceptable, Flexible Retrieval or Deep Archive may be suitable.
+
+#### 6. Important Points
+
+- Glacier storage is not automatically the best choice for every backup; retrieval time and cost must fit recovery requirements.
+- Objects in archive classes may need a restore/retrieval step before they can be downloaded, depending on the class.
+- Lifecycle policies can transition objects from Standard to archival classes after a chosen period.
+- Use S3 Standard for frequent, low-latency access; use Glacier classes for suitable archive workloads.
+
+---
