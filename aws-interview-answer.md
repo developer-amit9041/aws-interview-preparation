@@ -8138,3 +8138,66 @@ MERN application mein user image S3 par upload karta hai. S3 event Lambda ko inv
 - CloudWatch Logs aur metrics se execution behavior aur errors monitor kar sakte ho.
 
 ---
+
+### Q126. What is Lambda Cold Start?
+
+#### 1. English Definition
+
+**A Lambda cold start is the additional initialization time that may occur when AWS Lambda creates a new execution environment before running a function.**
+
+#### 2. Hindi Definition
+
+Lambda Cold Start woh extra time hai jo AWS Lambda ko naya execution environment create aur initialize karne mein lag sakta hai, uske baad function ka code execute hota hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Lambda function user ki API request handle karti hai. Agar AWS ko us function ke liye naya execution environment banana pade, toh request process hone se pehle initialization ka extra time lag sakta hai. Isi ko cold start kehte hain.
+
+Agar function ka suitable execution environment pehle se initialized aur available hai, toh invocation ko generally initialization ka woh extra delay nahi lagta—isse warm invocation kehte hain. Lekin warm environment reuse guaranteed nahi hai; AWS environment ko reuse bhi kar sakta hai aur retire bhi kar sakta hai.
+
+Cold start par effect daalne wale factors:
+- Runtime aur initialization code.
+- Deployment package/dependencies ka size aur complexity.
+- VPC configuration aur other resource initialization details.
+- Function architecture aur runtime features.
+
+#### 4. Practical Example
+
+```text
+First invocation (new environment)
+API request
+    |
+    v
+Create / initialize Lambda environment
+    |
+    v
+Run function code
+    |
+    v
+Return response
+
+Later invocation (environment reused)
+API request -> Run function code -> Return response
+```
+
+Yeh simplified flow hai. Warm invocation mein bhi execution latency hoti hai; sirf new environment initialization ka additional work avoid ho sakta hai.
+
+#### 5. How to Reduce Cold Start Impact
+
+| Approach | Why it helps |
+|---|---|
+| Keep initialization code minimal | Reduces work needed before handler runs |
+| Reduce package/dependency complexity | Can reduce initialization overhead |
+| Initialize reusable clients outside the handler when appropriate | Allows reuse within a reused execution environment |
+| Use Provisioned Concurrency for latency-sensitive workloads | Pre-initializes execution environments to reduce cold-start impact |
+| Measure with CloudWatch and tracing/metrics | Helps identify actual initialization latency |
+
+#### 6. Important Points
+
+- A cold start is not an error; it is extra initialization latency.
+- It can occur when Lambda needs a new execution environment, including scale-out or after an environment is retired.
+- Not every invocation is a cold start, and warm reuse is not guaranteed.
+- Provisioned Concurrency can reduce cold-start latency but adds cost and needs capacity planning.
+- Optimize based on measured latency; actual cold-start duration depends on runtime, code, configuration, and workload.
+
+---
