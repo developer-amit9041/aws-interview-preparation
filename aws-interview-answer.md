@@ -4561,3 +4561,56 @@ Yeh simplified example hai. `10.0.0.0/16` tumhari VPC range ko represent karta h
 - Internet Gateway route hone ke bawajood public IP/endpoint aur suitable security rules ke bina resource necessarily internet-accessible nahi hota.
 
 ---
+
+### Q67. What is a CIDR?
+
+#### 1. English Definition
+
+**CIDR (Classless Inter-Domain Routing) is a method of representing IP address ranges using an IP address followed by a prefix length, such as `10.0.0.0/16`.**
+
+#### 2. Hindi Definition
+
+CIDR ek method hai jisse hum IP addresses ki range ko represent karte hain. Ismein IP address ke baad `/` aur ek number hota hai, jaise `10.0.0.0/16`, jo batata hai ki kitne starting bits network portion ko represent karte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, AWS VPC create karte waqt tumhe IP address range define karni hoti hai. Is range ko CIDR block kehte hain.
+
+Example: `10.0.0.0/16`
+
+- `10.0.0.0` IP network address hai.
+- `/16` ka matlab IPv4 address ke 32 bits mein se pehle 16 bits network prefix ke liye hain.
+- IPv4 mein total addresses `2^(32 - prefix length)` se calculate hote hain.
+
+Isliye `10.0.0.0/16` mein total 65,536 IPv4 addresses hote hain. AWS VPC ke andar subnets ke liye isse chhoti ranges choose ki ja sakti hain, jaise `10.0.1.0/24`.
+
+#### 4. CIDR Examples
+
+| CIDR Block | Total IPv4 Addresses | Simple Meaning |
+|---|---:|---|
+| `10.0.0.0/16` | 65,536 | Large network range |
+| `10.0.1.0/24` | 256 | Smaller network range |
+| `10.0.1.0/28` | 16 | Much smaller network range |
+
+In standard AWS IPv4 subnets, AWS reserves 5 IP addresses per subnet, so not all addresses are assignable to resources. For example, a `/24` subnet has 256 total addresses and normally 251 available for use.
+
+#### 5. VPC and Subnet Example
+
+```text
+VPC CIDR: 10.0.0.0/16
+|
+|-- Public Subnet:   10.0.1.0/24
+|-- Private Subnet:  10.0.2.0/24
+`-- DB Subnet:       10.0.3.0/24
+```
+
+Yahan VPC ka larger address range `10.0.0.0/16` hai, aur har subnet ko uske andar ek smaller, non-overlapping CIDR block diya gaya hai.
+
+#### 6. Important Points
+
+- IPv4 CIDR prefix `/0` se `/32` tak ho sakta hai.
+- Prefix number jitna chhota, range utni badi; prefix number jitna bada, range utni chhoti.
+- VPC aur subnet CIDR blocks plan karte waqt overlapping ranges avoid karni chahiye.
+- CIDR IP range batata hai; woh khud internet access ya security permissions define nahi karta.
+
+---
