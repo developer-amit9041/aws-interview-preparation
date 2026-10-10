@@ -17592,3 +17592,79 @@ Maan lo tumhari Node.js application AWS par deploy hai aur ab v1 se v2 par jana 
 **Interview-ready answer:** Blue-Green Deployment maintains two separate production-like environments and switches traffic to the new environment after validation. Rolling Deployment updates application instances gradually in batches while healthy instances continue serving traffic. Blue-Green can offer a faster traffic-based rollback but often costs more infrastructure; Rolling can use less extra capacity but rollback may take longer. The right choice depends on availability requirements, cost, architecture, and compatibility between application versions.
 
 ---
+
+### Q225. What is AWS Secrets Manager?
+
+#### 1. English Definition
+
+AWS Secrets Manager is a managed service for securely storing, retrieving, and managing sensitive information such as database credentials, API keys, and other application secrets. It supports encryption with AWS KMS and can automate rotation for supported secrets and configurations.
+
+#### 2. Hindi Definition
+
+AWS Secrets Manager AWS ki service hai jisme hum database passwords, API keys aur doosre confidential credentials ko securely store aur manage kar sakte hain. Application zaroorat padne par secrets ko service se retrieve kar sakti hai, aur supported cases mein credentials ki rotation automate ki ja sakti hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein MongoDB password ya third-party API key hai. Agar tum ise source code mein hardcode kar doge ya GitHub par push kar doge, toh credential leak ho sakta hai.
+
+Secrets Manager mein secret securely store karte hain. Backend ko IAM role ke through access dete hain, aur Node.js application runtime par secret retrieve karti hai. Secret ko GitHub repository mein rakhne ki zaroorat nahi hoti.
+
+Common uses:
+- Database usernames and passwords
+- Third-party API keys and service credentials
+- Secrets that need controlled access and rotation
+
+#### 4. Practical AWS + Node.js Example
+
+First, create a secret in AWS Secrets Manager, for example named `prod/myapp/mongodb`. Store the MongoDB connection string or its credential fields in that secret. Give the application’s IAM role permission to retrieve only the required secret.
+
+Install the AWS SDK for JavaScript v3:
+
+```bash
+npm install @aws-sdk/client-secrets-manager
+```
+
+Example Node.js code:
+
+```js
+import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
+
+const client = new SecretsManagerClient({ region: process.env.AWS_REGION });
+
+export async function getMongoSecret() {
+  const response = await client.send(
+    new GetSecretValueCommand({ SecretId: "prod/myapp/mongodb" })
+  );
+
+  if (!response.SecretString) {
+    throw new Error("MongoDB secret is missing SecretString");
+  }
+
+  return JSON.parse(response.SecretString);
+}
+```
+
+If the secret is stored as JSON, the returned object might contain fields such as `username`, `password`, and `uri`; adjust parsing to match the structure you saved. For production, retrieve the secret during controlled application initialization or cache it appropriately, and handle refresh/rotation deliberately. Never log the secret value.
+
+#### 5. Important Security Points
+
+- Use an EC2 instance profile, ECS task role, or another appropriate IAM role rather than embedding long-lived AWS access keys in application code.
+- Follow least privilege: grant `secretsmanager:GetSecretValue` only for the specific secret required.
+- AWS KMS is used to encrypt secrets at rest; access policies and IAM permissions control retrieval.
+- Rotation can be automated for supported databases and configurations, but the application must handle credential changes correctly.
+- Secrets Manager has a cost; check current AWS pricing for stored secrets and API calls.
+- Do not confuse Secrets Manager with environment variables: an environment variable is a delivery mechanism, while Secrets Manager is a managed secret storage and access service.
+
+#### 6. Summary Table
+
+| Feature | Purpose |
+|---|---|
+| Secure storage | Store passwords, API keys, and credentials |
+| Access control | Use IAM policies and resource policies where applicable |
+| Encryption | Encrypt secret values at rest using AWS KMS |
+| Retrieval | Applications retrieve secrets through the AWS SDK/API |
+| Rotation | Automate credential rotation for supported setups |
+
+**Interview-ready answer:** AWS Secrets Manager is a managed AWS service used to store, retrieve, and manage sensitive data such as database passwords and API keys. It encrypts secrets, integrates with IAM for access control, and supports rotation for supported credentials. In a Node.js application, we grant the application an IAM role and retrieve the required secret through the AWS SDK instead of hardcoding credentials in source code.
+
+---
