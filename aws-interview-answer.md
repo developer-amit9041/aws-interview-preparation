@@ -8072,3 +8072,69 @@ Lambda invocation ke response mein result de sakti hai ya background task perfor
 - Hybrid architecture possible hai: main application EC2/ECS par aur event-driven background tasks Lambda par.
 
 ---
+
+### Q125. What triggers a Lambda function?
+
+#### 1. English Definition
+
+**A Lambda function is invoked by an event source or caller, such as an AWS service, an API request, a scheduled event, or a direct SDK/CLI invocation.**
+
+#### 2. Hindi Definition
+
+Lambda function ko kisi event source ya caller ke through invoke kiya jata hai, jaise API request, S3 par file upload, DynamoDB Streams mein change, scheduled event, ya direct API/SDK call.
+
+#### 3. Hinglish Explanation
+
+Bhai, Lambda function apne aap har waqt execute nahi hota. Use invoke karne ke liye koi trigger ya caller chahiye. Trigger event generate karta hai ya Lambda ko call karta hai, aur function us input ko process karta hai.
+
+Common triggers:
+- **Amazon API Gateway:** user ki HTTP request par Lambda invoke hota hai.
+- **Amazon S3:** bucket mein configured object upload/delete event par Lambda invoke ho sakta hai.
+- **DynamoDB Streams:** table ke item changes ke stream records Lambda ko process karne ke liye milte hain.
+- **Amazon EventBridge:** scheduled rule ya matching event par Lambda invoke hota hai.
+- **Amazon SQS:** queue messages ko Lambda event source mapping poll karke function tak batch mein deliver karti hai.
+- **Amazon SNS:** topic par publish hue message ke through Lambda invoke ho sakta hai.
+- **Direct invocation:** application AWS SDK/CLI se Lambda ko call kar sakti hai.
+
+Har integration ka behavior same nahi hota: kuch services Lambda ko directly invoke karti hain, aur kuch event source mappings ke through records poll karke deliver karti hain.
+
+#### 4. Practical Example
+
+```text
+User uploads profile image
+          |
+          v
+      Amazon S3
+          |
+    Object-created event
+          |
+          v
+     AWS Lambda
+          |
+          v
+Resize image / update metadata
+```
+
+MERN application mein user image S3 par upload karta hai. S3 event Lambda ko invoke karta hai, aur Lambda image process karke metadata save kar sakti hai. Is flow ke liye S3 event notification aur Lambda invoke permissions correctly configure karne hote hain.
+
+#### 5. Common Lambda Triggers
+
+| Trigger / caller | Example |
+|---|---|
+| API Gateway | HTTP API request handle karna |
+| S3 | Image upload ke baad processing |
+| DynamoDB Streams | Order item change process karna |
+| EventBridge | Scheduled cleanup ya matching event |
+| SQS | Queue mein pending jobs process karna |
+| SNS | Published notification message process karna |
+| SDK / CLI | Application ya developer se direct invocation |
+
+#### 6. Important Points
+
+- Trigger/caller Lambda ko invoke karta hai; Lambda ka code event input receive karta hai.
+- Trigger setup ke saath IAM permissions aur resource policies bhi zaroori ho sakti hain.
+- SQS jaise sources event source mapping use karte hain; unka invocation flow direct push trigger se different hai.
+- Retries ya at-least-once delivery ki wajah se duplicate processing possible ho sakti hai; idempotent handling design karo.
+- CloudWatch Logs aur metrics se execution behavior aur errors monitor kar sakte ho.
+
+---
