@@ -13054,3 +13054,125 @@ Replace the example instance ID and UTC timestamps with your actual values. Appr
 **Interview-ready answer:** CloudWatch monitors AWS resources and applications through metrics, logs, dashboards, and alarms. CloudTrail records supported AWS account activity and API calls for auditing and investigations. For example, CloudWatch can alert me when EC2 CPU is high, while CloudTrail can help identify who terminated an EC2 instance.
 
 ---
+
+### Q178. What information does CloudTrail store?
+
+#### 1. English Definition
+
+**CloudTrail stores event records about supported AWS account activity and API calls. Depending on the event, records can include the event time, action name, identity, source IP address, AWS Region, affected resource details, request parameters, and response elements when available.**
+
+#### 2. Hindi Definition
+
+CloudTrail AWS account mein hone wali supported activities aur API calls ka record store karta hai. Event ke according ismein action ka time, kis user ya role ne action kiya, API ka naam, source IP, Region aur resource/request ki details ho sakti hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo kisi ne AWS Console se EC2 instance stop kiya. CloudTrail event record dekhkar tum action ki details investigate kar sakte ho.
+
+Important fields:
+
+- **`eventTime`:** Action kab hua.
+- **`eventName`:** Kaunsi API action hui, jaise `StopInstances`.
+- **`eventSource`:** Kis AWS service ki API call thi, jaise `ec2.amazonaws.com`.
+- **`userIdentity`:** Action karne wali identity ki details, jaise IAM user, role ya assumed role.
+- **`sourceIPAddress`:** Request ka source IP, jab available ho.
+- **`awsRegion`:** Request kis AWS Region se related thi.
+- **`requestParameters`:** Request mein bheje gaye parameters, jab record mein available hon.
+- **`responseElements`:** API response ki details, jab available hon.
+- **`resources`:** Event se related resources ki details, jab available hon.
+- **`userAgent`:** Request mein use hue client/tool ki information, jab available ho.
+
+Har event mein saare fields populated nahi hote. Sensitive values ko log karne ke rules aur service-specific behavior bhi vary kar sakte hain. CloudTrail ko application ke complete request/response body ka universal log mat samajhna.
+
+#### 4. Practical Example
+
+Suppose EC2 instance stop ho gaya aur tumhe investigate karna hai. CloudTrail event mein, if available, tum dekh sakte ho:
+
+```json
+{
+  "eventTime": "2026-10-11T10:15:00Z",
+  "eventSource": "ec2.amazonaws.com",
+  "eventName": "StopInstances",
+  "awsRegion": "ap-south-1",
+  "sourceIPAddress": "203.0.113.10",
+  "userIdentity": {
+    "type": "AssumedRole",
+    "arn": "arn:aws:sts::123456789012:assumed-role/OperationsRole/session"
+  },
+  "requestParameters": {
+    "instancesSet": {
+      "items": [
+        { "instanceId": "i-0123456789abcdef0" }
+      ]
+    }
+  }
+}
+```
+
+**Note:** Yeh illustrative example hai; IP, account, role aur instance ID sample values hain. Actual fields aur response details event ke hisaab se differ kar sakte hain.
+
+#### 5. Architecture Diagram — CloudTrail Event Data
+
+```text
+        AWS API Action
+              |
+              v
+          CloudTrail
+              |
+              v
+        Event Record
+              |
+      +-------+--------+
+      |       |        |
+      v       v        v
+   Identity  Action   Time / Region
+      |       |        |
+      +-------+--------+
+              |
+              v
+   Resource / Request Details
+       (when available)
+              |
+              v
+   Event History / Configured Trail
+```
+
+**Flow:** AWS API action hota hai → CloudTrail event record karta hai → record mein event ke according identity, action, time aur other available details hoti hain → tum Event history ya configured trail se event inspect karte ho.
+
+#### 6. Practical Command / Configuration
+
+**A. Recent CloudTrail events list karo**
+
+```bash
+aws cloudtrail lookup-events --max-results 10
+```
+
+**B. Specific event name search karo**
+
+```bash
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=StopInstances \
+  --max-results 10
+```
+
+CLI response mein event details aksar `CloudTrailEvent` field ke andar JSON string ke form mein milti hain. Use parse karke relevant fields inspect kar sakte ho. Suitable IAM permissions required hain.
+
+For longer retention, CloudTrail trail ko S3 delivery ke saath configure karo. Data events jaise S3 object-level activity ke liye relevant event selectors enable karna pad sakta hai.
+
+#### 7. Summary Table
+
+| Field | Meaning |
+|---|---|
+| `eventTime` | Action ka time |
+| `eventName` | API action ka naam |
+| `eventSource` | AWS service |
+| `userIdentity` | User, role, ya other calling identity |
+| `sourceIPAddress` | Source IP, when available |
+| `awsRegion` | Related AWS Region |
+| `requestParameters` | Request details, when available |
+| `responseElements` | Response details, when available |
+| `resources` | Related resources, when available |
+
+**Interview-ready answer:** CloudTrail stores records of supported AWS API and account events. Depending on the event, a record can include the event time, API name, AWS service, calling identity, source IP, Region, request parameters, response details, and affected resources. Not every field is present in every event. I use these records to investigate who performed an action and what happened.
+
+---
