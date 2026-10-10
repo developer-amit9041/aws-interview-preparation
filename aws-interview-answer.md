@@ -7882,3 +7882,68 @@ Yeh handler event receive karta hai aur response return karta hai. HTTP response
 - Lambda has execution limits and is not automatically the right choice for every long-running workload.
 
 ---
+
+### Q122. Why use AWS Lambda?
+
+#### 1. English Definition
+
+**AWS Lambda is used to run event-driven code without managing servers, reduce operational overhead, scale automatically within service limits, and pay based on requests and compute duration.**
+
+#### 2. Hindi Definition
+
+AWS Lambda ka use bina servers ko directly manage kiye event ke response mein code run karne ke liye hota hai. Yeh infrastructure management kam karta hai, demand ke hisaab se scale karta hai aur usage ke basis par billing provide karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application mein user profile image upload karta hai, order place karta hai, ya database mein koi change hota hai. In events ke baad background mein koi task run karna ho, toh AWS Lambda useful hai.
+
+Lambda use karne ke main reasons:
+- **No server management:** EC2 instance ka OS, patching aur server process tumhe manage nahi karna padta.
+- **Automatic scaling:** Requests ke hisaab se Lambda executions scale kar sakti hai, service quotas aur concurrency limits ke andar.
+- **Pay for usage:** Billing requests aur compute duration par based hoti hai, isliye idle server ke liye instance running rakhna zaroori nahi.
+- **Event-driven:** S3 uploads, API Gateway requests, DynamoDB Streams aur EventBridge events par function run kar sakte ho.
+- **Easy integration:** IAM, CloudWatch aur other AWS services ke saath integrate hoti hai.
+- **Background processing:** Image resizing, notifications, scheduled jobs aur lightweight data processing ke liye useful hai.
+
+Lambda har workload ke liye best nahi hai. Long-running processes, specialized OS control, ya consistently high workloads mein EC2, containers, ya another compute service better fit ho sakta hai. Cost workload aur architecture par depend karti hai.
+
+#### 4. Practical Example
+
+```text
+MERN app user places an order
+            |
+            v
+      DynamoDB table
+            |
+            v
+     DynamoDB Streams
+            |
+            v
+       AWS Lambda
+            |
+            +--> Send order notification
+            +--> Update another system
+            +--> Write processing logs
+```
+
+Is example mein Lambda order change ke event par kaam karti hai. Tumhe sirf is background task ke liye continuously running server maintain nahi karna padta. Stream processing mein retries/duplicate records ko dhyan mein rakhkar idempotent logic design karna chahiye.
+
+#### 5. When to Use Lambda
+
+| Use case | Why Lambda fits |
+|---|---|
+| S3 image processing | Upload event par function trigger ho sakta hai |
+| API backend | API Gateway ke through request handle kar sakti hai |
+| DynamoDB change processing | Stream records par react kar sakti hai |
+| Scheduled tasks | EventBridge schedule se invoke ho sakti hai |
+| Notifications and lightweight jobs | Event ke baad background work kar sakti hai |
+
+#### 6. Important Points
+
+- Lambda reduces server management; it does not mean servers do not exist.
+- Scaling is managed but subject to concurrency, quotas, and service limits.
+- Billing depends on request count, compute duration, and configured resources/pricing terms.
+- Configure IAM permissions, timeout, memory, logging, retries, and idempotency carefully.
+- For long-running or OS-level workloads, compare Lambda with EC2, ECS, or AWS Fargate before choosing.
+
+---
