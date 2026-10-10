@@ -1123,3 +1123,63 @@ EC2 useful hai jab tumhe server environment par control chahiye, custom software
 **Yaad rakhne ki trick:** EC2 use karte hain taaki hum cloud mein apne applications ko flexible, configurable virtual servers par run kar saken.
 
 ---
+
+
+### Q18. What is an AMI?
+
+#### 1. English Definition
+
+**An Amazon Machine Image (AMI) is a template used to launch EC2 instances. It contains the information needed to configure an instance, such as an operating system and, optionally, preinstalled software and settings.**
+
+#### 2. Hindi Definition
+
+AMI ek template ya blueprint hoti hai, jiska use karke hum EC2 instance launch karte hain. Ismein operating system aur zaroorat ke hisaab se pehle se installed software aur configuration ho sakti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumne ek EC2 instance par Ubuntu, Node.js, Nginx aur apni application ke liye required setup kar liya. Ab tum same setup wala doosra server banana chahte ho.
+
+Tum us configured instance se ek custom AMI create kar sakte ho. Phir us AMI ko use karke naye EC2 instances launch kar sakte ho, jisse baar-baar basic setup karne ka kaam kam ho jata hai.
+
+**AMI ko server ka blueprint samjho; EC2 instance us blueprint se launch hua running server hai.** AMI mein instance ke saare runtime data ya har attached data volume ka backup automatically shamil hai, aisa assume nahi karna chahiye—AMI creation aur storage configuration matter karti hai.
+
+#### 4. Practical Example
+
+```text
+Configured EC2 Instance
+(Ubuntu + Node.js + Nginx)
+          |
+          v
+     Create AMI
+          |
+          v
+      Custom AMI
+       /      \
+      v        v
+  EC2 #1     EC2 #2
+```
+
+Example: tumhari MERN application ke liye ek standard server setup ready hai. Custom AMI se tum multiple EC2 instances launch kar sakte ho with a similar base configuration. Application-specific configuration, secrets, networking aur deployment steps ko phir bhi sahi tarah manage karna hoga.
+
+#### 5. Common AMI Types
+
+| AMI type | Meaning |
+|---|---|
+| AWS-provided AMI | AWS ki taraf se provided images, jaise supported Linux images |
+| AWS Marketplace AMI | Third-party vendors ki images, kabhi-kabhi licensing ya extra charges ke saath |
+| Custom AMI | Tumhare configured EC2 environment se banayi gayi image |
+| Community AMI | Other AWS users/publishers ki shared images; trust aur security verify karna zaroori hai |
+
+#### 6. AMI vs EC2 Instance
+
+| AMI | EC2 Instance |
+|---|---|
+| Template / blueprint | Virtual server launched from a template |
+| Instance launch karne ke liye use hoti hai | Application run karne ke liye use hota hai |
+| Khud running server nahi hoti | Running ya stopped state mein ho sakta hai |
+
+#### 7. Summary
+
+**Yaad rakhne ki trick:** AMI = server ka blueprint; EC2 = us blueprint se bana virtual server.
+
+---\n
