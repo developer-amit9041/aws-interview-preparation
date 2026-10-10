@@ -5331,3 +5331,68 @@ Clients -> NLB -> TCP/UDP target(s)
 - Both can support highly available architectures, but target health, Availability Zone configuration, and application resilience still matter.
 
 ---
+
+### Q80. What is a Target Group?
+
+#### 1. English Definition
+
+**A Target Group is a collection of registered targets—such as EC2 instances, IP addresses, or supported services—that a load balancer routes requests to, using configured listeners, rules, and health checks.**
+
+#### 2. Hindi Definition
+
+Target Group registered servers ya resources ka group hota hai, jahan Load Balancer incoming requests forward karta hai. Ismein targets register kiye jaate hain aur health checks configure kiye ja sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js application do EC2 instances par chal rahi hai. Load Balancer ko pata hona chahiye ki requests kin backend servers par bhejni hain. In backend targets ko organize karne ke liye hum **Target Group** use karte hain.
+
+- Target Group mein EC2 instances, IP addresses, ya supported target types register ho sakte hain.
+- Load Balancer ka listener aur uske rules decide karte hain ki traffic kis Target Group mein bhejna hai.
+- Health checks check karte hain ki registered targets traffic serve karne ke liye healthy hain ya nahi.
+- Unhealthy target ko load balancer health-check status ke basis par traffic se temporarily exclude kar sakta hai.
+
+#### 4. Practical Example: MERN Application
+
+```text
+Users
+  |
+  v
+Application Load Balancer (ALB)
+  |
+  | Listener rule: /api/*
+  v
+Target Group: Node.js API
+  |
+  +------> EC2 Instance 1 (port 3000)
+  |
+  +------> EC2 Instance 2 (port 3000)
+```
+
+Suppose ALB listener par HTTPS traffic aata hai aur `/api/*` path ke liye rule configured hai. ALB request ko Node.js API Target Group par forward karta hai. Target Group ke registered healthy EC2 instances request handle karte hain, assuming app aur network configuration theek hai.
+
+#### 5. Important Target Group Settings
+
+| Setting | Meaning |
+|---|---|
+| Target type | Kis type ke resources register honge, jaise instances, IP addresses, or supported service targets |
+| Registered targets | Actual backend resources jo traffic receive kar sakte hain |
+| Port / protocol | Target tak traffic kis protocol aur port par forward hoga; exact options load balancer type par depend karte hain |
+| Health check | Target ki health check karne ka protocol, path, port, aur thresholds |
+| Listener rule | Load balancer par aane wali request ko target group tak route karne ka rule; rule listener par configured hota hai |
+
+#### 6. Target Group vs Load Balancer
+
+| Load Balancer | Target Group |
+|---|---|
+| Incoming connections/requests receive karta hai | Backend targets ka group define karta hai |
+| Listener aur rules ke through traffic route karta hai | Registered targets aur health-check settings maintain karta hai |
+| Example: ALB | Example: Node.js EC2 instances running on port 3000 |
+
+#### 7. Important Points
+
+- A Target Group does not itself receive public user traffic like a public ALB; the load balancer listener forwards matching traffic to it.
+- One load balancer can route to multiple target groups using listener rules, depending on load balancer type and configuration.
+- A target must be registered and pass health checks to be considered healthy for routing.
+- For a typical MERN application, an ALB Target Group can contain the backend EC2 instances running the Node.js API.
+
+---
