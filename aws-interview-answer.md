@@ -145,3 +145,90 @@ Is tarah AWS hosting, storage aur infrastructure services provide karta hai.
 | Application monitor karna | CloudWatch |
 
 **Yaad rakhne ki trick:** Hosting + Storage + Scalability + Availability + Security.
+
+---
+
+### Q3. What are the major AWS services?
+
+#### 1. English Definition
+
+**AWS provides different services for computing, storage, databases, networking, security, monitoring, and application deployment. Each service is designed to perform a specific task in the cloud.**
+
+#### 2. Hindi Definition
+
+AWS alag-alag kaam ke liye services provide karta hai, jaise server chalana, files store karna, database manage karna, networking, security aur application monitoring. Har service ka apna specific kaam hota hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumne MERN Stack mein e-commerce application banayi hai. AWS par is application ko deploy karne ke liye alag-alag services use kar sakte ho:
+
+- **Amazon EC2:** Node.js + Express backend run karne ke liye virtual server.
+- **Amazon S3:** Product images, videos aur files store karne ke liye.
+- **Amazon RDS:** MySQL ya PostgreSQL jaise relational databases ke liye.
+- **Amazon VPC:** AWS resources ke liye logically isolated network banane ke liye.
+- **IAM:** AWS users, roles aur permissions manage karne ke liye.
+- **Elastic Load Balancing (ELB):** Incoming traffic ko multiple servers mein distribute karne ke liye.
+- **Auto Scaling:** Traffic ya configured policies ke according EC2 instances ki quantity adjust karne ke liye.
+- **Amazon Route 53:** DNS aur domain routing manage karne ke liye.
+- **Amazon CloudWatch:** Logs, metrics aur alarms ke through application aur infrastructure monitor karne ke liye.
+- **AWS Lambda:** Servers ko manually manage kiye bina event-driven code run karne ke liye.
+- **Amazon SQS:** Services ke beech messages ko queue mein rakhne ke liye.
+- **Amazon ECR / ECS:** Docker container images store karne aur containers run/manage karne ke liye.
+
+**Important:** Har project mein saari services ki zaroorat nahi hoti. Services project ki requirements, traffic, security aur budget ke according select karte hain.
+
+#### 4. Practical Example — MERN Application
+
+Maan lo tum apni MERN e-commerce website AWS par deploy kar rahe ho:
+
+```text
+                 User
+                   |
+                   v
+          Route 53 (Domain/DNS)
+                   |
+                   v
+          Load Balancer (ALB)
+                   |
+                   v
+          EC2 (Node.js + Express)
+             /             \
+            v               v
+   MongoDB Atlas          Amazon S3
+   (Application Data)    (Product Images)
+
+   IAM: Permissions and access control
+   CloudWatch: Logs, metrics and alarms
+```
+
+**Working flow:**
+
+1. User domain open karta hai; Route 53 DNS resolution mein help karta hai.
+2. Application traffic Application Load Balancer (ALB) tak aata hai.
+3. ALB request ko healthy backend EC2 instance tak forward karta hai.
+4. Node.js backend MongoDB Atlas se data fetch karta hai.
+5. Product images Amazon S3 se serve ki ja sakti hain.
+6. CloudWatch application aur infrastructure ki monitoring mein help karta hai.
+7. IAM permissions control karta hai, jaise EC2 application ko S3 access dena.
+
+#### 5. Summary Table
+
+| AWS Service | Main Purpose |
+|---|---|
+| EC2 | Virtual server / compute |
+| S3 | Object storage for files and images |
+| RDS | Managed relational database |
+| VPC | Isolated cloud network |
+| IAM | Identity and permissions |
+| ELB / ALB | Traffic distribution |
+| Auto Scaling | Capacity automatically adjust karna |
+| Route 53 | DNS and domain routing |
+| CloudWatch | Monitoring, logs and alarms |
+| Lambda | Run code in response to events |
+| SQS | Message queue |
+| ECR | Docker images store karna |
+| ECS | Containers run and manage karna |
+
+**Yaad rakhne ki trick:** Compute = EC2, Storage = S3, Database = RDS, Network = VPC, Security = IAM, Monitoring = CloudWatch.
+
+---
