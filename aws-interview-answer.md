@@ -8201,3 +8201,67 @@ Yeh simplified flow hai. Warm invocation mein bhi execution latency hoti hai; si
 - Optimize based on measured latency; actual cold-start duration depends on runtime, code, configuration, and workload.
 
 ---
+
+### Q127. How do you reduce Lambda Cold Start?
+
+#### 1. English Definition
+
+**You can reduce AWS Lambda cold-start impact by using Provisioned Concurrency for latency-sensitive functions, minimizing initialization work and dependencies, choosing an appropriate runtime, and measuring startup latency to identify bottlenecks.**
+
+#### 2. Hindi Definition
+
+Lambda Cold Start ka impact kam karne ke liye function ka initialization code aur dependencies kam rakho, suitable runtime choose karo, latency measure karo, aur zaroorat hone par Provisioned Concurrency use karo.
+
+#### 3. Hinglish Explanation
+
+Bhai, cold start tab ho sakta hai jab Lambda ko naya execution environment initialize karna padta hai. Is extra delay ko reduce karne ke kuch practical methods hain:
+
+1. **Provisioned Concurrency:** AWS pehle se execution environments initialize karke ready rakhta hai. Latency-sensitive APIs ke liye useful hai, lekin extra cost hoti hai.
+2. **Reduce dependencies:** Node.js project mein sirf required packages rakho aur deployment bundle ko unnecessarily large mat banao.
+3. **Optimize initialization code:** Handler ke bahar sirf woh initialization rakho jo reuse ho sakti hai; expensive unnecessary setup avoid karo.
+4. **Reuse SDK clients and database connections where appropriate:** Reused execution environment mein initialized clients reuse ho sakte hain. Har invocation par unnecessary new connection banana avoid karo, while handling stale connections correctly.
+5. **Choose a suitable runtime and architecture:** Supported runtime, package format, and architecture ko benchmark karke choose karo; results workload ke hisaab se vary karte hain.
+6. **Measure before optimizing:** CloudWatch logs/metrics, Lambda `REPORT` log fields and tracing se initialization duration aur latency inspect karo.
+
+Sirf function ko baar-baar invoke karna warm environment ki guarantee nahi deta. Provisioned Concurrency cold-start impact ko proactively reduce karne ka direct option hai, especially predictable latency requirements ke liye.
+
+#### 4. Practical Node.js Example
+
+```javascript
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+
+// Initialized once per execution environment and reused when possible
+const client = new DynamoDBClient({});
+
+exports.handler = async (event) => {
+  // Keep per-request work inside the handler
+  console.log("Processing request", event);
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: "Processed" })
+  };
+};
+```
+
+Is example mein SDK client handler ke bahar create hota hai, isliye reused execution environment mein client reuse ho sakta hai. Yeh cold start ko eliminate nahi karta, lekin repeated initialization work reduce kar sakta hai.
+
+#### 5. Methods Comparison
+
+| Method | Main benefit | Trade-off |
+|---|---|---|
+| Provisioned Concurrency | Environments pre-initialized rehte hain | Additional cost and capacity planning |
+| Smaller dependency bundle | Less code and initialization work | Build/package optimization effort |
+| Minimal initialization | Less work before handler execution | Requires code review and profiling |
+| Reuse clients/connections | Avoid unnecessary repeated setup | Must handle stale connections and state carefully |
+| Monitoring and profiling | Identifies actual bottleneck | Requires measurement and analysis |
+
+#### 6. Important Points
+
+- Provisioned Concurrency is the most direct option when low cold-start latency is a firm requirement; it does not mean every source of latency disappears.
+- Keep deployment packages and initialization code lean.
+- Initialize reusable clients outside the handler when appropriate, but do not keep request-specific state in global variables.
+- Do not rely on scheduled “keep-warm” invocations as a guarantee that environments will stay warm.
+- Measure real workload latency before choosing optimizations; cold starts cannot always be eliminated completely.
+
+---
