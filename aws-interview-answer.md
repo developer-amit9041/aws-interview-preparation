@@ -9549,86 +9549,90 @@ If browser requests include cookies or other browser credentials:
 
 #### 1. English Definition
 
-**Amazon CloudFront is a content delivery network (CDN) service that securely delivers websites, APIs, videos, and other content to users with low latency by caching content at edge locations around the world.**
+**Amazon CloudFront is a Content Delivery Network (CDN) service that securely delivers websites, APIs, videos, and other content with low latency by caching content at edge locations around the world.**
 
 #### 2. Hindi Definition
 
-Amazon CloudFront AWS ki CDN service hai jo websites, APIs, videos aur doosre content ko duniya bhar ke edge locations se deliver karti hai. Content ko user ke kareeb cache karne se latency kam ho sakti hai aur origin server par load bhi kam pad sakta hai.
+Amazon CloudFront AWS ki CDN service hai jo website, APIs, videos aur doosre content ko duniya bhar mein maujood edge locations ke through users tak pahunchati hai. Isse latency kam ho sakti hai aur origin server ka load reduce ho sakta hai.
 
 #### 3. Hinglish Explanation
 
-Maan lo tumhari MERN application AWS par deployed hai aur users India, USA aur Europe se website open karte hain.
+Maan lo tumhari MERN application AWS par deployed hai aur users India, USA aur Europe se website access karte hain. Agar har image, CSS file aur JavaScript file origin server se hi download hogi, toh users ko extra latency mil sakti hai.
 
-Agar har image, CSS, JavaScript file ya doosra cacheable content origin server se hi download ho, toh users ko extra latency mil sakti hai aur origin par load badh sakta hai.
+CloudFront ek **CDN** hai. Yeh cacheable content ko users ke geographically closer edge locations par cache kar sakta hai.
 
-CloudFront ek **CDN (Content Delivery Network)** hai. Yeh content ko edge locations par cache kar sakta hai. Jab user request karta hai, CloudFront cached content serve karne ki koshish karta hai. Cache miss hone par, configuration ke mutabiq, request origin—jaise S3 bucket, load balancer, ya web server—tak ja sakti hai.
+- **Cache hit:** Content cache se serve ho sakta hai.
+- **Cache miss:** CloudFront configured origin se content fetch kar sakta hai.
 
-**Simple words mein:** CloudFront content ko users ke geographically closer locations se deliver karke website ko faster banane mein help karta hai.
+Simple words mein: CloudFront content ko users tak faster deliver karne mein help karta hai.
 
-#### 4. Practical Example — MERN Application
+#### 4. Practical Example
 
-Suppose tumhari application mein:
+MERN application mein React frontend ke static files aur product images S3 bucket mein store hain. CloudFront ko S3 origin ke saath configure karke images, CSS aur JavaScript files deliver kar sakte ho. Node.js APIs ko ALB ya API Gateway ke through serve kar sakte ho; zaroorat ke hisaab se CloudFront ko API traffic ke liye bhi configure kiya ja sakta hai.
 
-- React frontend ke static files S3 bucket mein hain.
-- Node.js/Express API ALB ya API Gateway ke through accessible hai.
-- Product images S3 mein stored hain.
-
-CloudFront ko frontend assets aur images ke liye configure kar sakte ho. API traffic ko bhi CloudFront ke through route kar sakte ho if the behavior, caching, security, and origin configuration suit the application.
+#### 5. Architecture Diagram — Request Flow
 
 ```text
-          Users
-            |
-            v
-       CloudFront CDN
-            |
-      +-----+------+
-      |            |
-      v            v
-   S3 origin    API origin
- React assets   ALB / API Gateway
- images         Node.js backend
+User / Browser
+      |
+      v
+CloudFront Edge Location
+      |
+      +---- Cache hit ----> Return cached content to user
+      |
+      +---- Cache miss ---> Configured Origin
+                                  |
+                       +----------+----------+
+                       |                     |
+                       v                     v
+                    Amazon S3          ALB / API origin
+                 React files/images   Node.js / Express API
+                       |                     |
+                       +----------+----------+
+                                  |
+                         Response to CloudFront
+                                  |
+                                  v
+                               User
 ```
 
-**Request flow:**
+**Flow:** User request karta hai → CloudFront cache check karta hai → cache hit par content serve hota hai; cache miss par configured origin se content fetch karke response return kiya ja sakta hai.
 
-1. User website ya asset request karta hai.
-2. Request CloudFront ke edge location par reach karti hai.
-3. Cached aur still-valid content available ho, toh CloudFront wahi serve kar sakta hai.
-4. Cache miss ya revalidation ki zaroorat ho, toh CloudFront configured origin se content fetch karta hai.
-5. Content user ko return hota hai aur caching policy ke according cache ho sakta hai.
+#### 6. Practical AWS CLI Command / Configuration
 
-#### 5. Important CloudFront Terms
+CloudFront distributions list karne ke liye AWS CLI:
+
+```bash
+aws cloudfront list-distributions
+```
+
+Distribution ki details dekhne ke liye:
+
+```bash
+aws cloudfront get-distribution --id YOUR_DISTRIBUTION_ID
+```
+
+Replace `YOUR_DISTRIBUTION_ID` with your actual CloudFront distribution ID. Commands chalane ke liye AWS CLI configured hona chahiye aur IAM identity ke paas required CloudFront permissions honi chahiye.
+
+**Configuration mein important cheezein:**
+- **Origin:** S3 bucket, ALB, ya supported custom HTTP origin.
+- **Cache behavior/policy:** Decide karti hai kaun sa content cache hoga aur cache key/TTL kaise handle honge.
+- **HTTPS:** Viewer traffic ke liye HTTPS configure karo.
+- **Private S3 origin:** Suitable setup mein Origin Access Control (OAC) use karo.
+- **Dynamic/personalized responses:** Cache policy carefully set karo; sensitive user-specific responses ko accidentally shared cache mein store mat karo.
+
+#### 7. Summary Table
 
 | Term | Meaning |
 |---|---|
 | CDN | Content Delivery Network |
-| Edge location | CloudFront ka location jahan requests handle aur content cache ho sakta hai |
-| Origin | Original source, jaise S3, ALB, ya web server |
-| Cache hit | Requested content cache se serve hota hai |
-| Cache miss | Content cache mein available nahi, origin se fetch karna pad sakta hai |
-| Distribution | CloudFront configuration that defines origins, behaviors, and delivery settings |
-| Cache policy | Decide karti hai cache key aur TTL-related behavior |
-| Origin access control (OAC) | Supported S3 origins ko private rakhne aur CloudFront ko authorized access dene ka mechanism |
+| Edge location | Location jahan requests handle aur content cache ho sakta hai |
+| Origin | Original source, jaise S3 ya ALB |
+| Cache hit | Content cache se mil gaya |
+| Cache miss | Origin se content fetch karna pad sakta hai |
+| Distribution | CloudFront delivery configuration |
+| OAC | CloudFront ko private S3 origin access dene ka mechanism |
 
-#### 6. Benefits of CloudFront
-
-- **Low latency:** Users ko content nearby edge locations se mil sakta hai.
-- **Reduced origin load:** Cache hits se origin requests kam ho sakti hain.
-- **Scalability:** Large-scale content delivery handle karne mein help karta hai.
-- **Security:** HTTPS/TLS, AWS WAF integration, and supported access controls use kar sakte ho.
-- **Global delivery:** Users ko multiple geographic regions mein content deliver kar sakta hai.
-- **Flexible origins:** S3, load balancers, and custom HTTP origins jaise supported origins configure kar sakte ho.
-
-#### 7. Important Interview Points
-
-- CloudFront is a CDN, not a database or a replacement for your backend.
-- Static assets are common caching candidates; dynamic API responses need carefully designed cache policies.
-- Do not cache personalized or sensitive responses publicly unless the cache key and access design explicitly make it safe.
-- HTTPS, origin access restrictions, and AWS WAF can add security layers, but must be configured correctly.
-- CloudFront caching behavior depends on cache policies, origin headers, TTLs, and invalidations.
-
-#### 8. Summary
-
-Amazon CloudFront is AWS's CDN. It caches and delivers content through edge locations to reduce latency, lower origin load, and improve content delivery performance for websites and APIs.
+**Remember:** CloudFront CDN hai, backend ya database ka replacement nahi. Yeh content delivery ko faster banane, origin load reduce karne, aur global users ko content serve karne mein help karta hai.
 
 ---
