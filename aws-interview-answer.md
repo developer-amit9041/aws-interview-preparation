@@ -6003,3 +6003,72 @@ Example ASG settings: minimum `2`, desired `2`, maximum `6`. A configured scalin
 - Auto Scaling can help optimize costs, but it does not guarantee the lowest bill. Minimum capacity, instance types, scaling thresholds, and workload must be configured appropriately.
 
 ---
+
+### Q91. What is a Launch Template?
+
+#### 1. English Definition
+
+**An EC2 Launch Template is an AWS resource that stores the configuration needed to launch EC2 instances, such as the AMI, instance type, key pair, network settings, security groups, storage, and user data.**
+
+#### 2. Hindi Definition
+
+Launch Template AWS ka resource hai jisme EC2 instance launch karne ke liye required configuration save hoti hai, jaise AMI, instance type, security group, storage aur user data.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application ke liye ek EC2 instance configure kiya hai. Usmein Ubuntu AMI, instance type, security group, storage aur startup script set ki hai.
+
+Ab agar tumhe isi configuration ke saath 5 aur EC2 instances launch karne hain, toh har baar settings manually bharne ki zaroorat nahi. Tum **Launch Template** mein ye configuration save kar sakte ho aur us template se new instances launch kar sakte ho.
+
+Auto Scaling Group bhi Launch Template ka use karta hai, taaki jab scaling policy ke according extra EC2 instances chahiye hon, toh AWS defined configuration ke basis par instances launch kar sake.
+
+#### 4. Practical Example: MERN Application
+
+Suppose tum Launch Template mein ye settings save karte ho:
+
+- AMI: Ubuntu image with your required OS setup
+- Instance type: `t3.micro` (example only)
+- Security Group: allow only required inbound traffic, such as HTTP/HTTPS and restricted administrative access
+- Storage: required EBS volume
+- User Data: startup script to install/start the application, if appropriate
+
+```text
+Launch Template
+      |
+      +----> EC2 Instance 1
+      +----> EC2 Instance 2
+      +----> EC2 Instance 3
+
+Auto Scaling Group can use the template to launch instances as needed.
+```
+
+#### 5. What Can a Launch Template Contain?
+
+| Setting | Purpose |
+|---|---|
+| AMI ID | Defines the operating system and base image for the instance. |
+| Instance Type | Defines compute capacity, such as CPU and memory class. |
+| Key Pair | Configures the key pair for supported instance access methods. |
+| Security Groups | Controls allowed inbound and outbound network traffic. |
+| Storage | Defines EBS volume configuration and related storage settings. |
+| Network Settings | Configures options such as network interface and subnet-related launch settings where specified. |
+| User Data | Supplies startup commands or scripts that run during instance initialization, subject to OS/cloud-init configuration. |
+| IAM Instance Profile | Can attach an IAM role to provide the instance with appropriate AWS permissions. |
+
+#### 6. Why Do We Use a Launch Template?
+
+- Reuse the same instance configuration for multiple EC2 instances.
+- Keep deployments consistent and reduce manual configuration mistakes.
+- Provide the launch configuration used by an EC2 Auto Scaling Group.
+- Create template versions to manage configuration changes and rollbacks.
+- Support repeatable deployments and infrastructure automation.
+
+#### 7. Important Points
+
+- A Launch Template is a configuration blueprint; it is not a running EC2 instance.
+- One Launch Template can have multiple versions, allowing you to update settings while retaining previous versions.
+- An Auto Scaling Group can reference a Launch Template and a version or use the default/latest version according to its configuration.
+- Avoid putting passwords, access keys, or other secrets directly in User Data. Use IAM roles and a secrets-management solution where appropriate.
+- A Launch Template defines how to launch an instance; it does not itself automatically create or scale instances. EC2 launch actions or an Auto Scaling Group use it.
+
+---
