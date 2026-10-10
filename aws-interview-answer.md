@@ -1427,3 +1427,71 @@ Security Group instance ke network interface se associated hota hai. Ye operatin
 **Yaad rakhne ki trick:** Security Group = EC2 ke network traffic ka virtual gatekeeper.
 
 ---
+
+
+### Q24. Security Group vs NACL?
+
+#### 1. English Definition
+
+**A Security Group is a stateful virtual firewall associated with network interfaces, while a Network Access Control List (NACL) is a stateless firewall associated with a subnet. Both control network traffic in an Amazon VPC.**
+
+#### 2. Hindi Definition
+
+Security Group ek stateful virtual firewall hai jo EC2 ke network interface ke saath associate hota hai. NACL ek stateless firewall hai jo subnet ke saath associate hota hai. Dono VPC mein network traffic control karte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, simple example se samjho:
+
+- **Security Group = Instance-level gatekeeper:** EC2 ke network interface tak aane-jaane wale traffic par rules lagata hai.
+- **NACL = Subnet-level gatekeeper:** Subnet ke andar aur bahar jaane wale traffic ko subnet boundary par filter karta hai.
+
+Sabse important difference **stateful vs stateless** hai:
+
+- **Security Group stateful hota hai:** Agar inbound connection allow hai, toh us connection ka response traffic automatically allow hota hai, chahe reverse-direction ka separate outbound rule na ho.
+- **NACL stateless hota hai:** Request aur response traffic dono ke liye matching inbound/outbound rules configure karne padte hain. Return traffic ke liye ephemeral ports bhi allow karne pad sakte hain.
+
+#### 4. Difference Table
+
+| Feature | Security Group | Network ACL (NACL) |
+|---|---|---|
+| Scope | Network interface / resource level | Subnet level |
+| Traffic handling | Stateful | Stateless |
+| Rules | Allow rules only | Allow and deny rules |
+| Rule evaluation | All applicable allow rules are evaluated | Rules are evaluated in ascending rule-number order; first match applies |
+| Return traffic | Automatically allowed for an allowed connection | Must be explicitly allowed by rules in the opposite direction |
+| Association | Attached to network interfaces; EC2 association is commonly managed through its ENI | Associated with a subnet |
+| Common use | Fine-grained access control for individual workloads | Subnet-level traffic filtering and explicit deny rules |
+
+#### 5. Practical MERN Example
+
+Maan lo tumhara MERN backend EC2 par hai:
+
+```text
+Internet
+   |
+   v
+Subnet NACL
+(subnet boundary rules)
+   |
+   v
+EC2 Security Group
+(instance network-interface rules)
+   |
+   v
+Nginx / Node.js API
+```
+
+Example approach:
+- Security Group mein public HTTPS `443` allow karo, aur SSH `22` sirf trusted IP se allow karo.
+- NACL mein subnet ke liye required inbound aur outbound traffic rules define karo; kyunki NACL stateless hai, response traffic ke rules bhi verify karo.
+
+Actual connectivity dono layers ke rules ke saath route tables, internet gateway/NAT, instance configuration aur host firewall par bhi depend karti hai. Security Group aur NACL ek doosre ka replacement nahi hain; dono saath kaam karte hain.
+
+#### 6. Interview Summary
+
+**Security Group = stateful, resource/network-interface level, allow rules only. NACL = stateless, subnet level, allow and deny rules.**
+
+**Yaad rakhne ki trick:** SG = Server ka Gate; NACL = Network/Subnet ka Gate.
+
+---\n
