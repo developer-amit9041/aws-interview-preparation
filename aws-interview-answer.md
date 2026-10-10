@@ -6360,3 +6360,59 @@ Example: Normal traffic mein ASG 2 EC2 instances maintain karta hai. Traffic bad
 - ASG aur ALB integration availability improve kar sakti hai, lekin application, health checks aur multi-AZ design ko bhi sahi configure karna chahiye.
 
 ---
+
+
+### Q97. How would you handle sudden traffic spikes?
+
+#### 1. English Definition
+
+**I would handle sudden traffic spikes by distributing requests through a load balancer, scaling application capacity with an Auto Scaling Group, monitoring metrics, and protecting backend services with caching, rate limiting, and resilient database design.**
+
+#### 2. Hindi Definition
+
+Sudden traffic spike handle karne ke liye load balancer se requests distribute karunga, Auto Scaling Group se application capacity badhaunga, CloudWatch se metrics monitor karunga, aur caching, rate limiting aur database optimization use karunga.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application par sale ke time achanak bahut saare users aa jaate hain. Sirf EC2 instances badhana kaafi nahi hota; frontend/API, database aur network sabko consider karna padta hai.
+
+Main is tarah approach karunga:
+
+1. **ALB:** Incoming HTTP/HTTPS requests ko multiple healthy EC2 targets par distribute karunga.
+2. **EC2 Auto Scaling Group:** Target tracking ya suitable scaling policy configure karunga, taaki demand badhne par instances add ho sakein. Sudden spikes ke liye scaling lag se bachne ko sufficient baseline capacity aur, where predictable, scheduled/pre-scaled capacity rakhunga.
+3. **CloudWatch monitoring and alarms:** Request count, latency, 5xx errors, CPU, memory (with an appropriate agent), and database metrics monitor karunga.
+4. **Caching:** Frequently requested data ko Redis/ElastiCache ya suitable caching layer mein rakhunga; static assets ko CloudFront/S3 se serve kar sakta hoon.
+5. **Protect the API:** Rate limiting, throttling, request timeouts, and AWS WAF where appropriate use karunga to reduce abusive or excessive requests.
+6. **Database readiness:** MongoDB connection pooling, indexes, query optimization, and database capacity monitor karunga. App servers scale karne se database automatically scale nahi hota.
+7. **Load testing and recovery:** Traffic spike se pehle load tests karunga, scaling thresholds verify karunga, and dashboards/alarms plus rollback or incident procedures ready rakhunga.
+
+#### 4. Practical Architecture: MERN on AWS
+
+```text
+Users
+  |
+  v
+CloudFront / AWS WAF (as appropriate)
+  |
+  v
+Application Load Balancer
+  |
+  v
+EC2 Auto Scaling Group (Node.js / Express API)
+  |                    |
+  v                    v
+Redis / Cache       MongoDB database
+                    (capacity and queries monitored)
+```
+
+Example: A sudden increase in requests arrives. ALB distributes traffic to healthy targets; CloudWatch metrics and scaling policies help ASG add EC2 instances. Cache reduces repeated database reads, while rate limits and optimized queries help protect the API and database. Newly launched instances still need time to start and pass health checks, so pre-scaling and enough baseline capacity matter for very sharp spikes.
+
+#### 5. Important Points
+
+- Don't rely on Auto Scaling alone; it may take time to launch and warm up new instances.
+- Identify bottlenecks with metrics: CPU, latency, request count, error rates, memory, connection pools, and database performance.
+- Make the application suitable for multiple instances: externalize sessions/shared state and avoid relying on instance-local files for persistent uploads.
+- Use caching, queues for suitable background work, and rate limiting when they fit the workload.
+- Test with realistic load before production events and set sensible scaling limits and budgets.
+
+---\n
