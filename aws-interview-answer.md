@@ -1980,3 +1980,84 @@ MongoDB Atlas or another managed database must allow the EC2 application's netwo
 **Deploying Node.js on EC2 involves launching the instance, installing Node.js, transferring code, configuring dependencies and environment variables, running the app with a process manager, and using Nginx/HTTPS plus secure networking for production access.**
 
 ---
+
+### Q32. How do you keep Node.js application running after SSH logout?
+
+#### 1. English Definition
+
+**Use a process manager such as PM2 to run a Node.js application as a managed background process so it continues running after you disconnect from SSH.**
+
+#### 2. Hindi Definition
+
+PM2 jaise process manager ka use karke Node.js application ko background mein run aur manage kar sakte hain, jisse SSH logout karne ke baad bhi application chalti rahe.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tum EC2 par SSH se login karte ho aur ye command chalate ho:
+
+```bash
+node server.js
+```
+
+Agar app foreground mein run ho rahi hai, toh SSH session band hone par process terminate ho sakta hai. Production mein application ko PM2 jaise process manager ke through run karna common approach hai.
+
+PM2 application ko background mein manage karta hai, process status aur logs dikhata hai, aur configuration ke hisaab se crashed process ko restart kar sakta hai. Reboot ke baad automatically start karne ke liye startup integration bhi configure karni hoti hai.
+
+#### 4. Practical Example — PM2
+
+Assume tumhari app ka entry point `server.js` hai aur Node.js/npm installed hain:
+
+```bash
+# Install PM2 globally
+npm install -g pm2
+
+# Start the app under PM2
+pm2 start server.js --name my-node-api
+
+# Check process status
+pm2 status
+
+# View logs
+pm2 logs my-node-api
+
+# Save the current process list
+pm2 save
+```
+
+Ab tum SSH session se `exit` karke disconnect kar sakte ho; PM2-managed application normally run karti rahegi.
+
+#### 5. Start the app after an EC2 reboot
+
+SSH logout aur EC2 reboot alag cheezein hain. Logout ke baad PM2 process continue kar sakta hai, lekin server reboot hone par automatic startup ke liye setup chahiye.
+
+```bash
+# Generate the startup command for your OS/init system
+pm2 startup
+
+# Run the exact sudo command printed by PM2, then:
+pm2 save
+```
+
+`pm2 startup` output mein jo command print ho, wahi apne environment ke hisaab se execute karo. Reboot ke baad verify karo with `pm2 status` and application health checks.
+
+#### 6. Other options
+
+| Method | When to use |
+|---|---|
+| PM2 | Common Node.js process manager for status, logs, restarts and startup integration |
+| systemd service | Linux service manager; suitable for managing a Node.js process as an OS service |
+| Docker with restart policy/orchestrator | Containerized applications where deployment uses Docker or an orchestrator |
+| `nohup` | Simple temporary background execution; less process-management functionality than PM2/systemd |
+
+#### 7. Important Points
+
+- PM2 does not make an app immune to crashes; monitor logs and health checks.
+- `pm2 save` saves the process list; `pm2 startup` configures startup integration for reboots.
+- Ensure the app's environment variables, working directory and permissions are configured for the process manager.
+- Use Nginx or a load balancer for production HTTP/HTTPS routing; do not rely on an open terminal session.
+
+#### 8. Interview Summary
+
+**I use PM2 to run the Node.js app as a managed background process. I verify it with `pm2 status`, inspect logs with `pm2 logs`, and configure `pm2 startup` plus `pm2 save` if it must restart after an EC2 reboot.**
+
+---
