@@ -726,3 +726,126 @@ Yeh example policy sirf ek specific bucket ke objects read karne ki permission d
 **Yaad rakhne ki trick:** Policy = Action + Resource + Effect (+ optional Condition).
 
 ---
+
+### Q12. What is the Principle of Least Privilege?
+
+#### 1. English Definition
+
+**The Principle of Least Privilege means giving a user, role, or application only the minimum permissions required to perform its job, and no unnecessary access.**
+
+#### 2. Hindi Definition
+
+Principle of Least Privilege ka matlab hai kisi user, role ya application ko sirf utni hi permissions dena jitni uske kaam ke liye zaroori hain—extra permissions nahi.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js application ko S3 se product images read karni hain. Agar application ko sirf images read karni hain, toh usse poore AWS account ka admin access dena galat hoga.
+
+Least Privilege follow karne ke liye:
+
+- Sirf required actions allow karo, jaise `s3:GetObject`.
+- Permissions ko required bucket ya objects tak limit karo.
+- Unnecessary `AdministratorAccess` aur wildcard permissions (`*`) avoid karo.
+- Permissions ko regularly review karo aur unused access remove karo.
+
+#### 4. Practical Example
+
+Agar application ko `my-product-images` bucket ke objects read karne hain, toh policy mein specific action aur resource use kar sakte ho:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::my-product-images/*"
+    }
+  ]
+}
+```
+
+Yeh example sirf object read permission dikhata hai. Is policy ko suitable identity/role se attach karna hoga, aur doosre applicable access controls bhi matter karte hain.
+
+#### 5. Why Is It Important?
+
+- Unauthorised access ka risk kam hota hai.
+- Credentials compromise hone par potential damage limit ho sakta hai.
+- Accidental deletion ya configuration changes ka risk reduce hota hai.
+- Security audit aur compliance mein help milti hai.
+
+#### 6. Summary Table
+
+| Practice | Example |
+|---|---|
+| Minimum actions | `s3:GetObject` instead of all S3 actions |
+| Minimum resources | Sirf required S3 bucket ke objects |
+| Avoid excess access | Unnecessary admin permissions na dena |
+| Review access | Unused permissions remove karna |
+
+**Yaad rakhne ki trick:** Right identity + right actions + right resources + minimum access.
+
+---
+
+### Q13. Root User kya hota hai?
+
+#### 1. English Definition
+
+**The AWS account root user is the identity created when an AWS account is first created. It has full access to the account and should be used only for tasks that specifically require root-user credentials.**
+
+#### 2. Hindi Definition
+
+AWS Root User woh identity hoti hai jo AWS account create karte waqt banti hai. Iske paas account ka full access hota hai, isliye ise sirf un tasks ke liye use karna chahiye jinke liye root credentials specifically required hon.
+
+#### 3. Hinglish Explanation
+
+Bhai, Root User ko AWS account ki highest-privilege identity samjho. Iska access bahut powerful hota hai, isliye daily development, EC2 manage karne ya normal S3 access ke liye root user use nahi karna chahiye.
+
+Best practices:
+
+- Root user ke liye MFA enable karo.
+- Root credentials aur access keys ko securely protect karo; routine work ke liye root access keys create/use mat karo.
+- Daily tasks ke liye IAM Identity Center ya appropriately permissioned IAM identities/roles use karo.
+- Root credentials ko kisi ke saath share mat karo.
+- Root user se sirf woh account-level tasks karo jinke liye root access zaroori ho.
+
+#### 4. Practical Example
+
+Maan lo tum MERN application deploy kar rahe ho:
+
+1. AWS account setup karte waqt root user create hota hai.
+2. Daily AWS Console aur development work ke liye suitable permissions ke saath separate identity configure karo.
+3. EC2 application ko S3 access dene ke liye IAM role use karo.
+4. Root user ko routine application requests ya backend code mein use mat karo.
+
+```text
+AWS Account
+    |
+    +-- Root User: Account-level full access; protect carefully
+    |
+    +-- IAM Identity / Role: Routine work with limited permissions
+    |
+    +-- EC2 Role: Application ko required AWS services access
+```
+
+#### 5. Root User vs IAM User/Role
+
+| Feature | Root User | IAM User / Role |
+|---|---|---|
+| Creation | AWS account create karte waqt | Account ke andar configure kiye jaate hain |
+| Access | Account ka full access | Assigned permissions ke according |
+| Daily use | Avoid; only required root tasks | Routine work ke liye suitable option |
+| Security | MFA and strict protection essential | Least privilege and appropriate authentication |
+
+#### 6. Summary Table
+
+| Best practice | Why |
+|---|---|
+| Enable MFA | Account protection improve karna |
+| Avoid routine root use | Risk aur accidental damage reduce karna |
+| Use roles/limited identities | Required access tak limit rakhna |
+| Protect credentials | Account compromise ka risk kam karna |
+
+**Yaad rakhne ki trick:** Root User = account ka full-access owner identity; daily work = limited permissions wali identity ya role.
+
+---
