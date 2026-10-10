@@ -9733,3 +9733,87 @@ aws cloudfront get-distribution --id YOUR_DISTRIBUTION_ID
 **Remember:** CloudFront ka main purpose content delivery ko faster banana, cacheable content ke liye origin load reduce karna, aur global users ko better experience dena hai.
 
 ---
+
+### Q146. What is a CDN?
+
+#### 1. English Definition
+
+**A Content Delivery Network (CDN) is a geographically distributed network of servers that delivers web content to users from locations closer to them, helping reduce latency and improve content delivery performance.**
+
+#### 2. Hindi Definition
+
+CDN servers ka ek distributed network hota hai jo website ka content users ke kareeb locations se deliver karta hai. Isse content load hone ka time kam ho sakta hai aur original server par load bhi reduce ho sakta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari website ka main server India mein hai, lekin users USA aur Europe mein bhi hain. Agar har user ko images, CSS aur JavaScript files India wale server se hi download karni padein, toh distance ki wajah se response slow ho sakta hai.
+
+CDN content ko multiple geographic locations par cache kar sakta hai. User request karta hai toh CDN available aur valid cached content ko nearby location se serve kar sakta hai. Agar content cache mein nahi hai, toh CDN configured origin se fetch kar sakta hai.
+
+**Amazon CloudFront AWS ki CDN service hai.** CDN ek general technology/category hai; CloudFront uska AWS implementation hai.
+
+#### 4. Practical Example
+
+Maan lo tumhari MERN e-commerce application mein product images aur React static files hain. Tum images ko Amazon S3 mein rakhte ho aur CloudFront ko CDN ke roop mein configure karte ho.
+
+- India ka user image request karta hai; CloudFront available cached image serve kar sakta hai.
+- USA ka user bhi image request karta hai; CloudFront uske request path ke mutabiq suitable edge location se content serve kar sakta hai.
+- Agar image cache mein available nahi hai ya revalidation required hai, CloudFront origin se content fetch kar sakta hai.
+
+#### 5. Architecture Diagram — Request Flow
+
+```text
+          User / Browser
+                |
+                v
+             CDN Edge
+                |
+         Check cached content
+                |
+          +-----+-----+
+          |           |
+       Cache hit   Cache miss
+          |           |
+          |           v
+          |      Origin Server
+          |      (S3 / Web Server)
+          |           |
+          |<----------+
+          |
+          v
+     Content to User
+```
+
+**Request flow:** User content request karta hai → CDN cache check karta hai → cache hit par content serve hota hai → cache miss par origin se content fetch ho sakta hai → response user tak pahunchta hai.
+
+#### 6. Practical Command / Configuration
+
+CDN use karne ke liye aam taur par apne domain/DNS aur CDN provider mein configuration karni hoti hai. AWS CloudFront ki distribution list dekhne ke liye:
+
+```bash
+aws cloudfront list-distributions
+```
+
+CloudFront setup mein commonly:
+- **Origin:** S3 bucket ya web server choose karo.
+- **Cache behavior:** Kaun se paths cache honge, configure karo.
+- **TTL/cache policy:** Content kitni der cache ho sakta hai, set karo.
+- **HTTPS:** TLS certificate aur viewer protocol policy configure karo.
+- **DNS:** Apne domain ko CloudFront distribution se map karo, if using a custom domain.
+
+AWS CLI use karne ke liye credentials aur required IAM permissions configured honi chahiye.
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| CDN | Content Delivery Network |
+| Edge location | User requests handle karne aur content cache karne ki location |
+| Origin | Original content source |
+| Cache hit | Content cache se serve hota hai |
+| Cache miss | Content origin se fetch karna pad sakta hai |
+| Amazon CloudFront | AWS ki CDN service |
+
+**Remember:** CDN content ko users ke kareeb locations se deliver karta hai. Amazon CloudFront AWS ka CDN hai, jo latency aur origin load reduce karne mein help kar sakta hai.
+
+---
