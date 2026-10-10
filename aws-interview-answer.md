@@ -849,3 +849,73 @@ AWS Account
 **Yaad rakhne ki trick:** Root User = account ka full-access owner identity; daily work = limited permissions wali identity ya role.
 
 ---
+
+---
+
+### Q14. IAM Role ka use kab karte hain?
+
+#### 1. English Definition
+
+**An IAM role is used when a trusted user, AWS service, or application needs temporary permissions to access AWS resources without relying on long-term credentials tied to an IAM user.**
+
+#### 2. Hindi Definition
+
+IAM Role ka use tab karte hain jab kisi trusted user, AWS service ya application ko AWS resources access karne ke liye permissions chahiye hoti hain. Role assume karne par temporary credentials mil sakti hain, isliye long-term access keys ko code mein rakhne ki zaroorat nahi hoti.
+
+#### 3. Hinglish Explanation
+
+Bhai, sabse common example tumhari MERN application hai. Maan lo Node.js backend EC2 instance par chal raha hai aur use Amazon S3 se product images read karni hain.
+
+**IAM Role kab use karte hain?**
+
+- **EC2 to S3:** EC2 instance ko S3 access dene ke liye instance role use karo.
+- **Lambda to DynamoDB:** Lambda function ko DynamoDB table access karna ho, toh execution role use karo.
+- **Cross-account access:** Ek AWS account ki trusted identity ko doosre account ke resources access karne dene ke liye role use ho sakta hai.
+- **Federated access:** SSO ya identity provider se aane wale trusted users ko AWS access dene ke liye roles use ho sakte hain.
+- **Temporary elevated access:** Approved task ke liye required duration aur permissions ke according role assume kiya ja sakta hai.
+
+#### 4. Practical MERN Example — EC2 Accessing S3
+
+```text
+Node.js Backend on EC2
+          |
+          v
+   EC2 IAM Role
+          |
+          v
+   IAM Permission Policy
+   (s3:GetObject on required bucket)
+          |
+          v
+      Amazon S3
+```
+
+**Setup flow:**
+
+1. IAM role create karo aur trust relationship mein EC2 service ko trusted principal banao.
+2. Role ko minimum required S3 permissions wali policy attach karo.
+3. Role ko EC2 instance ke saath associate karo.
+4. Node.js application AWS SDK use kare; SDK supported environment mein role se temporary credentials automatically retrieve kar sakta hai.
+
+Isse application source code ya `.env` file mein long-term AWS access key aur secret key rakhne ki zaroorat nahi hoti.
+
+#### 5. IAM Role vs IAM User
+
+| IAM Role | IAM User |
+|---|---|
+| Trusted entity role assume karti hai. | Separate identity hoti hai. |
+| Assume karne par usually temporary credentials milti hain. | Password ya long-term access keys ho sakti hain. |
+| AWS services aur temporary/cross-account access ke liye useful. | Human or workload identity ke liye use ho sakta hai, but workloads ke liye roles often preferred hote hain. |
+
+#### 6. Summary Table
+
+| Situation | Role ka example |
+|---|---|
+| EC2 ko S3 access chahiye | EC2 instance role |
+| Lambda ko DynamoDB access chahiye | Lambda execution role |
+| Cross-account access | Cross-account role |
+| SSO/federated login | Federated role |
+
+**Yaad rakhne ki trick:** Jab AWS service ya trusted identity ko secure, limited aur temporary AWS access dena ho, toh IAM Role use karne par consider karo.
+
+---
