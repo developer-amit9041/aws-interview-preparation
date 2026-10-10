@@ -15472,3 +15472,94 @@ Both examples assume the image has been built and pushed to ECR and that the req
 **Interview-ready answer:** Amazon ECS is an AWS-native container orchestration service that uses task definitions and services. Kubernetes is an open-source orchestration platform, and Amazon EKS is AWS's managed Kubernetes service. ECS can offer a simpler AWS-specific operating model, while EKS provides Kubernetes APIs and ecosystem compatibility. I would choose based on the team's Kubernetes expertise, portability needs, AWS integration, and operational requirements rather than assuming one is always better.
 
 ---
+
+### Q201. What is Amazon ECR?
+
+#### 1. English Definition
+
+**Amazon Elastic Container Registry (ECR)** is a managed container image registry that stores, manages, and helps distribute Docker and other OCI-compatible container images. It integrates with AWS services such as ECS and EKS.
+
+#### 2. Hindi Definition
+
+Amazon ECR AWS ki managed service hai jahan hum apni Docker/container images ko securely store, manage aur retrieve kar sakte hain. ECS aur EKS in images ko pull karke containers run kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumne apni Node.js application ka Docker image banaya:
+
+```bash
+docker build -t node-api .
+```
+
+Ab ye image tumhare local computer par hai. Agar tumhe ise ECS ya EKS par deploy karna hai, toh image ko ek registry mein store karna padega. AWS par is kaam ke liye Amazon ECR use karte hain.
+
+Simple difference yaad rakho:
+
+- **Docker:** Image build karta hai aur local containers run kar sakta hai.
+- **ECR:** Docker image store karta hai.
+- **ECS/EKS:** Image ko pull karke containers run aur manage karte hain.
+
+ECR private repositories, permissions through IAM, image tags, and image scanning options support karta hai. Public images publish karne ke liye ECR Public bhi available hai.
+
+#### 4. Practical Architecture
+
+```text
+Developer's machine / CI pipeline
+          |
+          | docker build
+          v
+     Docker image
+          |
+          | docker push
+          v
+   Amazon ECR repository
+          |
+          | ECS/EKS pulls image
+          v
+   Running application container
+```
+
+Example: Tum `node-api` image ko ECR mein push karte ho. ECS task definition mein us ECR image URI ko specify karte ho, aur ECS task start hote waqt image pull karke container run karta hai. Image pull karne ke liye appropriate IAM permissions aur network access required hote hain.
+
+#### 5. Practical Commands
+
+**Step 1: Create an ECR repository**
+
+```bash
+aws ecr create-repository \
+  --repository-name node-api \
+  --region ap-south-1
+```
+
+**Step 2: Authenticate Docker to ECR**
+
+```bash
+aws ecr get-login-password --region ap-south-1 | \
+  docker login --username AWS --password-stdin \
+  <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com
+```
+
+**Step 3: Build, tag, and push**
+
+```bash
+docker build -t node-api .
+docker tag node-api:latest <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:latest
+docker push <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:latest
+```
+
+Replace `<ACCOUNT_ID>` with your AWS account ID. The AWS CLI must be configured with credentials that have the required ECR permissions. In production, prefer immutable version tags or image digests rather than relying only on `latest`.
+
+#### 6. Summary Table
+
+| Term | Purpose |
+|---|---|
+| Docker | Builds container images and runs containers |
+| Amazon ECR | Stores and distributes container images |
+| ECS | Orchestrates containers using tasks and services |
+| EKS | Runs Kubernetes workloads |
+| ECR repository | Stores images for a particular application or purpose |
+| Image tag | Identifies an image version, such as `v1.0.0` |
+
+**Interview-ready answer:** Amazon ECR is AWS's managed container image registry. I use it to store and manage Docker images for my applications. After building an image, I tag and push it to an ECR repository. ECS or EKS can then pull that image to deploy and run containers, with access controlled through IAM permissions.
+
+---
