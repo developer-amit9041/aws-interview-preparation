@@ -14887,3 +14887,96 @@ These commands assume the cluster and service already exist. For production, als
 **Interview-ready answer:** An ECS service manages a long-running application by maintaining the desired number of tasks based on a task definition. It can replace stopped tasks, integrate with an Application Load Balancer, and perform deployments. For example, setting desired count to three tells ECS to maintain three running task instances, subject to available capacity and correct configuration.
 
 ---
+
+### Q196. What is Fargate?
+
+#### 1. English Definition
+
+**AWS Fargate** is a serverless compute engine for containers that works with Amazon ECS and Amazon EKS. It lets you run containers without provisioning or managing the underlying EC2 servers.
+
+#### 2. Hindi Definition
+
+AWS Fargate ek serverless compute engine hai jo containers ko run karne deta hai, bina underlying EC2 servers ko create aur manage kiye.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application ka Node.js backend Docker image mein hai aur tum use ECS par run karna chahte ho.
+
+**ECS + EC2:** Tumhe EC2 instances ki capacity, instance configuration aur maintenance manage karni hoti hai.
+
+**ECS + Fargate:** Tum task definition mein container image, CPU, memory, networking aur doosri settings configure karte ho. AWS underlying server infrastructure manage karta hai, aur tum apne tasks run karte ho.
+
+Yaad rakho: ECS container orchestration service hai; Fargate compute option hai. Fargate Docker ka replacement nahi hai, aur na hi ECS ka replacement.
+
+#### 4. Practical Architecture
+
+```text
+Developer builds Docker image
+          |
+          v
+Amazon ECR (stores image)
+          |
+          v
+Amazon ECS Service
+          |
+          v
+AWS Fargate runs the task
+  - Node.js container
+  - Configured CPU and memory
+  - Task networking
+
+AWS manages underlying server infrastructure
+```
+
+Example: tum ECS service ka desired count 2 set karte ho aur Fargate capacity use karte ho. ECS service do tasks maintain karne ki koshish karti hai, while AWS manages the underlying servers. Tumhe EC2 instances manually launch ya patch karne ki zaroorat nahi hoti.
+
+#### 5. Practical Configuration / Commands
+
+Fargate task definition mein `requiresCompatibilities` aur `networkMode` configure hote hain. Example fragment:
+
+```json
+{
+  "family": "node-api",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "node-api",
+      "image": "<ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/my-node-api:latest",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 3000, "protocol": "tcp" }
+      ]
+    }
+  ]
+}
+```
+
+Register the completed task definition and create an ECS service using the Fargate launch type or an appropriate Fargate capacity provider. Configure subnets, security groups, task execution role, application task role, logs, and health checks. CPU and memory values must be a valid Fargate combination.
+
+#### 6. Fargate vs ECS with EC2
+
+| Feature | Fargate | ECS with EC2 |
+|---|---|---|
+| Underlying servers | AWS manages them | You manage EC2 instances and capacity |
+| Container orchestration | ECS or EKS | ECS or EKS |
+| Infrastructure control | Less control over host | More host-level control |
+| Capacity management | Specify task resources | Manage instance capacity plus task resources |
+| Operational overhead | Lower server-management overhead | More infrastructure management |
+| Billing model | Based on requested task resources and runtime, subject to pricing rules | EC2 instance costs plus related resources |
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| Fargate | Serverless compute engine for containers |
+| ECS | Orchestrates containers and manages tasks/services |
+| ECR | Stores Docker/container images |
+| Task definition | Describes container image and runtime configuration |
+| Main benefit | Run containers without managing EC2 hosts |
+
+**Interview-ready answer:** AWS Fargate is a serverless compute engine for containers that works with ECS and EKS. It removes the need to provision and manage the underlying EC2 servers. With ECS on Fargate, I define the container image, CPU, memory, and networking, while AWS manages the server infrastructure that runs the tasks.
+
+---
