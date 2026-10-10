@@ -16662,3 +16662,80 @@ This example demonstrates CI checks. To add CD, extend the workflow with secure 
 **Interview-ready answer:** CI/CD stands for Continuous Integration and Continuous Delivery or Continuous Deployment. CI automatically builds and tests code whenever changes are integrated. Continuous Delivery keeps validated changes ready for release, while Continuous Deployment automatically releases changes that pass the required checks. CI/CD improves release speed, consistency, and software quality by automating repetitive steps.
 
 ---
+
+### Q214. What is AWS CodePipeline?
+
+#### 1. English Definition
+
+AWS CodePipeline is a fully managed continuous delivery service that automates the stages required to release software, such as source retrieval, building, testing, and deployment.
+
+#### 2. Hindi Definition
+
+AWS CodePipeline ek managed CI/CD service hai jo source code se lekar build, testing aur deployment tak ke software release process ko automate karne mein help karti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application GitHub par hai aur tum har baar manually server par code deploy nahi karna chahte.
+
+CodePipeline ek workflow banati hai jisme source stage, build/test stage aur deployment stage connect hote hain. Jab configured source change detect hota hai, pipeline stages ko configured order mein run kar sakti hai.
+
+Common integrations:
+
+- **Source:** CodeCommit (where available), GitHub, Bitbucket or supported source providers.
+- **Build and test:** AWS CodeBuild.
+- **Artifact storage:** Often Amazon S3 for pipeline artifacts.
+- **Deployment:** AWS CodeDeploy, ECS, EKS through configured actions, or other supported deployment providers.
+
+CodePipeline workflow ko orchestrate karta hai. Actual build commands CodeBuild jaise service mein run hote hain, aur deployment configured deployment action perform karta hai.
+
+#### 4. Practical MERN Example
+
+```text
+Developer pushes code to GitHub
+          |
+          v
+AWS CodePipeline (orchestrates stages)
+          |
+          v
+AWS CodeBuild
+  - Install dependencies
+  - Run tests
+  - Build Docker image
+          |
+          v
+Amazon ECR
+  - Store container image
+          |
+          v
+Deployment action
+  - Deploy to ECS or update EKS workloads
+          |
+          v
+Application running in AWS
+```
+
+Exact stages and integrations depend on the deployment design. For EKS, the pipeline needs a deployment step that can securely access the cluster and apply the required Kubernetes manifests or deployment package.
+
+#### 5. Main Components
+
+| Component | Purpose |
+|---|---|
+| Pipeline | Defines the software release workflow |
+| Stage | Groups a phase such as Source, Build, or Deploy |
+| Action | Performs a task within a stage |
+| Artifact | Output passed between actions, such as a build package or manifest |
+| Approval action | Can pause the pipeline until an authorized person approves |
+
+#### 6. Benefits
+
+- Automates repeatable release workflows.
+- Connects source, build, test, and deployment tools.
+- Supports sequential stages and approval gates.
+- Provides visibility into execution status and failures.
+- Integrates with AWS services and supported external providers.
+
+#### 7. Summary
+
+**Interview-ready answer:** AWS CodePipeline is a managed CI/CD orchestration service that automates software release workflows. It connects source providers, build and test tools such as CodeBuild, and deployment actions such as ECS or CodeDeploy. For a MERN application, it can trigger when code changes, run tests, package the application, and deploy the validated build to AWS, with approval gates when needed.
+
+---
