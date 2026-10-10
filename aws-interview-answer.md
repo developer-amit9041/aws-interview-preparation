@@ -15710,3 +15710,111 @@ The image can be pulled with the matching registry URI. For production, use vers
 **Interview-ready answer:** Amazon ECR and Docker Hub are both container registries. ECR is AWS's managed registry and integrates closely with IAM, ECS, and EKS, making it convenient for AWS deployments. Docker Hub is a widely used registry for discovering and sharing public images and hosting private images. I choose based on the deployment platform, access-control requirements, image distribution needs, limits, and cost.
 
 ---
+
+### Q204. How do you push a Docker image to ECR?
+
+#### 1. English Definition
+
+To push a Docker image to Amazon ECR, create an ECR repository, authenticate Docker to the registry, build and tag the image with the repository URI, and then run `docker push`.
+
+#### 2. Hindi Definition
+
+Docker image ko ECR par push karne ke liye pehle ECR repository banate hain, Docker ko AWS registry se login karte hain, image build aur tag karte hain, phir `docker push` command se image upload kar dete hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js application ka Dockerfile ready hai. Image abhi local machine par hai. ECS se use deploy karne ke liye image ko ECR repository mein upload kar sakte ho.
+
+Steps:
+
+1. AWS mein ECR repository create karo.
+2. AWS CLI credentials aur region configure karo.
+3. Docker ko ECR ke saath authenticate karo.
+4. Docker image build karo.
+5. Image ko ECR repository URI ke saath tag karo.
+6. `docker push` se image upload karo.
+
+#### 4. Practical Example
+
+```text
+Node.js project + Dockerfile
+          |
+          v
+docker build
+          |
+          v
+Local Docker image: node-api:v1.0.0
+          |
+          v
+docker tag with ECR repository URI
+          |
+          v
+docker push
+          |
+          v
+Amazon ECR repository
+```
+
+Example image URI:
+
+```text
+123456789012.dkr.ecr.ap-south-1.amazonaws.com/node-api:v1.0.0
+```
+
+Here, the account ID, region, repository name, and tag must match your actual AWS setup.
+
+#### 5. Practical Commands
+
+**Step 1: Create the ECR repository**
+
+```bash
+aws ecr create-repository \
+  --repository-name node-api \
+  --region ap-south-1
+```
+
+**Step 2: Authenticate Docker to ECR**
+
+```bash
+aws ecr get-login-password --region ap-south-1 | \
+  docker login --username AWS --password-stdin \
+  <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com
+```
+
+**Step 3: Build the image**
+
+Run from the directory containing the Dockerfile:
+
+```bash
+docker build -t node-api:v1.0.0 .
+```
+
+**Step 4: Tag the image with the ECR URI**
+
+```bash
+docker tag node-api:v1.0.0 \
+  <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:v1.0.0
+```
+
+**Step 5: Push the image**
+
+```bash
+docker push \
+  <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:v1.0.0
+```
+
+Prerequisites: AWS CLI must be configured with credentials that have the required ECR permissions, Docker must be running, and the repository must exist in the selected region. Use a versioned tag or image digest for repeatable production deployments instead of relying only on `latest`.
+
+#### 6. Summary Table
+
+| Command / Step | Purpose |
+|---|---|
+| `aws ecr create-repository` | Creates an ECR repository |
+| `aws ecr get-login-password` | Gets an authentication token for Docker login |
+| `docker build` | Builds the local image |
+| `docker tag` | Adds the ECR registry URI and image tag |
+| `docker push` | Uploads the image to ECR |
+
+**Interview-ready answer:** To push a Docker image to ECR, I first create an ECR repository and authenticate Docker using the AWS CLI. Then I build the image, tag it with the ECR repository URI, and run `docker push`. After the image is uploaded, I can reference that image URI in an ECS task definition or Kubernetes manifest.
+
+---
