@@ -3880,3 +3880,80 @@ images/
 - Keep API/backend deployment separate, and configure frontend API URLs and CORS as needed.
 
 ---
+
+### Q57. What is S3 CORS?
+
+#### 1. English Definition
+
+**S3 CORS (Cross-Origin Resource Sharing) is a configuration that tells browsers which origins, HTTP methods, and headers are allowed when web pages make cross-origin requests to an S3 bucket.**
+
+#### 2. Hindi Definition
+
+S3 CORS ek configuration hai jo browser ko batati hai ki kaunsi website/origin S3 bucket se cross-origin requests kar sakti hai aur kaunse methods aur headers allowed hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhara React frontend `https://app.example.com` par hosted hai aur S3 bucket `my-app-assets` se image ya file upload/download karta hai. Browser jab ek origin se doosre origin par request karta hai, toh browser CORS rules check kar sakta hai.
+
+S3 bucket ki CORS configuration mein tum specify karte ho:
+
+- `AllowedOrigins` — kaunsi websites request kar sakti hain.
+- `AllowedMethods` — kaunse HTTP methods allowed hain, jaise `GET`, `PUT`, `POST`.
+- `AllowedHeaders` — request mein kaunse headers allowed hain.
+- `ExposeHeaders` — response ke kaunse headers browser JavaScript ko read karne dega.
+- `MaxAgeSeconds` — preflight response browser kitni der cache kar sakta hai.
+
+**Important:** CORS S3 permissions ka replacement nahi hai. CORS request ko browser se allow karne mein help karta hai; bucket policy/IAM/presigned URL decide karte hain ki request ko S3 authorization milti hai ya nahi.
+
+#### 4. Practical Example — React App Uploads Directly to S3
+
+Suppose your frontend origin is `https://app.example.com` and the browser uploads an object using a pre-signed `PUT` URL. A matching S3 CORS rule could look like:
+
+```json
+[
+  {
+    "AllowedOrigins": ["https://app.example.com"],
+    "AllowedMethods": ["GET", "PUT", "HEAD"],
+    "AllowedHeaders": ["*"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
+Add this under the bucket's **Permissions → Cross-origin resource sharing (CORS)** configuration. Replace the origin with your actual frontend origin. Include only the methods and headers the app needs; avoid `*` origins unless broad access is genuinely required. If the signed upload requires a particular header, make sure that header is allowed and sent exactly as required.
+
+#### 5. How the Request Works
+
+```text
+React Browser (https://app.example.com)
+             |
+             | Cross-origin request
+             v
+          S3 Bucket
+             |
+             v
+S3 returns CORS response headers
+             |
+             v
+Browser allows or blocks frontend JavaScript access
+```
+
+For some requests, the browser sends an `OPTIONS` preflight request first. S3 CORS configuration must allow the relevant origin, method, and headers for the browser to proceed.
+
+#### 6. CORS vs S3 Bucket Policy
+
+| S3 CORS | S3 Bucket Policy / IAM |
+|---|---|
+| Controls browser cross-origin access behavior | Controls authorization to S3 resources |
+| Defines origins, methods and headers | Defines principals, actions and resources |
+| Does not grant S3 read/write permission by itself | Can grant or deny S3 operations |
+
+#### 7. Important Points
+
+- Configure CORS only when browser-based cross-origin access is needed; server-to-server requests are not governed by browser CORS enforcement.
+- Use the exact frontend origin, including scheme and port when applicable.
+- CORS does not make a private bucket public and does not bypass IAM or bucket policies.
+- For direct browser uploads, you need both valid S3 authorization (such as a pre-signed URL) and suitable CORS configuration.
+
+---
