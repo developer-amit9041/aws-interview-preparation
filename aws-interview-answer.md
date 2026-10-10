@@ -6240,3 +6240,63 @@ Example: Normal traffic par 2 EC2 instances chal rahe hain. Traffic increase hon
 - Scaling behavior policies, health checks, quotas, and application startup time par depend karta hai.
 
 ---
+
+### Q95. What is Vertical Scaling?
+
+#### 1. English Definition
+
+**Vertical scaling is the process of increasing or decreasing the computing capacity of a single server, for example by changing it to an EC2 instance type with more or fewer CPU and memory resources.**
+
+#### 2. Hindi Definition
+
+Vertical Scaling ka matlab ek hi server ki capacity ko badhana ya ghatana hai, jaise EC2 instance ko zyada ya kam CPU aur RAM wale instance type mein change karna.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application ek EC2 instance par chal rahi hai. Traffic badhne par server ka CPU aur memory usage bahut high ho raha hai.
+
+Vertical Scaling mein tum same server ko more powerful instance type se replace/resize karte ho. Example ke liye, chhote EC2 instance se larger instance type par jaana. Isse ek server ko zyada compute capacity milti hai, bina multiple application servers add kiye.
+
+Instance type change karne ke liye aksar EC2 instance ko stop karna pad sakta hai, depending on the change and setup. Isliye maintenance window aur availability impact plan karna zaroori hai.
+
+#### 4. Practical Example: EC2
+
+```text
+Before:  One EC2 instance with less CPU/RAM
+                    |
+                    v
+After:   One EC2 instance with more CPU/RAM
+```
+
+Maan lo application ek smaller instance par chal rahi hai aur load badh raha hai. Tum supported larger instance type choose karke compute capacity increase kar sakte ho. Actual CPU, memory aur network capacity selected instance type par depend karegi.
+
+#### 5. Vertical Scaling vs Horizontal Scaling
+
+| Basis | Vertical Scaling | Horizontal Scaling |
+|---|---|---|
+| Meaning | Existing server ki capacity change karna | More servers/instances add ya remove karna |
+| Also called | Scale Up / Scale Down | Scale Out / Scale In |
+| Example | EC2 instance type ko larger type mein change karna | Auto Scaling Group mein EC2 instances add karna |
+| Architecture | Often simpler | Multiple instances ko coordinate karna hota hai |
+| Limitation | Instance type ki maximum capacity aur possible downtime/maintenance | Application design, quotas, and shared-state concerns |
+
+#### 6. Advantages and Limitations
+
+**Advantages:**
+- Often simpler than distributing an application across multiple servers.
+- Existing application may need fewer architectural changes.
+- Useful when a workload benefits from more CPU or memory on one server.
+
+**Limitations:**
+- Limited by the maximum capacity of available instance types.
+- Changing instance type may require a stop/start or other planned transition.
+- One server can remain a single point of failure unless redundancy is designed separately.
+
+#### 7. Important Points
+
+- Vertical Scaling = **one more powerful server**.
+- Horizontal Scaling = **multiple servers**.
+- In AWS, changing an EC2 instance type is a common way to scale vertically, subject to compatibility and configuration constraints.
+- Vertical scaling and horizontal scaling can both be used in the same architecture when appropriate.
+
+---
