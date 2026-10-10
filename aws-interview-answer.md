@@ -11631,3 +11631,123 @@ DNS propagation, TLS certificate validity, security group rules, and web-server 
 **Interview answer:** I connect a domain to EC2 by configuring DNS in Route 53. For a simple setup, I point an A record to an Elastic IP. For a production setup, I often point a Route 53 Alias record to an Application Load Balancer, configure HTTPS, and ensure security groups allow only the required traffic.
 
 ---
+
+### Q165. How do you connect a domain to ALB?
+
+#### 1. English Definition
+
+**To connect a domain to an Application Load Balancer (ALB), create a DNS record—commonly an Amazon Route 53 Alias record—that points the domain to the ALB's DNS name. Configure an HTTPS listener and certificate when secure access is required.**
+
+#### 2. Hindi Definition
+
+Domain ko ALB se connect karne ke liye Route 53 mein DNS record banate hain, jo domain ko ALB ke DNS name par point karta hai. HTTPS ke liye ALB par certificate aur HTTPS listener configure karte hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application AWS par deployed hai. ALB users ki incoming HTTP/HTTPS requests ko registered EC2 targets ya doosre supported targets tak forward karta hai.
+
+Typical steps:
+1. ALB create karo aur target group configure karo.
+2. EC2 instances register karo; health check successful hona chahiye.
+3. ALB ke security group mein required inbound traffic allow karo, usually 80 and/or 443.
+4. Route 53 Hosted Zone mein domain ke liye **A-type Alias record** create karo.
+5. Alias target mein apna ALB select karo.
+6. HTTPS ke liye AWS Certificate Manager (ACM) certificate request/validate karo aur ALB par HTTPS listener (443) attach karo.
+7. Domain, certificate aur target health test karo.
+
+**Important:** ALB ka DNS name directly IP address nahi hota. Isliye uske current IP addresses ko manually A record mein enter mat karo; Route 53 Alias use karo. Agar domain ka DNS Route 53 ke bahar manage hota hai, to provider ke supported CNAME/ALIAS/ANAME method se ALB hostname point karo. Root-domain support provider par depend karta hai.
+
+#### 4. Practical Example
+
+Example:
+- Domain: `myapp.com`
+- ALB DNS name: `myapp-alb-123456.ap-south-1.elb.amazonaws.com` (illustrative)
+- Target group: EC2 instances running Nginx or the application
+
+Route 53 configuration:
+
+| Field | Value |
+|---|---|
+| Record name | `myapp.com` |
+| Record type | `A` |
+| Alias | `Yes` |
+| Alias target | Your Application Load Balancer |
+| HTTPS | ACM certificate attached to ALB listener 443 |
+
+Subdomain `api.myapp.com` ke liye bhi A-type Alias record bana sakte ho. Agar frontend aur backend alag hain, to `myapp.com` ko frontend aur `api.myapp.com` ko API ALB/endpoint par point karna possible hai.
+
+#### 5. Architecture Diagram — Domain to ALB
+
+```text
+User opens https://myapp.com
+             |
+             v
+      DNS Resolver
+             |
+             v
+   Route 53 A-type Alias
+             |
+             v
+ Application Load Balancer
+        HTTPS : 443
+             |
+      TLS certificate (ACM)
+             |
+             v
+       Target Group
+             |
+             v
+    Healthy EC2 Instances
+             |
+             v
+       Nginx / App
+```
+
+**Flow:** User domain open karta hai → DNS ALB ka endpoint resolve karta hai → HTTPS connection ALB par terminate hota hai → ALB target group mein healthy EC2 instance ko request forward karta hai.
+
+#### 6. Practical Command / Configuration
+
+ALB ka DNS name dekhne ke liye:
+
+```bash
+aws elbv2 describe-load-balancers \
+  --names YOUR_ALB_NAME \
+  --query "LoadBalancers[0].DNSName" \
+  --output text
+```
+
+Target health check karne ke liye:
+
+```bash
+aws elbv2 describe-target-health \
+  --target-group-arn YOUR_TARGET_GROUP_ARN
+```
+
+Route 53 DNS records inspect karne ke liye:
+
+```bash
+aws route53 list-resource-record-sets \
+  --hosted-zone-id YOUR_HOSTED_ZONE_ID
+```
+
+Console configuration:
+1. **EC2 → Load Balancers:** ALB listener aur target group check karo.
+2. **AWS Certificate Manager:** Domain certificate request aur DNS validation complete karo.
+3. **ALB → Listeners:** HTTPS listener on port 443 create karo aur ACM certificate attach karo.
+4. **Route 53 → Hosted Zone:** A record create karo, Alias enable karo, ALB target select karo.
+5. Verify karo ki target group healthy hai aur `https://myapp.com` work karta hai.
+
+#### 7. Summary Table
+
+| Step | Action |
+|---|---|
+| 1 | ALB and target group create/configure karo |
+| 2 | Targets register karo and health checks pass karao |
+| 3 | ACM certificate validate karo |
+| 4 | ALB par HTTPS listener configure karo |
+| 5 | Route 53 A-type Alias record create karo |
+| 6 | Domain and HTTPS test karo |
+
+**Interview answer:** I connect a domain to an ALB by creating a Route 53 A-type Alias record that targets the load balancer. I configure an HTTPS listener with an ACM certificate, register healthy targets in the target group, and verify that the domain resolves and serves traffic securely.
+
+---
