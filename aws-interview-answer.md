@@ -7296,3 +7296,64 @@ Node.js AWS SDK ke through item read/write kar sakta hai. Actual table key desig
 - For MERN applications, choose DynamoDB only when its access patterns and data model fit the application requirements.
 
 ---
+
+### Q112. DynamoDB vs MongoDB?
+
+#### 1. English Definition
+
+**Amazon DynamoDB is AWS's fully managed serverless NoSQL database service, while MongoDB is a document database available as self-managed software and through managed offerings such as MongoDB Atlas.**
+
+#### 2. Hindi Definition
+
+DynamoDB AWS ki managed serverless NoSQL database service hai. MongoDB ek document-oriented NoSQL database hai jise self-host kar sakte hain ya MongoDB Atlas jaise managed service ke through use kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, dono NoSQL databases hain, lekin inka data model aur use karne ka tareeka different hai.
+
+**MongoDB** documents ko BSON format mein store karta hai. Ismein tum flexible document structure, nested objects, arrays aur aggregation pipeline use kar sakte ho. MERN stack mein MongoDB commonly use hota hai aur Node.js ke saath Mongoose ya MongoDB Node.js driver se connect kar sakte ho.
+
+**DynamoDB** AWS ki key-value aur document database service hai. Ismein table ke items ko partition key aur optional sort key se identify karte ho. Iska design access patterns ke around karna important hai. AWS infrastructure manage karta hai aur on-demand/provisioned capacity options deta hai.
+
+Agar tumhari existing MERN application MongoDB queries, aggregation pipeline ya MongoDB-specific features par depend karti hai, toh DynamoDB par move karna simple database URL change nahi hoga. Data model aur queries ko redesign karna pad sakta hai.
+
+#### 4. Difference Table
+
+| Basis | DynamoDB | MongoDB |
+|---|---|---|
+| Type | Managed key-value/document NoSQL service | Document-oriented NoSQL database |
+| Management | AWS-managed serverless service | Self-managed or managed via MongoDB Atlas and other options |
+| Data model | Items and attributes; partition key and optional sort key | BSON documents, collections, nested objects and arrays |
+| Query design | Access patterns built around keys and indexes | Flexible document queries and aggregation pipeline |
+| Scaling | On-demand or provisioned capacity options | Scaling options depend on deployment, such as Atlas clusters or self-managed sharding |
+| Ecosystem | AWS integrations and IAM-based access controls | MongoDB drivers, tools, Atlas features and broad deployment choices |
+| Best fit | AWS workloads with predictable key-based access patterns at scale | Applications needing flexible document querying and MongoDB-specific capabilities |
+
+#### 5. Practical MERN Example
+
+Suppose your app stores product documents like this in MongoDB:
+
+```js
+{
+  name: "Wireless Mouse",
+  price: 1200,
+  categories: ["electronics", "accessories"],
+  specifications: { color: "black", wireless: true }
+}
+```
+
+MongoDB is convenient for querying nested fields and using aggregation pipelines. DynamoDB can also store document-like attributes, but you should design the partition key, sort key, indexes, and access patterns around the queries the app needs.
+
+#### 6. Which One Should You Choose?
+
+- Choose **MongoDB** when the app needs MongoDB's flexible document queries, aggregation pipeline, or is already built around MongoDB; Atlas can provide managed hosting.
+- Choose **DynamoDB** when the application fits key-based access patterns, needs AWS-native integration, and benefits from its serverless capacity model.
+- Compare total cost, query patterns, consistency needs, operational requirements, and migration effort before deciding.
+
+#### 7. Important Points
+
+- Both are NoSQL, but their APIs, query capabilities, indexes, and data modeling are not interchangeable.
+- DynamoDB is not simply AWS-hosted MongoDB, and MongoDB is not just a different interface for DynamoDB.
+- For a migration, redesign and test access patterns, indexes, consistency expectations, and application queries before switching.
+
+---
