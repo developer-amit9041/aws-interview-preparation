@@ -4670,3 +4670,63 @@ Example mein VPC A ki route table mein VPC B ke CIDR (`10.1.0.0/16`) ko peering 
 | Non-transitive | VPC internet connectivity component; VPC-to-VPC transit routing service nahi |
 
 ---
+
+### Q69. What is a Security Group?
+
+#### 1. English Definition
+
+**A Security Group is a virtual, stateful firewall that controls inbound and outbound traffic for supported AWS resources, such as EC2 instances.**
+
+#### 2. Hindi Definition
+
+Security Group AWS ka virtual, stateful firewall hota hai jo EC2 jaise resources ke liye incoming aur outgoing network traffic ko rules ke through control karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js application EC2 instance par run ho rahi hai. Tum chahte ho ki users website ko HTTPS par access kar saken, lekin koi bhi random port par connection na kar sake.
+
+Security Group ke rules se tum specify karte ho:
+
+- Kaunsa inbound traffic allow hoga, jaise HTTPS port `443`.
+- Kaunsa outbound traffic allow hoga.
+- Traffic kis source/destination se aa ya ja sakta hai, jaise specific IP range ya doosra Security Group.
+
+Security Groups allow rules define karte hain; explicit deny rules nahi. Agar traffic kisi applicable inbound allow rule se match nahi karta, toh woh inbound traffic blocked hota hai. Security Group **stateful** hai: allowed inbound connection ka response automatically allow hota hai, aur allowed outbound connection ka response bhi automatically allow hota hai.
+
+#### 4. Practical Example: MERN Application
+
+```text
+Internet Users
+      |
+      | HTTPS :443
+      v
+Load Balancer / EC2 Security Group
+      |
+      | Backend port (e.g. 3000), only from Load Balancer SG
+      v
+Node.js EC2 Security Group
+      |
+      | Database port, only from backend SG
+      v
+Database Security Group
+```
+
+Example rules:
+
+| Resource | Inbound rule example | Purpose |
+|---|---|---|
+| Public Load Balancer | TCP `443` from intended client ranges | HTTPS access |
+| Node.js EC2 | TCP `3000` from Load Balancer Security Group | Only load balancer can reach the app port |
+| Database | Database port only from backend Security Group | Restrict database access to backend |
+
+Exact ports and sources depend on your architecture. Avoid opening SSH (`22`) or database ports to `0.0.0.0/0` unless there is a carefully justified need; normally restrict access to trusted IPs or appropriate security groups.
+
+#### 5. Important Points
+
+- Security Groups are **stateful**.
+- They apply at the resource/network-interface level, unlike Network ACLs, which apply at the subnet level.
+- They support allow rules, not explicit deny rules.
+- Multiple Security Groups can be associated with supported resources; their allow rules are aggregated.
+- A Security Group does not replace route tables or a Network ACL; all required networking paths and rules must be configured.
+
+---
