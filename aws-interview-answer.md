@@ -509,3 +509,73 @@ Note: Edge Location ek AWS Region ya Availability Zone ka synonym nahi hai. Edge
 **Yaad rakhne ki trick:** Region = deploy resources; AZ = improve infrastructure resilience; Edge Location = content users ke paas se deliver karna.
 
 ---
+
+---
+
+### Q8. What is AWS Global Infrastructure?
+
+#### 1. English Definition
+
+**AWS Global Infrastructure is the worldwide network of AWS Regions, Availability Zones, and edge locations that supports cloud services and helps deliver applications securely, reliably, and with low latency.**
+
+#### 2. Hindi Definition
+
+AWS Global Infrastructure, AWS ka duniya bhar mein phaila hua infrastructure hai. Ismein Regions, Availability Zones aur Edge Locations shamil hain, jo cloud applications ko reliable tareeke se host karne aur users tak content pahunchane mein help karte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, AWS sirf ek city ya ek data center mein operate nahi karta. Iska infrastructure duniya ke different geographic areas mein distributed hai. Isse developers apni application ke users, availability, performance aur compliance requirements ke according resources deploy kar sakte hain.
+
+Iske main components:
+
+- **Regions:** Alag geographic areas, jaise Asia Pacific (Mumbai).
+- **Availability Zones (AZs):** Ek Region ke andar isolated infrastructure locations/groups. Multiple AZs mein deploy karne se availability improve ho sakti hai.
+- **Edge Locations:** AWS ke global edge network ke sites, jinhe CloudFront jaise services content ko users ke kareeb deliver karne ke liye use karti hain.
+
+#### 4. Architecture Example — MERN Application
+
+```text
+                 Users Worldwide
+                        |
+                        v
+              CloudFront Edge Network
+                        |
+                        v
+              AWS Region: Mumbai
+                   ap-south-1
+                        |
+              +---------+---------+
+              |                   |
+            AZ-a                AZ-b
+              |                   |
+          EC2 Backend         EC2 Backend
+              |                   |
+              +---------+---------+
+                        |
+              Database / S3 Origin
+```
+
+Yeh conceptual diagram hai. Actual architecture mein CloudFront, load balancing, database aur S3 ko separately configure kiya jata hai; har request isi exact path se nahi guzarti.
+
+**Practical example:** Tum React frontend, Node.js backend aur database ko requirements ke according AWS Region mein deploy kar sakte ho. Backend ko multiple AZs mein run kar sakte ho, aur static images ko S3 + CloudFront se deliver kar sakte ho.
+
+#### 5. Why is AWS Global Infrastructure Important?
+
+- **Low latency:** Users ke liye suitable geographic location aur edge delivery choose kar sakte ho.
+- **High availability:** Multiple AZs mein resources distribute kar sakte ho.
+- **Disaster recovery:** Requirements ke according multiple Regions mein backup ya recovery setup bana sakte ho.
+- **Compliance:** Data residency aur regulatory requirements ko consider karke Region select kar sakte ho.
+- **Scalability:** Different locations mein cloud resources provision kar sakte ho.
+
+#### 6. Summary Table
+
+| Component | Main purpose | Example use |
+|---|---|---|
+| Region | Geographic deployment area | Mumbai mein backend deploy karna |
+| Availability Zone | Isolated infrastructure location/group | Multiple AZs mein backend instances |
+| Edge Location | Users ke paas content deliver karna | CloudFront se cached images serve karna |
+| Global Infrastructure | In components ka worldwide network | Global users ke liye reliable application architecture |
+
+**Yaad rakhne ki trick:** Region = geographic area; AZ = isolated locations within a Region; Edge Location = users ke kareeb content delivery. In sab ka worldwide network AWS Global Infrastructure hai.
+
+---
