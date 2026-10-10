@@ -1064,3 +1064,62 @@ EC2 sirf virtual server provide karta hai; application deploy karna, operating s
 **Yaad rakhne ki trick:** EC2 = Cloud ka virtual server, jahan tum apni application run karte ho.
 
 ---
+
+### Q17. Why do we use EC2?
+
+#### 1. English Definition
+
+**We use Amazon EC2 to run applications on virtual servers in the cloud without purchasing and maintaining physical server hardware ourselves.**
+
+#### 2. Hindi Definition
+
+Hum Amazon EC2 ka use cloud mein applications chalane ke liye karte hain, jisse humein apna physical server khareedne aur maintain karne ki zaroorat nahi hoti.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application ka Node.js + Express backend hai. Is backend ko 24/7 run karne ke liye server chahiye. EC2 par tum virtual server launch karke apna backend deploy kar sakte ho.
+
+EC2 use karne ke main reasons:
+
+1. **No physical server purchase:** Apna server hardware khareedne ki zaroorat nahi.
+2. **Flexible capacity:** Requirement ke according instance type change ya additional instances launch kar sakte ho.
+3. **Control:** Operating system, runtime, libraries aur server configuration par control milta hai.
+4. **Scalability:** Traffic badhne par more instances ya Auto Scaling configure kar sakte ho.
+5. **Pay for usage:** Compute cost usage, instance type, operating system, region aur pricing model par depend karti hai; storage aur data transfer jaise charges alag ho sakte hain.
+6. **Wide workload support:** Websites, REST APIs, background jobs aur other applications run kar sakte ho.
+
+#### 4. Practical MERN Example
+
+Maan lo tumhari application mein React frontend aur Node.js backend hai:
+
+```text
+React Frontend
+      |
+      | API request
+      v
+EC2 Instance
+(Node.js + Express)
+      |
+      v
+MongoDB Atlas
+```
+
+**Flow:** EC2 launch karo → Node.js install karo → Express API deploy karo → required network access configure karo → frontend se API call karo.
+
+#### 5. When is EC2 a good choice?
+
+EC2 useful hai jab tumhe server environment par control chahiye, custom software install karna ho, ya application ko specific configuration ke saath run karna ho. Agar tum server manage nahi karna chahte, toh AWS Lambda ya other managed services bhi consider kar sakte ho.
+
+#### 6. Summary Table
+
+| Reason | Benefit |
+|---|---|
+| No physical hardware | Server hardware khareedne aur maintain karne ki zaroorat kam |
+| Flexible capacity | Instance type aur count requirement ke hisaab se adjust kar sakte ho |
+| Server control | OS aur software configuration par control |
+| Scalability | More instances aur Auto Scaling use kar sakte ho |
+| Multiple workloads | Websites, APIs, workers aur applications run kar sakte ho |
+
+**Yaad rakhne ki trick:** EC2 use karte hain taaki hum cloud mein apne applications ko flexible, configurable virtual servers par run kar saken.
+
+---
