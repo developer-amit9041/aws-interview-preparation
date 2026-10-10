@@ -1676,3 +1676,53 @@ EBS application ke liye block storage hai; ise database ka automatic backup ya m
 **EBS is persistent block storage for EC2. It works like a virtual hard disk that can store an operating system, application files, and other data.**
 
 ---
+
+### Q28. EBS vs Instance Store?
+
+#### 1. English Definition
+
+**Amazon EBS provides persistent block storage that can be managed independently of an EC2 instance, while EC2 Instance Store provides local storage physically attached to the host machine and is intended for data that can be recreated or is temporary.**
+
+#### 2. Hindi Definition
+
+EBS ek persistent virtual disk hai jise EC2 instance se alag manage kiya ja sakta hai. Instance Store host machine se directly attached local storage hoti hai, jo temporary ya dobara generate kiye ja sakne wale data ke liye suitable hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, EC2 ko virtual computer samjho. Iske saath storage dene ke do common options samjhte hain:
+
+- **EBS:** Network-attached virtual disk. Iska lifecycle EC2 instance se alag ho sakta hai, isliye instance stop ya terminate hone par bhi volume ka data retain kiya ja sakta hai, configuration par depend karta hai.
+- **Instance Store:** EC2 host machine par local storage. Ye temporary data, cache ya scratch files ke liye useful hai. Instance stop/terminate ya underlying host failure jaise events mein data lose ho sakta hai, isliye ise durable storage nahi samajhna chahiye.
+
+Simple scenario: agar tumhe important files persistently store karni hain, toh EBS consider karo. Agar temporary cache hai jise dobara generate kiya ja sakta hai, toh suitable instance type par Instance Store useful ho sakta hai.
+
+#### 4. Practical Example — MERN Project
+
+```text
+EC2 Instance (Node.js + Express)
+   |
+   +-- EBS Volume
+   |     Persistent app files / data that must survive instance lifecycle
+   |
+   +-- Instance Store
+         Temporary cache / scratch data that can be recreated
+```
+
+Example: Node.js application ke temporary image-processing files ya cache ko Instance Store par rakhna possible ho sakta hai, agar application loss ko tolerate kar sake. Important user uploads ya files jo survive karni chahiye, unke liye EBS, S3, ya suitable managed storage use karo.
+
+#### 5. Difference Table
+
+| Feature | EBS | EC2 Instance Store |
+|---|---|---|
+| Storage | Network-attached block storage | Host machine ka local storage |
+| Persistence | Volume instance se separately persist/manage ho sakta hai | Temporary/ephemeral; host and instance lifecycle par depend karta hai |
+| Detach and reattach | Supported configurations mein possible | General persistent volume ki tarah detach/reattach nahi hota |
+| Instance stop/termination | Data commonly retain ho sakta hai, volume settings par depend karta hai | Data loss ho sakta hai; durable storage ke liye use na karo |
+| Performance | Volume type/configuration aur network par depend | Kuch workloads mein low-latency/high-throughput local storage de sakta hai |
+| Best suited for | OS/root volume, persistent files, workloads requiring durable block storage | Cache, temporary files, scratch data |
+
+#### 6. Interview Summary
+
+**EBS is persistent, separately managed block storage; Instance Store is local ephemeral storage intended for temporary or reproducible data.** Choose based on durability, performance needs, and whether the data can be recreated.
+
+---
