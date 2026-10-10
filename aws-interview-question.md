@@ -2,6 +2,51 @@
 
 Target: MERN / Node.js developers (approximately 1–4 years' experience)
 
+
+## 🔥 Most Important for Your MERN Interview
+
+You do **not** need to memorize all 234 questions at once. For a MERN / Node.js developer with approximately 3–4 years of experience, prepare these topics first in priority order. This roadmap complements the full question bank below.
+
+### Priority 1 — Must Know
+- EC2
+- IAM
+- S3
+- VPC
+- Security Groups
+- Application Load Balancer (ALB)
+- RDS
+- Route 53
+- CloudWatch
+- Lambda
+- SQS
+- Docker + ECS
+- CI/CD
+
+### Priority 2 — Production / Scenario
+- Public Subnet vs Private Subnet
+- Internet Gateway vs NAT Gateway
+- ALB + EC2 architecture
+- Auto Scaling
+- S3 + CloudFront
+- AWS Secrets Manager
+- Blue-Green Deployment
+- Docker → ECR → ECS → ALB deployment flow
+- GitHub → CI/CD → AWS deployment flow
+
+### Priority 3 — Advanced
+- EKS
+- Kubernetes on AWS
+- DynamoDB
+- API Gateway
+- AWS KMS
+- Event-driven architecture
+- AWS serverless architecture
+
+**Recommended preparation order:** Complete Priority 1 first, practise the Priority 2 production scenarios, then move to Priority 3.
+
+---
+
+
 ## 1. AWS Fundamentals
 1. What is AWS?
 2. Why do we use AWS?
