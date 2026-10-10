@@ -9187,3 +9187,89 @@ Feature availability can change; check current AWS documentation for the exact A
 | Key limitation vs REST API | Some advanced API management features are not available |
 
 ---
+
+### Q140. How do you secure API Gateway?
+
+#### 1. English Definition
+
+**API Gateway can be secured using authentication and authorization, HTTPS, resource policies, throttling, input validation, and monitoring. The exact controls depend on the API type, integration, and application requirements.**
+
+#### 2. Hindi Definition
+
+API Gateway ko secure karne ke liye authentication, authorization, HTTPS, resource policies, throttling, input validation aur monitoring jaise controls use kiye jaate hain. Kaunse controls chahiye, yeh API ke type aur application ki requirements par depend karta hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein login aur payment APIs hain. Tum nahi chahoge ki koi unauthorized user tumhari APIs ko access kare ya bahut saari requests bhejkar service ko overload kar de.
+
+Isliye API Gateway par multiple security layers lagate hain:
+
+- **Authentication:** User ki identity verify karo, jaise JWT authorizer, Amazon Cognito, ya supported IAM authentication.
+- **Authorization:** Check karo ki authenticated user ko requested resource access karne ki permission hai ya nahi.
+- **HTTPS:** Client aur API ke beech data transit mein encrypt rakho.
+- **Resource policies:** Zaroorat ke hisaab se API access ko AWS principals, accounts, IP ranges, ya network conditions tak restrict karo, subject to API type and policy support.
+- **Throttling and quotas:** Request rate ko control karo; yeh abuse reduce karne mein help karta hai, lekin complete DDoS protection ka replacement nahi hai.
+- **Input validation:** Expected parameters, headers, and payloads validate karo; backend mein bhi validation zaroor rakho.
+- **Monitoring and logging:** CloudWatch metrics/logs aur relevant AWS security services se unusual traffic aur errors monitor karo.
+- **Least privilege:** API Gateway ko Lambda invoke karne ki sirf required permissions do; secrets source code mein store mat karo.
+
+#### 4. Practical Example — React + API Gateway + Lambda
+
+Suppose React frontend protected `GET /profile` endpoint call karta hai.
+
+```text
+React Frontend
+      |
+      | HTTPS + access token
+      v
+Amazon API Gateway
+      |
+      | Validate identity / authorization
+      v
+Authorized request only
+      |
+      v
+AWS Lambda (Node.js)
+      |
+      v
+Database / services
+```
+
+Example request:
+
+```http
+GET /profile
+Authorization: Bearer <access-token>
+```
+
+API Gateway ko configured authorizer token validate karne ke liye use kiya ja sakta hai. Agar token invalid ho ya access denied ho, request ko backend tak pahunchne se pehle reject kiya ja sakta hai. Lambda ko phir bhi user permissions aur resource-level access verify karna chahiye where appropriate.
+
+#### 5. Security Checklist
+
+| Control | What it does |
+|---|---|
+| Authentication | Identifies the caller |
+| Authorization | Decides what the caller may access |
+| HTTPS/TLS | Encrypts data in transit |
+| Resource policy | Restricts who or where requests can come from |
+| Throttling / quotas | Limits request rates or usage |
+| Input validation | Rejects malformed or unexpected input |
+| Least-privilege IAM | Limits AWS permissions |
+| Logging and monitoring | Helps detect errors and suspicious patterns |
+| Secrets management | Keeps credentials out of code and logs |
+| Backend checks | Enforces business rules and resource-level permissions |
+
+#### 6. Important Interview Points
+
+- **API keys are not user authentication.** They can identify or meter API consumers in supported configurations, but should not be treated as a secure substitute for authentication and authorization.
+- **CORS is not an API security boundary.** It controls browser cross-origin behavior; non-browser clients can still call an endpoint.
+- **WAF integration:** AWS WAF can be associated with supported API Gateway API types, including REST APIs; confirm current support for the API type and Region.
+- **Private APIs:** Where supported and appropriate, private API endpoints and network controls can limit access to approved networks.
+- **Protect the backend too:** Avoid exposing a backend endpoint that bypasses the API Gateway controls you rely on.
+- **Security is layered:** No single setting replaces authentication, authorization, validation, least privilege, and monitoring.
+
+#### 7. Summary
+
+Secure API Gateway with strong authentication and authorization, HTTPS, appropriate resource policies, throttling, input validation, least-privilege permissions, and monitoring. Never rely on API keys or CORS alone to secure an API.
+
+---
