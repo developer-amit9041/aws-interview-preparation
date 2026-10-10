@@ -985,3 +985,82 @@ Ye command tabhi successful hogi jab configured identity ke paas required permis
 
 ---
 
+---
+
+## 2. EC2 ⭐⭐⭐
+
+### Q16. What is EC2?
+
+#### 1. English Definition
+
+**Amazon EC2 (Elastic Compute Cloud) is an AWS service that provides resizable virtual servers, called instances, to run applications in the cloud.**
+
+#### 2. Hindi Definition
+
+Amazon EC2 AWS ki service hai jo cloud mein virtual servers provide karti hai. In virtual servers ko instances kehte hain, aur in par hum apni applications run kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumne MERN Stack mein application banayi hai. React frontend ready hai aur Node.js + Express backend bhi ready hai. Ab backend ko internet par run karne ke liye server chahiye.
+
+Pehle tum physical server khareed kar maintain kar sakte the. AWS EC2 mein tum cloud par virtual server launch karte ho aur us par apna backend deploy kar dete ho.
+
+EC2 instance par tum:
+
+- Node.js, Express aur doosre runtime install kar sakte ho.
+- Apna backend code deploy kar sakte ho.
+- Nginx, PM2 aur monitoring tools configure kar sakte ho.
+- Requirements ke according instance type aur capacity choose kar sakte ho.
+
+#### 4. Architecture Example — MERN Backend on EC2
+
+```text
+User / Browser
+      |
+      v
+React Frontend
+      |
+      v
+Internet / HTTPS
+      |
+      v
+Amazon EC2 Instance
+(Node.js + Express API)
+      |
+      v
+MongoDB Atlas
+```
+
+**Working flow:**
+
+1. AWS Console ya AWS CLI se EC2 instance launch karo.
+2. Operating system image (AMI), instance type, network settings aur storage select karo.
+3. Instance par Node.js install karke Express backend deploy karo.
+4. Security Group mein sirf required inbound ports allow karo; production mein HTTPS ke liye aam taur par 443 expose kiya jata hai, often through a Load Balancer or Nginx.
+5. React frontend se backend API call karo.
+
+EC2 sirf virtual server provide karta hai; application deploy karna, operating system patches, firewall configuration aur application process management jaise kaam tumhari responsibility ho sakte hain.
+
+#### 5. Important EC2 Terms
+
+| Term | Meaning |
+|---|---|
+| EC2 Instance | Cloud mein virtual server |
+| AMI | Instance launch karne ke liye template/image |
+| Instance Type | CPU, memory aur networking capacity ka combination |
+| EBS | EC2 ke liye block storage volume |
+| Security Group | Instance ke liye virtual firewall rules |
+| Key Pair | Supported login methods mein instance authentication ke liye use ho sakta hai |
+
+#### 6. Summary Table
+
+| Question | Short answer |
+|---|---|
+| EC2 ka full form | Elastic Compute Cloud |
+| EC2 kya provide karta hai? | Virtual servers |
+| EC2 par kya run kar sakte hain? | Node.js, Express, websites, APIs and other workloads |
+| EC2 ka main benefit | Cloud mein compute capacity ko requirement ke according choose aur adjust karna |
+
+**Yaad rakhne ki trick:** EC2 = Cloud ka virtual server, jahan tum apni application run karte ho.
+
+---
