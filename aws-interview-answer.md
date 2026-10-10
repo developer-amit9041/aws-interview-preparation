@@ -579,3 +579,150 @@ Yeh conceptual diagram hai. Actual architecture mein CloudFront, load balancing,
 **Yaad rakhne ki trick:** Region = geographic area; AZ = isolated locations within a Region; Edge Location = users ke kareeb content delivery. In sab ka worldwide network AWS Global Infrastructure hai.
 
 ---
+
+### Q9. What is IAM?
+
+#### 1. English Definition
+
+**AWS Identity and Access Management (IAM) is a service that helps you securely control who can access AWS resources and what actions they can perform.**
+
+#### 2. Hindi Definition
+
+AWS IAM ek service hai jo control karti hai ki kaun AWS resources ko access kar sakta hai aur kaun-se actions perform kar sakta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application EC2 par chal rahi hai aur backend ko S3 se product images access karni hain. IAM ki help se tum permissions define kar sakte ho, taaki application ko sirf required access mile.
+
+IAM ke main components:
+
+- **User:** Kisi person ya application ke liye identity, jise credentials diye ja sakte hain.
+- **Role:** Aisi identity jise trusted user ya AWS service temporarily assume kar sakti hai.
+- **Policy:** Permissions ka document jo batata hai kaun-se actions allowed ya denied hain.
+
+#### 4. Practical Example
+
+EC2 par running Node.js application ko S3 access dena hai:
+
+1. IAM policy mein required S3 permissions define karo.
+2. Policy ko IAM role se attach karo.
+3. Role ko EC2 instance ke saath associate karo.
+4. Application AWS SDK ke through temporary role credentials use karke S3 access kare.
+
+Is approach mein application code ke andar long-term AWS access keys hardcode karne ki zaroorat nahi hoti.
+
+#### 5. Summary Table
+
+| Component | Purpose |
+|---|---|
+| IAM User | Identity with credentials and assigned permissions |
+| IAM Role | Trusted entity ke liye assumable identity, usually temporary credentials ke saath |
+| IAM Policy | Permissions define karne wala document |
+
+**Yaad rakhne ki trick:** IAM = kaun access karega aur kya kar sakta hai.
+
+---
+
+### Q10. IAM User vs Role vs Policy?
+
+#### 1. English Definition
+
+**An IAM user is an identity for a person or workload, an IAM role is an identity that trusted entities can assume, and an IAM policy defines permissions.**
+
+#### 2. Hindi Definition
+
+IAM User ek identity hoti hai, IAM Role ek aisi identity hoti hai jise trusted entity assume kar sakti hai, aur IAM Policy permissions define karti hai.
+
+#### 3. Hinglish Explanation
+
+In teenon ka kaam alag hai:
+
+- **User = Kaun?** Example: AWS Console use karne wala developer. Workloads ke liye users create karna har case mein preferred nahi; AWS services ke liye roles aksar better choice hote hain.
+- **Role = Kis identity ke through access?** Example: EC2 instance ka role, jisse Node.js app S3 access kar sake.
+- **Policy = Kya allowed hai?** Example: Sirf ek specific S3 bucket se objects read karne ki permission.
+
+#### 4. Practical Example — EC2 to S3
+
+```text
+EC2 Instance
+    |
+    v
+IAM Role (attached to EC2)
+    |
+    v
+IAM Policy (allowed S3 actions)
+    |
+    v
+Amazon S3 bucket
+```
+
+Role trusted entity ko identify karta hai aur policy permissions define karti hai. Actual access trust policy, permission policies, resource policies aur applicable controls par depend karta hai.
+
+#### 5. Comparison Table
+
+| Feature | IAM User | IAM Role | IAM Policy |
+|---|---|---|---|
+| What is it? | Identity | Assumable identity | Permissions document |
+| Credentials | May have password/access keys | Usually temporary credentials when assumed | Credentials nahi hoti |
+| Main use | Human or workload identity where appropriate | AWS services or trusted identities ko temporary access | Allow/deny actions define karna |
+| Example | Developer identity | EC2 instance role | S3 read policy |
+
+**Yaad rakhne ki trick:** User = identity; Role = assumable identity; Policy = permissions.
+
+---
+
+### Q11. What is an IAM Policy?
+
+#### 1. English Definition
+
+**An IAM policy is a JSON document that defines permissions by specifying which actions are allowed or denied on which AWS resources, optionally under specific conditions.**
+
+#### 2. Hindi Definition
+
+IAM Policy ek JSON document hota hai jo define karta hai ki kaun-se AWS actions allowed ya denied hain, kin resources par aur kin conditions ke under.
+
+#### 3. Hinglish Explanation
+
+Bhai, policy ko permission rules ki list samjho. For example, agar tumhari Node.js application ko S3 bucket se product images read karni hain, toh policy mein required read action allow kar sakte ho. Sirf zaroori permissions do—ise **least privilege** principle kehte hain.
+
+IAM policy ke common fields:
+
+- **Version:** Policy language ka version, commonly `2012-10-17`.
+- **Statement:** Permission rules ka array.
+- **Effect:** `Allow` ya `Deny`.
+- **Action:** AWS API action, jaise `s3:GetObject`.
+- **Resource:** Jis resource par action apply hota hai.
+- **Condition:** Optional rules, jaise request context ke basis par access restrict karna.
+
+#### 4. Practical Example — S3 Objects Read Karna
+
+Yeh example policy sirf ek specific bucket ke objects read karne ki permission dikhati hai. Bucket name ko apne actual bucket name se replace karo.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::my-product-images/*"
+    }
+  ]
+}
+```
+
+**Iska matlab:** `my-product-images` bucket ke objects read karne ki permission allow hai. Yeh policy apne aap kisi identity ko access nahi deti; ise suitable IAM identity/role ke saath attach karna ya applicable resource-based authorization configure karna hota hai. Koi applicable explicit Deny access ko block kar sakta hai.
+
+#### 5. Summary Table
+
+| Field | Purpose |
+|---|---|
+| `Effect` | Allow ya Deny |
+| `Action` | Kaun-sa AWS operation |
+| `Resource` | Kis resource par operation |
+| `Condition` | Optional additional restriction |
+| Least privilege | Sirf required permissions dena |
+
+**Yaad rakhne ki trick:** Policy = Action + Resource + Effect (+ optional Condition).
+
+---
