@@ -6717,3 +6717,63 @@ Example: E-commerce app mein product listing aur product details ki bahut saari 
 - Read Replica availability, promotion, and cross-Region capabilities depend on the database engine and configuration.
 
 ---
+
+### Q103. Multi-AZ vs Read Replica?
+
+#### 1. English Definition
+
+**Multi-AZ primarily improves database availability through redundancy and failover, while a Read Replica primarily improves read scalability by serving read queries from a replicated copy of the source database.**
+
+#### 2. Hindi Definition
+
+Multi-AZ ka main purpose database ki availability improve karna aur failure par failover support karna hai. Read Replica ka main purpose read queries ko alag database copy par bhejkar read workload scale karna hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, dono mein database ki additional copy ho sakti hai, lekin dono ka kaam alag hai.
+
+- **Multi-AZ:** Socho primary database ya uski Availability Zone mein problem aa gayi. Supported RDS Multi-AZ deployment mein AWS standby/redundant resource par failover kar sakta hai. Iska focus application ko database availability dena hai.
+- **Read Replica:** Socho bahut saare users products aur reports dekh rahe hain. Tum read queries replica par bhej sakte ho, jisse primary database ka read load kam ho. Iska focus read scaling hai.
+
+#### 4. Difference Table
+
+| Basis | Multi-AZ | Read Replica |
+|---|---|---|
+| Main purpose | High availability and failover | Read scalability |
+| Typical traffic | Traditional standby is not used for normal read queries | Can serve read queries |
+| Failure handling | Supported deployments provide managed failover | Can sometimes be promoted, depending on engine/configuration; not the same as automatic Multi-AZ failover |
+| Replication | Traditional Multi-AZ DB instance deployments commonly use synchronous replication | Commonly asynchronous, so replication lag may occur |
+| Data freshness | Depends on deployment and failover state | Replica can temporarily lag behind the primary |
+| Common example | Keep the production database available during an AZ/primary failure | Offload product listings, dashboards, or reporting reads |
+
+#### 5. Practical MERN Example
+
+Suppose your Node.js e-commerce backend uses Amazon RDS:
+
+- Use **Multi-AZ** to improve resilience if the primary database becomes unavailable.
+- Use a **Read Replica** to send high-volume product-listing or reporting queries away from the primary database.
+- A production architecture may use both, if supported and justified by availability and traffic requirements.
+
+```text
+                 Node.js Backend
+                  /           \\
+          Write / primary     Read traffic
+                |                 |
+                v                 v
+           Primary RDS ------> Read Replica
+                |
+          Multi-AZ standby
+          in another AZ
+```
+
+This is a conceptual diagram: exact topology and replication behavior depend on the RDS engine and deployment type.
+
+#### 6. Important Points
+
+- Multi-AZ and Read Replica are not interchangeable; they solve different problems.
+- Multi-AZ is mainly for availability/failover; Read Replica is mainly for read scaling.
+- A Read Replica may have replication lag, so use the primary for reads that require the most current data.
+- Multi-AZ is not a substitute for backups, and Read Replicas are not a substitute for a tested backup/recovery strategy.
+- RDS features vary by database engine and deployment type; some Multi-AZ configurations have readable standby instances, so check the specific engine architecture.
+
+---
