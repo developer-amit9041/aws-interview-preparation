@@ -3195,3 +3195,92 @@ The application's IAM role typically needs `s3:PutObject` on the target object A
 - Validate file type, size, and user permissions before upload.
 
 ---
+
+### Q48. How do you make an S3 object public?
+
+#### 1. English Definition
+
+**An S3 object can be made publicly readable by configuring the bucket's access controls and a bucket policy that grants `s3:GetObject` to the intended objects, provided S3 Block Public Access settings do not block that policy.**
+
+#### 2. Hindi Definition
+
+S3 object ko public banane ke liye bucket ki permissions configure karke required objects ko read karne ki permission deni hoti hai. Agar Block Public Access settings public policy ko block kar rahi hain, toh access dene se pehle un settings ko samajhna zaroori hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumne product images S3 bucket mein upload ki hain aur chahte ho ki website par koi bhi user image dekh sake. Public read ka matlab hai ki jiske paas object ka URL hai, woh bina AWS login ke object read kar sakta hai.
+
+Lekin **poori bucket ko public karna usually recommended nahi hai**. Agar images ya documents private hain, toh bucket private rakho aur presigned URL ya authorized backend use karo.
+
+#### 4. Practical Example — Bucket Policy for Public Read
+
+**Step 1: S3 bucket select karo**
+
+AWS Console → S3 → apni bucket → **Permissions** tab.
+
+**Step 2: Block Public Access settings check karo**
+
+S3 mein Block Public Access settings account aur bucket level par public access ko block kar sakti hain. Agar tum intentionally public website assets serve kar rahe ho, toh organization ki security policy ke mutabik relevant blocking setting adjust karni pad sakti hai. Isse pehle confirm karo ki bucket mein sensitive data nahi hai.
+
+**Step 3: Bucket policy add karo**
+
+Bucket ke **Permissions → Bucket policy** section mein, apne bucket name ko replace karke yeh policy use kar sakte ho:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicReadOnlyForWebsiteImages",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::my-mern-app-uploads/public/*"
+    }
+  ]
+}
+```
+
+Is policy mein `my-mern-app-uploads` ko apne bucket name se replace karo. Yeh policy sirf `public/` prefix ke objects ko publicly read karne deti hai, poori bucket ko nahi. `s3:PutObject` ya delete permission grant nahi ki gayi.
+
+**Step 4: Public object URL use karo**
+
+Agar object key `public/product.png` hai, toh URL ka format hoga:
+
+```text
+https://my-mern-app-uploads.s3.ap-south-1.amazonaws.com/public/product.png
+```
+
+Bucket name, region aur object key apne actual values se replace karo. URL ka format hona object ko public banane ke liye sufficient nahi hai; permissions aur Block Public Access configuration bhi allow karni chahiye.
+
+#### 5. Alternative — Keep the Bucket Private
+
+Agar file private hai, bucket policy mein `Principal: "*"` mat do. Node.js backend se temporary presigned URL generate kar sakte ho:
+
+```javascript
+const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+
+const s3 = new S3Client({ region: process.env.AWS_REGION });
+
+const url = await getSignedUrl(
+  s3,
+  new GetObjectCommand({
+    Bucket: process.env.S3_BUCKET_NAME,
+    Key: 'private/document.pdf',
+  }),
+  { expiresIn: 300 } // 5 minutes
+);
+```
+
+Install the presigner package with `npm install @aws-sdk/s3-request-presigner`. Generate the URL only after your backend has authenticated and authorized the requesting user. A presigned URL grants temporary access to whoever possesses it until it expires.
+
+#### 6. Important Points
+
+- Public read means anyone can read the allowed objects; do not use it for private documents or user uploads by default.
+- Grant only `s3:GetObject` and limit the resource ARN to the intended object prefix.
+- Do not disable all Block Public Access controls blindly; evaluate the exact setting and your security requirements.
+- For many production static websites, consider CloudFront in front of a private S3 bucket using Origin Access Control.
+- If public access still fails, check the bucket policy, account-level Block Public Access, bucket-level Block Public Access, and any organization-level restrictions.
+
+---
