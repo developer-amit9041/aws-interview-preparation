@@ -13276,3 +13276,126 @@ For ongoing audits, configure a CloudTrail trail with suitable event coverage an
 **Interview-ready answer:** I use AWS CloudTrail to track resource changes. I find the relevant event in the correct Region and time range, then inspect fields such as `userIdentity`, `eventName`, `eventTime`, and `requestParameters`. This helps identify the caller and understand the change. For longer-term auditing, I configure a CloudTrail trail with appropriate event coverage and retention.
 
 ---
+
+## 15. SQS & SNS ⭐⭐⭐
+
+### Q180. What is SQS?
+
+#### 1. English Definition
+
+**Amazon Simple Queue Service (SQS) is a fully managed message queuing service that lets distributed application components communicate asynchronously by sending, storing, and receiving messages through a queue.**
+
+#### 2. Hindi Definition
+
+Amazon SQS ek fully managed message queue service hai. Ismein ek application message queue mein bhejti hai aur doosri application baad mein message receive karke process karti hai. Isse dono components ko ek hi time par available rehna zaroori nahi hota.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein user order place karta hai. Order save karne ke baad tumhe email bhejna, invoice generate karna aur notification send karna hai.
+
+Agar API in sab tasks ko synchronously karegi, toh user ko response milne mein delay ho sakta hai. SQS use karke background tasks ko queue mein daal sakte ho.
+
+- **Producer:** Message queue mein send karta hai, jaise Node.js backend.
+- **SQS Queue:** Messages ko temporarily store karti hai.
+- **Consumer/Worker:** Queue se message receive karke task process karta hai.
+- **Delete message:** Successful processing ke baad worker message delete karta hai.
+
+SQS application components ko decouple karta hai, traffic spikes handle karne mein help karta hai aur asynchronous processing support karta hai.
+
+SQS ke main queue types:
+- **Standard Queue:** High throughput aur at-least-once delivery; duplicate messages possible hain, aur ordering best-effort hoti hai.
+- **FIFO Queue:** Ordering preserve karti hai aur supported deduplication features deti hai; throughput aur configuration ke rules apply hote hain.
+
+Consumer ko duplicate processing safely handle karni chahiye, especially Standard Queue ke saath. Message process karne mein time lagta ho toh visibility timeout ko workload ke according configure karo.
+
+#### 4. Practical Example
+
+Suppose user e-commerce website par order place karta hai:
+
+1. Node.js API order database mein save karti hai.
+2. API SQS queue mein `OrderPlaced` message send karti hai.
+3. Background worker message receive karta hai.
+4. Worker invoice generate karta hai aur confirmation email trigger karta hai.
+5. Successful processing ke baad worker SQS message delete karta hai.
+
+Isse user ko order API response ka wait background email aur invoice generation ke liye nahi karna padta.
+
+#### 5. Architecture Diagram — SQS Message Flow
+
+```text
+           User Places Order
+                  |
+                  v
+          Node.js API
+             (Producer)
+                  |
+                  v
+             Amazon SQS
+               (Queue)
+                  |
+                  v
+        Background Worker
+             (Consumer)
+                  |
+          +-------+--------+
+          |                |
+          v                v
+    Generate Invoice   Send Email
+          |
+          v
+   Delete SQS Message
+   after successful processing
+```
+
+**Flow:** Producer message queue mein bhejta hai → SQS message store karta hai → consumer message receive aur process karta hai → successful processing ke baad message delete karta hai.
+
+#### 6. Practical Command / Configuration
+
+**A. Create an SQS queue**
+
+```bash
+aws sqs create-queue --queue-name order-processing
+```
+
+**B. Send a message**
+
+```bash
+aws sqs send-message \
+  --queue-url <SQS_QUEUE_URL> \
+  --message-body '{"event":"OrderPlaced","orderId":"order-123"}'
+```
+
+**C. Receive a message**
+
+```bash
+aws sqs receive-message \
+  --queue-url <SQS_QUEUE_URL> \
+  --max-number-of-messages 1
+```
+
+After processing successfully, delete the message using the receipt handle returned by `receive-message`:
+
+```bash
+aws sqs delete-message \
+  --queue-url <SQS_QUEUE_URL> \
+  --receipt-handle <RECEIPT_HANDLE>
+```
+
+Replace placeholders with values returned by AWS. Configure appropriate IAM permissions for the producer and consumer.
+
+#### 7. Summary Table
+
+| Feature | Amazon SQS |
+|---|---|
+| Full form | Simple Queue Service |
+| Main purpose | Asynchronous message queuing |
+| Producer | Sends messages |
+| Queue | Stores messages until received/processed |
+| Consumer | Receives and processes messages |
+| Standard Queue | High throughput; duplicates and reordering possible |
+| FIFO Queue | Ordered processing with FIFO-specific features |
+| Common use case | Background jobs, order processing, decoupling services |
+
+**Interview-ready answer:** Amazon SQS is a fully managed message queue service that enables asynchronous communication between application components. A producer sends messages to a queue, and a consumer processes them independently. For example, a Node.js order API can put an order event into SQS while a background worker generates invoices and sends emails. This reduces coupling and helps handle traffic spikes.
+
+---
