@@ -3461,3 +3461,75 @@ async function getInvoiceUrl(invoiceKey) {
 - For browser direct uploads, configure S3 CORS as needed; CORS does not replace S3 permissions.
 
 ---
+
+### Q51. What is S3 Versioning?
+
+#### 1. English Definition
+
+**S3 Versioning is a feature that keeps multiple versions of an object in the same S3 bucket, allowing you to recover earlier versions after an object is overwritten or deleted.**
+
+#### 2. Hindi Definition
+
+S3 Versioning ek feature hai jo ek hi S3 bucket mein file ke multiple versions save karta hai, taaki file overwrite ya delete hone par purane version ko recover kiya ja sake.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein `profile.jpg` S3 par stored hai. User nayi image upload karta hai aur same object key par file dobara upload hoti hai. Agar bucket versioning enabled hai, toh S3 existing object ko simply replace karne ke bajaye naya version store karta hai.
+
+Example:
+
+```text
+profile.jpg
+  ├── Version ID: v1 (old image)
+  ├── Version ID: v2 (updated image)
+  └── Version ID: v3 (latest image)
+```
+
+Tum purana version retrieve kar sakte ho, agar uska version delete nahi kiya gaya ho aur required permissions available hon.
+
+#### 4. How to Enable S3 Versioning
+
+1. AWS Console mein **S3** open karo.
+2. Apni bucket select karo.
+3. **Properties** tab open karo.
+4. **Bucket Versioning** section mein **Edit** select karo.
+5. **Enable** choose karke changes save karo.
+
+Versioning enable hone ke baad, S3 mein object ke future writes ke liye versions create hone lagte hain. Existing objects ke liye pehle se purani versions automatically create nahi hoti.
+
+#### 5. What Happens When You Delete an Object?
+
+Versioning-enabled bucket mein normal delete request generally ek **delete marker** add karti hai, jisse object normal listing/request mein deleted jaisa dikhta hai. Purane object versions tab tak stored rehte hain jab tak unhe explicitly delete na kiya jaaye.
+
+Agar kisi specific version ID ko permanently delete kiya jaata hai, toh woh version recover nahi kiya ja sakta. Versioning accidental overwrite/deletion se recovery mein help karta hai, lekin ise backup strategy ka complete replacement nahi samajhna chahiye.
+
+#### 6. Practical Example — Uploading Multiple Versions
+
+Node.js mein same bucket aur same key par file upload karne par, versioning enabled hone ki condition mein, S3 new version create karega:
+
+```javascript
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+
+const s3 = new S3Client({ region: process.env.AWS_REGION });
+
+const result = await s3.send(new PutObjectCommand({
+  Bucket: process.env.S3_BUCKET_NAME,
+  Key: 'uploads/profile.jpg',
+  Body: imageBuffer,
+  ContentType: 'image/jpeg',
+}));
+
+console.log('Version ID:', result.VersionId);
+```
+
+Here, `imageBuffer` represents the file data received by your backend. If bucket versioning is enabled, S3 can return a `VersionId` for the new version.
+
+#### 7. Important Points
+
+- Versioning is configured at the bucket level.
+- Different versions of the same key can incur additional storage charges.
+- A delete marker does not immediately remove older versions.
+- Use lifecycle rules to manage or expire noncurrent versions when appropriate.
+- Versioning helps recover from accidental overwrites and deletes, but it does not protect against every disaster or malicious action by itself.
+
+---
