@@ -13908,3 +13908,130 @@ Replace placeholders with the actual queue URL and receipt handle. The visibilit
 **Interview-ready answer:** Visibility Timeout is the period for which an SQS message remains hidden from other consumers after being received. If the consumer processes and deletes the message within that period, it is removed from the queue. Otherwise, the message can become visible again after the timeout, so the timeout should match the processing duration and consumers should handle duplicate processing safely.
 
 ---
+
+### Q185. What is Dead Letter Queue?
+
+#### 1. English Definition
+
+A **Dead Letter Queue (DLQ)** in Amazon SQS is a separate queue that stores messages that a source queue's consumer has failed to process successfully after a configured number of receive attempts. It helps isolate problematic messages so they can be investigated and handled without repeatedly blocking normal processing.
+
+#### 2. Hindi Definition
+
+Dead Letter Queue ek alag SQS queue hoti hai jahan woh messages bheje jaate hain jo source queue se baar-baar receive hone ke baad bhi successfully process nahi ho paate.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application mein SQS order-processing queue hai. Ek order message baar-baar worker ke paas aata hai, lekin invalid data ya kisi processing error ki wajah se process nahi hota.
+
+- Tum source queue par redrive policy configure karte ho.
+- `maxReceiveCount` batata hai ki message kitni baar receive hone ke baad DLQ mein move hoga.
+- Limit cross hone par SQS message ko Dead Letter Queue mein move kar sakta hai.
+- Normal orders process hote rehte hain, aur failed message ko baad mein inspect, debug, ya retry kiya ja sakta hai.
+
+**Important:** DLQ ko source queue se alag create karke uska ARN redrive policy mein set karna hota hai. DLQ automatically application error fix nahi karti; yeh failed messages ko isolate karti hai. Consumer ko successful processing ke baad hi message delete karna chahiye. FIFO queues mein DLQ use karne se strict end-to-end message ordering affect ho sakti hai.
+
+#### 4. Practical Example / Code
+
+Example: order-processing queue mein invalid order message 3 receive attempts ke baad bhi fail hota hai. Agar redrive policy ka `maxReceiveCount` 3 hai, toh SQS us message ko configured DLQ mein move kar sakta hai.
+
+```text
+Order Producer
+      |
+      v
+Source SQS Queue ---> Order Worker
+      |                    |
+      |            Processing keeps failing
+      |                    |
+      +--- after maxReceiveCount ---+
+                                   v
+                         Dead Letter Queue
+                                   |
+                                   v
+                          Inspect / Fix / Retry
+```
+
+Node.js consumer mein processing fail hone par message ko successful maan kar delete mat karo:
+
+```javascript
+try {
+  const order = JSON.parse(message.Body ?? "{}");
+  await processOrder(order);
+
+  // Delete only after successful processing.
+  await sqs.send(new DeleteMessageCommand({
+    QueueUrl: sourceQueueUrl,
+    ReceiptHandle: message.ReceiptHandle,
+  }));
+} catch (error) {
+  console.error("Order processing failed:", error);
+  // Leave the message undeleted so SQS can retry it.
+  // The redrive policy can eventually move it to the DLQ.
+}
+```
+
+#### 5. Architecture Diagram
+
+```text
+Producer
+   |
+   v
+Source SQS Queue <---- Worker
+   |                    |
+   |              repeated failures
+   |                    |
+   +---- maxReceiveCount reached
+                |
+                v
+          Dead Letter Queue
+                |
+                v
+       Inspect / troubleshoot
+       then redrive if appropriate
+```
+
+#### 6. Practical Command / Configuration
+
+**A. Create a DLQ:**
+
+```bash
+aws sqs create-queue \
+  --queue-name order-processing-dlq \
+  --region ap-south-1
+```
+
+**B. Get the DLQ ARN:**
+
+```bash
+aws sqs get-queue-attributes \
+  --queue-url "<DLQ_QUEUE_URL>" \
+  --attribute-names QueueArn \
+  --region ap-south-1
+```
+
+**C. Configure the source queue redrive policy:**
+
+Replace `<DLQ_ARN>` with the ARN returned above.
+
+```bash
+aws sqs set-queue-attributes \
+  --queue-url "<SOURCE_QUEUE_URL>" \
+  --attributes '{"RedrivePolicy":"{\"deadLetterTargetArn\":\"<DLQ_ARN>\",\"maxReceiveCount\":\"3\"}"}' \
+  --region ap-south-1
+```
+
+`maxReceiveCount` is the number of receives allowed before SQS moves a message to the DLQ. Choose a value based on the workload and retry strategy. The source queue and DLQ must be compatible; for example, a FIFO source queue requires a FIFO DLQ.
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| DLQ | Separate queue for messages that repeatedly fail processing |
+| Source queue | Original queue receiving application messages |
+| Redrive policy | Configures the DLQ destination and receive-attempt limit |
+| `maxReceiveCount` | Receive count after which SQS moves the message to the DLQ |
+| Main benefit | Isolates poison/problematic messages and supports troubleshooting |
+| Best practice | Monitor DLQ depth, investigate failures, and redrive only after fixing the cause |
+
+**Interview-ready answer:** A Dead Letter Queue is a separate SQS queue used to isolate messages that fail processing repeatedly. A redrive policy specifies the DLQ and `maxReceiveCount`; once the receive-attempt limit is reached, SQS moves the message to the DLQ so it can be investigated without repeatedly interfering with normal message processing.
+
+---
