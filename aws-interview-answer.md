@@ -14503,3 +14503,68 @@ Then create an ECS task definition referencing that ECR image and create an ECS 
 **Interview-ready answer:** Amazon ECS is AWS's managed container orchestration service. It runs and manages Docker containers using task definitions, tasks, and services. ECS supports Fargate for serverless container compute or EC2 instances that you manage, and it can integrate with ECR, IAM, CloudWatch, and load balancers to deploy and scale applications.
 
 ---
+
+### Q191. ECS vs EC2?
+
+#### 1. English Definition
+
+**Amazon EC2** provides virtual servers on AWS. **Amazon ECS** is a container orchestration service that schedules and manages containerized applications. They are not direct alternatives: ECS can run containers using EC2 instances or AWS Fargate.
+
+#### 2. Hindi Definition
+
+EC2 AWS par virtual server provide karta hai. ECS Docker containers ko run, schedule aur manage karta hai. Dono alag kaam karte hain, aur ECS ko EC2 instances ke upar bhi run kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, simple example se samjho:
+
+- **EC2:** Tumhe ek virtual machine milti hai. Tum OS, software, Docker aur server configuration manage kar sakte ho.
+- **ECS:** Tum ECS ko batate ho ki kaunsi container image run karni hai aur kitne tasks chahiye. ECS un containers ko schedule aur manage karta hai.
+
+Example: tumhari MERN app ka Node.js backend Docker image mein hai. EC2-only setup mein tum EC2 par Docker install karke containers khud run/manage kar sakte ho. ECS with EC2 mein ECS container scheduling aur service management karta hai, jabki tum EC2 capacity manage karte ho. ECS with Fargate mein tumhe underlying EC2 servers manage nahi karne padte.
+
+#### 4. Practical Architecture
+
+```text
+Option A: EC2 only
+Users -> EC2 virtual server -> Docker/container (you manage it)
+
+Option B: ECS with EC2
+Users -> Load Balancer -> ECS Service -> Tasks on your EC2 instances
+                         ECS schedules/manages containers
+
+Option C: ECS with Fargate
+Users -> Load Balancer -> ECS Service -> Fargate Tasks
+                         AWS manages underlying servers
+```
+
+#### 5. Summary Table
+
+| Feature | EC2 by itself | ECS |
+|---|---|---|
+| Main purpose | Virtual compute server | Container orchestration |
+| Runs applications | Directly or inside containers | Runs and manages containerized tasks |
+| Container scheduling | You configure/manage it | ECS schedules tasks |
+| Server/OS management | You manage the guest OS and instance setup | Depends on capacity option: EC2 instances are your responsibility; Fargate servers are AWS-managed |
+| Scaling | Scale instances or configure Auto Scaling | Scale task count; with EC2 capacity, also ensure enough instance capacity |
+| Typical use | Full OS control, custom server workloads | Managed deployment of containerized services |
+
+#### 6. When to Use Which?
+
+**Use EC2 directly when:**
+- You need full control over the virtual machine or operating system.
+- You are running workloads that do not need ECS container orchestration.
+- You want to manage deployment and process supervision yourself.
+
+**Use ECS when:**
+- Your application is packaged as Docker containers.
+- You want ECS to schedule tasks, maintain service desired count, and integrate with load balancing.
+- You need a managed way to run containerized microservices.
+
+**Important interview point:** ECS and EC2 can be used together. ECS is the orchestrator; EC2 is one compute option underneath it. The other common ECS compute option is Fargate.
+
+#### 7. Interview-Ready Answer
+
+EC2 is a virtual server service, whereas ECS is a container orchestration service. With EC2 alone, I manage the server and how my application or containers run. With ECS, I define container tasks and services, and ECS schedules and manages them. ECS can run on EC2 instances that I manage or on Fargate, where AWS manages the underlying compute infrastructure.
+
+---
