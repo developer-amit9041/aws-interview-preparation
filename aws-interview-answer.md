@@ -5396,3 +5396,63 @@ Suppose ALB listener par HTTPS traffic aata hai aur `/api/*` path ke liye rule c
 - For a typical MERN application, an ALB Target Group can contain the backend EC2 instances running the Node.js API.
 
 ---
+
+### Q81. What is a Listener?
+
+#### 1. English Definition
+
+**A listener is a load balancer component that checks for connection requests on a configured protocol and port, then forwards or otherwise handles them according to its default action and rules.**
+
+#### 2. Hindi Definition
+
+Listener Load Balancer ka woh component hai jo configured protocol aur port par aane wali connection requests ko listen karta hai aur configured rules ke according traffic ko forward ya handle karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhare AWS Application Load Balancer par users HTTPS ke through request bhejte hain. ALB ko pata hona chahiye ki kaunse port par requests accept karni hain aur request aane ke baad kya action lena hai. Ye kaam **Listener** karta hai.
+
+Example:
+
+- Listener protocol: HTTPS
+- Listener port: `443`
+- Rule: Agar path `/api/*` ho, toh request Node.js API Target Group ko forward karo.
+- Default action: Agar koi specific rule match nahi hota, toh configured default action perform karo, jaise fixed response ya default target group par forward karna.
+
+#### 4. Practical Example: MERN Application
+
+```text
+User Browser
+    |
+    | HTTPS request to port 443
+    v
+Application Load Balancer
+    |
+    v
+Listener: HTTPS : 443
+    |
+    | Rule: /api/*
+    v
+Target Group: Node.js API
+    |
+    +------> EC2 Instance 1
+    +------> EC2 Instance 2
+```
+
+Jab user `https://example.com/api/users` request karta hai, ALB ka HTTPS listener request receive karta hai. Listener rule path ko match karke request ko Node.js API Target Group tak forward karta hai.
+
+#### 5. Listener vs Target Group
+
+| Listener | Target Group |
+|---|---|
+| Configured protocol aur port par requests accept karta hai | Backend targets ko group karta hai |
+| Default action aur routing rules apply karta hai | Registered targets aur health-check configuration maintain karta hai |
+| Example: HTTPS on port `443` | Example: Node.js EC2 instances on port `3000` |
+
+#### 6. Important Points
+
+- Listener port is the port where the load balancer accepts incoming connections; target port can be different.
+- An ALB commonly uses HTTP port `80` and HTTPS port `443`, but listener configuration depends on the application.
+- HTTPS listeners need a valid TLS certificate configuration, commonly managed with AWS Certificate Manager.
+- Listener rules can route traffic to different target groups based on supported conditions, such as host or path.
+
+---
