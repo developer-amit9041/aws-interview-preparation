@@ -919,3 +919,65 @@ Isse application source code ya `.env` file mein long-term AWS access key aur se
 **Yaad rakhne ki trick:** Jab AWS service ya trusted identity ko secure, limited aur temporary AWS access dena ho, toh IAM Role use karne par consider karo.
 
 ---
+
+---
+
+### Q15. AWS Console vs AWS CLI?
+
+#### 1. English Definition
+
+**AWS Console is a web-based graphical interface for managing AWS resources, while AWS CLI is a command-line tool that lets you manage AWS services by running commands in a terminal.**
+
+#### 2. Hindi Definition
+
+AWS Console ek web-based graphical interface hai jahan buttons aur forms se AWS resources manage karte hain. AWS CLI ek command-line tool hai jisse terminal mein commands run karke AWS resources manage kiye ja sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, dono se AWS services manage kar sakte ho, lekin use karne ka tareeka alag hai:
+
+- **AWS Console:** Browser mein login karo, service select karo aur GUI ke through resources create ya configure karo. Beginners ke liye visual aur easy hota hai.
+- **AWS CLI:** Terminal mein commands run karke resources inspect aur manage karo. Repeatable scripts aur automation mein useful hai.
+
+#### 4. Practical Example — Current AWS Identity Check
+
+**AWS Console:** Browser mein AWS Console open karke account aur identity information dekh sakte ho.
+
+**AWS CLI:** Pehle CLI install aur configure karo, phir terminal mein run karo:
+
+```bash
+aws sts get-caller-identity
+```
+
+Yeh command batati hai ki configured credentials kis AWS identity/account ko represent karti hain. Is command ke liye valid credentials aur AWS STS tak connectivity chahiye.
+
+S3 buckets list karne ka example:
+
+```bash
+aws s3 ls
+```
+
+Yeh command sirf un buckets ko list kar payegi jinhe current identity ki permissions allow karti hain.
+
+#### 5. Comparison Table
+
+| Feature | AWS Console | AWS CLI |
+|---|---|---|
+| Interface | Browser-based GUI | Terminal / command line |
+| How to use | Clicks, forms, menus | Commands and scripts |
+| Best for | Learning, visual setup, manual configuration | Automation, repeatable operations, scripting |
+| Speed for repeated tasks | Har baar manual steps ho sakte hain | Script/command repeat karna easy |
+| Prerequisite | Browser and sign-in access | CLI installed, credentials configured, permissions available |
+| Example | Console se S3 bucket create karna | `aws s3 ls` se buckets list karna |
+
+#### 6. Summary Table
+
+| Tool | Yaad rakhne wali baat |
+|---|---|
+| AWS Console | GUI — click karke manage karo |
+| AWS CLI | Commands — terminal se manage karo |
+| Permissions | Dono mein current identity ke access rules apply hote hain |
+
+**Yaad rakhne ki trick:** Console = Clicks; CLI = Commands. Dono AWS resources manage karte hain, bas interface alag hai.
+
+---
