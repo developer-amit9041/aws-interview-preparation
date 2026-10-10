@@ -13176,3 +13176,103 @@ For longer retention, CloudTrail trail ko S3 delivery ke saath configure karo. D
 **Interview-ready answer:** CloudTrail stores records of supported AWS API and account events. Depending on the event, a record can include the event time, API name, AWS service, calling identity, source IP, Region, request parameters, response details, and affected resources. Not every field is present in every event. I use these records to investigate who performed an action and what happened.
 
 ---
+
+### Q179. How can you track who changed an AWS resource?
+
+#### 1. English Definition
+
+**You can track who changed an AWS resource by reviewing the relevant AWS CloudTrail event, which can show the calling identity, event name, timestamp, source IP address, and request details when those fields are available.**
+
+#### 2. Hindi Definition
+
+AWS resource ko kisne change kiya, yeh jaanne ke liye CloudTrail ke relevant event ko check karte hain. Event mein kis user ya role ne action kiya, kaunsi API call hui, kab hui aur available source/request details mil sakti hain.
+
+#### 3. Hinglish Explanation
+
+Maan lo kisi ne production EC2 ka security group change kar diya ya S3 bucket ki settings modify kar di. Tumhe identify karna hai ki change kisne kiya.
+
+Process:
+
+1. **CloudTrail → Event history** open karo aur correct AWS Region select karo.
+2. Approximate time range set karo.
+3. Resource ya event ke according event name search karo, jaise security group inbound rule ke liye `AuthorizeSecurityGroupIngress`.
+4. Event open karke `userIdentity`, `eventTime`, `eventName`, `sourceIPAddress` aur `requestParameters` jaise available fields check karo.
+5. Identity ko IAM role/user aur deployment automation ke context mein verify karo.
+
+Agar long-term history chahiye, toh pehle se configured CloudTrail trail ke S3 records ya CloudTrail Lake event data store query karo. Event history generally recent management events ko 90 days tak, Region-wise, provide karti hai.
+
+**Important:** CloudTrail ka record API activity trace karta hai. Agar action assumed role, AWS service, ya automation ne kiya ho, toh identity details ko session, role aur automation logs ke saath correlate karna pad sakta hai.
+
+#### 4. Practical Example
+
+Suppose kisi ne EC2 security group mein inbound rule add kiya. Relevant event name ho sakta hai `AuthorizeSecurityGroupIngress`.
+
+Event details mein, when available:
+- `userIdentity`: IAM user/role or assumed-role session
+- `eventTime`: Change ka time
+- `sourceIPAddress`: Request source IP
+- `requestParameters`: Requested security group rule details
+- `awsRegion`: Related Region
+
+In details se tum determine karne mein help le sakte ho ki change kisi engineer, role-based session, ya deployment automation se aaya tha.
+
+#### 5. Architecture Diagram — Tracking Resource Changes
+
+```text
+       User / Role / Automation
+                  |
+                  v
+          AWS Resource Change
+                  |
+                  v
+              CloudTrail
+                  |
+                  v
+         Relevant Event Record
+                  |
+                  v
+     Identity + Time + API + Request
+                  |
+                  v
+        Audit / Investigation
+```
+
+**Flow:** User ya automation AWS API call karta hai → CloudTrail event record karta hai → tum event details inspect karke identity aur requested change investigate karte ho.
+
+#### 6. Practical Command / Configuration
+
+**A. Search security group inbound-rule changes**
+
+```bash
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=AuthorizeSecurityGroupIngress \
+  --max-results 10
+```
+
+**B. Search EC2 instance stop actions**
+
+```bash
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=StopInstances \
+  --max-results 10
+```
+
+Commands selected Region ke events aur caller ke permissions ke according results return karte hain. Add `--region ap-south-1` if you want to query a specific Region.
+
+For ongoing audits, configure a CloudTrail trail with suitable event coverage and S3 retention. Data events and some specialized event types require explicit configuration.
+
+#### 7. Summary Table
+
+| Step | What to check |
+|---|---|
+| 1 | Correct AWS Region and time range |
+| 2 | Relevant event name or resource |
+| 3 | `userIdentity` — caller identity |
+| 4 | `eventTime` — when it happened |
+| 5 | `sourceIPAddress` — source, when available |
+| 6 | `requestParameters` — requested change, when available |
+| 7 | Trail/S3 or CloudTrail Lake for configured longer-term records |
+
+**Interview-ready answer:** I use AWS CloudTrail to track resource changes. I find the relevant event in the correct Region and time range, then inspect fields such as `userIdentity`, `eventName`, `eventTime`, and `requestParameters`. This helps identify the caller and understand the change. For longer-term auditing, I configure a CloudTrail trail with appropriate event coverage and retention.
+
+---
