@@ -15818,3 +15818,93 @@ Prerequisites: AWS CLI must be configured with credentials that have the require
 **Interview-ready answer:** To push a Docker image to ECR, I first create an ECR repository and authenticate Docker using the AWS CLI. Then I build the image, tag it with the ECR repository URI, and run `docker push`. After the image is uploaded, I can reference that image URI in an ECS task definition or Kubernetes manifest.
 
 ---
+
+### Q205. How does ECS pull an image from ECR?
+
+#### 1. English Definition
+
+Amazon ECS pulls a container image from Amazon ECR when a task starts and the image needs to be retrieved. The task execution role provides permissions for ECS/Fargate or the ECS container agent to authenticate to ECR and download the image.
+
+#### 2. Hindi Definition
+
+Jab ECS task start hota hai, toh ECS ECR se Docker image pull karta hai. Iske liye task execution role ko ECR image pull karne ki permissions chahiye hoti hain, taaki image download hokar container run ho sake.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumne Node.js application ki image ECR par push kar di hai aur ECS task definition mein uska image URI diya hai.
+
+1. ECS service task start karti hai.
+2. ECS/Fargate image pull karne ke liye task execution role ki permissions use karta hai.
+3. ECS ECR se authenticate karke image layers download karta hai.
+4. Container runtime downloaded image se container start karta hai.
+
+Important difference:
+
+- **Task execution role:** ECS ko image pull karne aur configured logging jaise startup operations ke liye permissions deta hai.
+- **Task role:** Running application ke code ko AWS services, jaise S3 ya DynamoDB, access karne ki permissions deta hai.
+
+Image URI correct hona chahiye aur required network connectivity bhi honi chahiye. Private subnet mein ECR ke required endpoints ya suitable NAT/network routing configure karni pad sakti hai.
+
+#### 4. Practical Example
+
+Example ECR image URI:
+
+```text
+123456789012.dkr.ecr.ap-south-1.amazonaws.com/node-api:v1.0.0
+```
+
+ECS task definition ke container configuration mein:
+
+```json
+{
+  "name": "node-api",
+  "image": "123456789012.dkr.ecr.ap-south-1.amazonaws.com/node-api:v1.0.0",
+  "essential": true
+}
+```
+
+Jab ECS task launch hota hai, required image ECR se pull hoti hai aur phir container run hota hai. Agar image URI, IAM permission, network connectivity, ya image tag galat ho, task image-pull error ke saath fail ho sakta hai.
+
+#### 5. Practical Configuration
+
+**Step 1: Configure the task execution role**
+
+Task definition mein `executionRoleArn` specify karo:
+
+```json
+"executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/ecsTaskExecutionRole"
+```
+
+Standard ECR image pulls aur CloudWatch Logs ke liye `AmazonECSTaskExecutionRolePolicy` commonly use hoti hai. Specific configurations, such as customer-managed KMS keys, may require additional permissions.
+
+**Step 2: Specify the ECR image URI**
+
+```json
+"image": "<ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/node-api:v1.0.0"
+```
+
+**Step 3: Troubleshoot failed tasks**
+
+```bash
+aws ecs describe-tasks \
+  --cluster <CLUSTER_NAME> \
+  --tasks <TASK_ARN> \
+  --region ap-south-1
+```
+
+Check `stoppedReason`, container `reason`, ECS service events, and CloudWatch logs where available. Common causes include missing ECR permissions, an incorrect image URI/tag, or unavailable network access to ECR and image layers.
+
+#### 6. Summary Table
+
+| Component | Responsibility |
+|---|---|
+| Task definition | Specifies the ECR image URI |
+| Task execution role | Grants permissions needed to pull the image |
+| Amazon ECR | Stores and serves the container image |
+| Network configuration | Enables access to ECR and image layers |
+| ECS/Fargate | Starts the container using the retrieved image |
+| Task role | Grants AWS permissions to application code |
+
+**Interview-ready answer:** ECS reads the image URI from the task definition and uses the task execution role to obtain the permissions needed to authenticate to ECR and pull the image. The container runtime then starts the container from that image. I ensure the execution role has the required ECR permissions, the image URI and tag are correct, and the task has network access to ECR. The task role is separate and is used by the application to access AWS services.
+
+---
