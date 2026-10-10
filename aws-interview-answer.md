@@ -17934,3 +17934,79 @@ Production best practice: do not commit the real URI. Retrieve it from Secrets M
 **Interview-ready answer:** I never hardcode MongoDB credentials in source code or commit them to GitHub. For local development, I use a `.env` file excluded through `.gitignore`. In AWS production, I store the connection string in Secrets Manager or Parameter Store SecureString and allow the application to retrieve it through a least-privilege IAM role. I also use a restricted MongoDB user, TLS, network access controls, and credential rotation, and I never log the secret.
 
 ---
+
+### Q230. How do you securely store JWT secrets?
+
+#### 1. English Definition
+
+JWT signing secrets and private keys should be stored outside source code in a secure secrets-management system, with access restricted to the services that need them. In AWS, use Secrets Manager or Parameter Store `SecureString`, and access the secret through an IAM role.
+
+#### 2. Hindi Definition
+
+JWT token sign aur verify karne ke liye jo secret ya private key use hoti hai, use source code mein hardcode nahi karna chahiye. Use secure secret store mein rakho aur access sirf authorized backend ko do.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhare Node.js backend mein JWT create karne ke liye ye code hai:
+
+```js
+jwt.sign(payload, "mysecret123"); // Unsafe: hardcoded secret
+```
+
+Agar code GitHub par chala gaya, toh koi attacker secret copy karke forged tokens sign karne ki koshish kar sakta hai. Isliye production JWT secret ko AWS Secrets Manager ya Parameter Store `SecureString` mein store karo. Backend ki IAM role ko sirf us secret ko read karne ki permission do.
+
+Local development mein `.env` use kar sakte ho, lekin real `.env` file ko `.gitignore` mein rakho aur commit mat karo.
+
+#### 4. Practical Node.js Example
+
+Local development `.env`:
+
+```env
+JWT_SECRET=<long-random-secret-value>
+```
+
+Node.js code:
+
+```js
+import jwt from "jsonwebtoken";
+
+const jwtSecret = process.env.JWT_SECRET;
+
+if (!jwtSecret) {
+  throw new Error("JWT_SECRET is not configured");
+}
+
+export function createToken(user) {
+  return jwt.sign(
+    { sub: user.id },
+    jwtSecret,
+    { expiresIn: "15m", algorithm: "HS256" }
+  );
+}
+```
+
+This example assumes the secret has already been securely injected into the runtime environment. In AWS production, the application can retrieve it from Secrets Manager using the AWS SDK and an IAM role, or use a secure deployment secret-injection mechanism. Do not log the secret or expose it to frontend React code.
+
+#### 5. Security Best Practices
+
+- Generate a high-entropy random secret; do not use a predictable password such as `secret123`.
+- Store production secrets in Secrets Manager or Parameter Store `SecureString`, and restrict access with least-privilege IAM policies.
+- Keep JWT signing secrets only on trusted backend services. Never put them in React environment variables that are bundled into browser code.
+- Set token expiration and validate the expected algorithm and relevant claims when verifying tokens.
+- Plan rotation carefully: changing a signing secret can invalidate existing tokens unless a deliberate key-version/key-ID strategy is used.
+- For asymmetric JWT signing, keep the private key secure and distribute only the public key to verifiers that need it.
+- If a secret is exposed, rotate it immediately and assess/revoke affected tokens as appropriate.
+
+#### 6. Summary Table
+
+| Where | Recommended approach |
+|---|---|
+| Local development | `.env` excluded from Git |
+| AWS production | Secrets Manager or Parameter Store `SecureString` |
+| Application access | IAM role with permission to read only the required secret |
+| React frontend | Never expose JWT signing secret or private key |
+| JWT design | Strong random key, short-lived tokens, strict verification and planned rotation |
+
+**Interview-ready answer:** I store JWT signing secrets outside the source code. For local development, I use a `.env` file that is excluded from Git. In AWS production, I use Secrets Manager or Parameter Store `SecureString` and grant the backend's IAM role least-privilege access. I never expose the signing secret to the React frontend or logs. I also use a strong random key, token expiration, strict verification, and a planned rotation strategy.
+
+---
