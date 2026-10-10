@@ -7679,3 +7679,61 @@ Tumhe pehle se read/write throughput numbers select karne ki zaroorat nahi hoti.
 - Stable, predictable high traffic ke liye Provisioned Capacity kabhi-kabhi zyada cost-effective ho sakti hai; actual choice workload aur pricing par depend karti hai.
 
 ---
+
+### Q119. What is DynamoDB Streams?
+
+#### 1. English Definition
+
+**DynamoDB Streams captures a time-ordered sequence of item-level changes made to a DynamoDB table, such as inserts, updates, and deletes, so applications can react to those changes.**
+
+#### 2. Hindi Definition
+
+DynamoDB Streams table mein hone wale item-level changes—jaise naya item add hona, item update hona, ya delete hona—ka sequence record karta hai, jisse application un changes par action le sakti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari e-commerce application mein DynamoDB ki `Orders` table hai. Jab koi user naya order place karta hai, order update karta hai, ya order delete hota hai, DynamoDB Streams us change ka record capture kar sakta hai.
+
+Phir koi consumer—jaise AWS Lambda—stream record ko read karke next action perform kar sakta hai. Example: order create hote hi confirmation notification bhejna, inventory update karna, ya doosre system mein data sync karna.
+
+Stream mein kya data aayega, woh tum selected view type se control kar sakte ho: keys only, old image, new image, ya old and new images. Stream records ko 24 hours tak access kiya ja sakta hai.
+
+#### 4. Practical Example
+
+```text
+User places an order
+        |
+        v
+DynamoDB Orders table changes
+        |
+        v
+DynamoDB Streams records the change
+        |
+        v
+AWS Lambda reads the stream record
+        |
+        v
+Send confirmation / update inventory / sync data
+```
+
+Example: order item insert hone par Lambda stream record receive karti hai aur order confirmation process start kar sakti hai. Lambda ko safely implement karo, kyunki stream event processing retries ki wajah se same record dobara process ho sakta hai; handler ko idempotent banana useful hai.
+
+#### 5. Stream View Types
+
+| View type | Stream mein kya hota hai |
+|---|---|
+| `KEYS_ONLY` | Changed item ki key attributes |
+| `NEW_IMAGE` | Change ke baad item ka full image |
+| `OLD_IMAGE` | Change se pehle item ka full image |
+| `NEW_AND_OLD_IMAGES` | Change se pehle aur baad ke item images |
+
+#### 6. Important Points
+
+- DynamoDB Streams item-level changes ka time-ordered record provide karta hai.
+- Streams ko table par enable karna hota hai aur stream view type select karna hota hai.
+- AWS Lambda commonly stream records process karne ke liye use hoti hai.
+- Stream records 24 hours tak retained hote hain.
+- Yeh event-driven workflows, audit-style change processing, notifications, aur data synchronization ke liye useful hai.
+- Stream processing ko duplicate delivery/retries handle karne ke liye idempotent design karna chahiye.
+
+---
