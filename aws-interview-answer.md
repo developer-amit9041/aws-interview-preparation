@@ -1320,3 +1320,110 @@ Final selection actual CPU/RAM needs, traffic, pricing, architecture compatibili
 **Yaad rakhne ki trick:** T/M = balanced, C = compute, R/X = memory, I/D/H = storage, P/G/Inf/Trn = accelerators.
 
 ---
+
+### Q22. What is a Key Pair?
+
+#### 1. English Definition
+
+**An EC2 key pair consists of a public key and a private key and is used to securely connect to an EC2 instance, commonly through SSH on Linux instances.**
+
+#### 2. Hindi Definition
+
+EC2 key pair mein public key aur private key hoti hain. Linux EC2 instance se SSH ke through secure connection banane ke liye iska use hota hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, jab tum Linux EC2 instance launch karte ho, toh connection ke liye key pair choose ya create kar sakte ho. AWS public key ko instance par configure karta hai, aur private key file tum securely apne paas rakhte ho.
+
+Simple samjho:
+- **Public key:** Instance par configure hoti hai.
+- **Private key:** Tumhare paas rehti hai aur SSH authentication mein use hoti hai.
+
+Private key kisi ke saath share mat karna. Agar private key lose ho jaye, toh access recover karne ke options instance configuration par depend karte hain; original private key ko AWS dobara download karne ke liye provide nahi karta.
+
+#### 4. Practical Example
+
+Linux EC2 ke liye, agar tumhare paas `.pem` private key hai aur SSH access configured hai:
+
+```bash
+chmod 400 my-key.pem
+ssh -i my-key.pem ec2-user@<EC2-PUBLIC-IP>
+```
+
+`ec2-user` Amazon Linux ke liye common username hai; Ubuntu AMIs mein aam taur par `ubuntu` use hota hai. Actual username AMI par depend karta hai. Security group mein SSH port 22 ko sirf trusted IP addresses se allow karna chahiye.
+
+#### 5. Key Pair Summary
+
+| Item | Purpose |
+|---|---|
+| Public key | Instance par authentication ke liye configure hoti hai |
+| Private key | Client par securely rakhi jati hai; SSH authentication mein use hoti hai |
+| `.pem` file | Common private-key file format |
+| SSH port 22 | Linux instance ke SSH connection ka default port |
+
+**Yaad rakhne ki trick:** Public key server par, private key tumhare paas—private key ko secret rakho.
+
+---
+
+### Q23. What is a Security Group?
+
+#### 1. English Definition
+
+**An EC2 security group is a virtual, stateful firewall that controls inbound and outbound traffic for associated resources, such as EC2 instances.**
+
+#### 2. Hindi Definition
+
+Security Group AWS ka virtual firewall hai jo EC2 instance ke andar aane wale (inbound) aur bahar jaane wale (outbound) network traffic ko rules ke through control karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhara Node.js backend EC2 par chal raha hai. Har network connection ko allow karna safe nahi hota. Security Group rules decide karte hain ki kaunse traffic ko instance tak aane ya instance se bahar jaane ki permission hai.
+
+- **Inbound rules:** Instance tak aane wale traffic ko control karte hain.
+- **Outbound rules:** Instance se bahar jaane wale traffic ko control karte hain.
+- **Stateful:** Agar inbound connection allow hai, toh us connection ka response traffic automatically allow hota hai; response ke liye alag reverse-direction rule ki zaroorat nahi hoti.
+- **Allow rules only:** Security Groups allow rules use karte hain; unmatched traffic allowed nahi hota.
+
+#### 4. Practical MERN Example
+
+Example rules for a public-facing application (actual ports depend on your architecture):
+
+| Direction | Protocol / Port | Source or destination | Purpose |
+|---|---|---|---|
+| Inbound | TCP 22 | Your trusted public IP `/32` only | SSH administration |
+| Inbound | TCP 443 | `0.0.0.0/0` and IPv6 range if needed | HTTPS web traffic |
+| Inbound | TCP 80 | `0.0.0.0/0` if HTTP redirect is needed | HTTP to HTTPS redirect |
+| Outbound | Required ports | Required destinations | Updates, APIs and other dependencies |
+
+Best practice: Node.js port `3000` ko public internet ke liye open karne ke bajaye, Nginx ko `80/443` par expose karo aur backend port ko private rakho. SSH port 22 ko `0.0.0.0/0` par open karna avoid karo.
+
+#### 5. How the traffic flow works
+
+```text
+Internet
+   |
+   v
+Security Group checks inbound rules
+   |
+   v
+EC2 / Nginx (HTTPS 443)
+   |
+   v
+Node.js backend (private/internal port)
+```
+
+Security Group instance ke network interface se associated hota hai. Ye operating-system firewall ka replacement har situation mein nahi hai; dono layers saath use ki ja sakti hain.
+
+#### 6. Security Group Summary
+
+| Term | Meaning |
+|---|---|
+| Inbound | Traffic entering the resource |
+| Outbound | Traffic leaving the resource |
+| Stateful | Allowed connection ka response automatically allowed |
+| Source | Inbound traffic kis IP/CIDR ya security group se aa sakta hai |
+| Least privilege | Sirf required traffic aur trusted sources allow karo |
+
+**Yaad rakhne ki trick:** Security Group = EC2 ke network traffic ka virtual gatekeeper.
+
+---
