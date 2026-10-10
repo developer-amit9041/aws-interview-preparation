@@ -9999,3 +9999,101 @@ Command ke liye AWS CLI credentials aur required IAM permissions configured honi
 **Remember:** CloudFront performance ko mainly edge caching, reduced origin traffic, and optimized content delivery ke through improve karta hai. Actual improvement content type, cache configuration, and user location par depend karti hai.
 
 ---
+
+### Q149. What is CloudFront Distribution?
+
+#### 1. English Definition
+
+**A CloudFront distribution is the configuration that tells Amazon CloudFront how to deliver content, including which origins to use, how requests are routed, what content can be cached, and how viewers access the content.**
+
+#### 2. Hindi Definition
+
+CloudFront Distribution ek configuration hoti hai jo CloudFront ko batati hai ki content kahan se lena hai, user ki request ko kaise handle karna hai, kaun sa content cache karna hai aur users ko content kaise deliver karna hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhari MERN application mein React files S3 bucket mein hain aur backend API ALB par chal rahi hai.
+
+CloudFront distribution create karte waqt tum define karte ho:
+- **Origin:** Content ka source, jaise S3 bucket ya ALB.
+- **Cache behavior:** Kaun se URL paths kis origin par jayenge aur caching kaise hogi.
+- **Viewer protocol policy:** HTTP requests ko HTTPS par redirect karna hai ya nahi.
+- **Domain and TLS certificate:** Default CloudFront domain ya custom domain aur HTTPS certificate.
+- **Security/access settings:** Origin access, allowed methods, aur zaroorat ke mutabiq WAF.
+
+Simple words mein, distribution CloudFront ki delivery configuration hai. CloudFront network content deliver karta hai; distribution us delivery ke rules define karti hai.
+
+#### 4. Practical Example
+
+Suppose:
+- React static files S3 mein hain.
+- Node.js API ALB ke through accessible hai.
+
+Ek distribution mein different cache behaviors configure kiye ja sakte hain, for example:
+- `/assets/*` → S3 origin, static files ke liye caching.
+- `/api/*` → API origin, API ke liye appropriate methods aur carefully configured caching.
+
+Exact routing aur cache policies application ki requirements ke mutabiq set karni hoti hain.
+
+#### 5. Architecture Diagram — Request Flow
+
+```text
+User / Browser
+      |
+      v
+CloudFront Distribution
+      |
+      +---- /assets/* ----> S3 Origin
+      |                     React files / images
+      |
+      +---- /api/* -------> ALB / API Origin
+                            Node.js / Express API
+      |
+      v
+CloudFront applies the matching behavior,
+cache policy and security settings
+      |
+      v
+Response returned to user
+```
+
+**Request flow:** User request karta hai → CloudFront distribution URL path aur matching behavior check karti hai → request configured origin ki taraf route hoti hai → caching/security rules apply hote hain → response user ko return hota hai. Cached response available aur valid ho toh origin call avoid ho sakti hai.
+
+#### 6. Practical Command / Configuration
+
+CloudFront distributions list karne ke liye:
+
+```bash
+aws cloudfront list-distributions
+```
+
+Distribution ki detailed configuration dekhne ke liye:
+
+```bash
+aws cloudfront get-distribution --id YOUR_DISTRIBUTION_ID
+```
+
+**Distribution configure karte waqt:**
+1. Ek ya more origins define karo.
+2. Path patterns ke through cache behaviors set karo.
+3. Suitable cache policy, origin request policy, aur TTL configure karo.
+4. HTTPS aur custom domain settings configure karo, if required.
+5. Private S3 origin ke liye Origin Access Control (OAC) aur suitable bucket policy use karo.
+6. Configuration deploy hone ke baad distribution status aur behavior test karo.
+
+AWS CLI commands ke liye credentials aur required IAM permissions configured honi chahiye.
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| Distribution | CloudFront ki content-delivery configuration |
+| Origin | Original content source, jaise S3 ya ALB |
+| Cache behavior | Request path ke liye routing aur caching rules |
+| Cache policy | Cache key aur TTL behavior define karti hai |
+| Viewer protocol policy | Viewer HTTP/HTTPS behavior control karti hai |
+| Domain name | Distribution ka default domain; custom domain bhi configure ho sakta hai |
+
+**Remember:** CloudFront distribution define karti hai ki CloudFront content kahan se fetch kare, requests ko kaise route kare aur content ko kaise cache aur securely deliver kare.
+
+---
