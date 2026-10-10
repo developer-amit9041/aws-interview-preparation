@@ -7400,3 +7400,54 @@ Agar table mein sort key bhi defined ho, toh primary key composite hoti hai: par
 - Poorly chosen keys can create hot partitions and reduce effective throughput.
 
 ---
+
+### Q114. What is a Sort Key?
+
+#### 1. English Definition
+
+**A sort key is an optional attribute in a DynamoDB composite primary key that lets items sharing the same partition key be uniquely identified and organized by the sort key value.**
+
+#### 2. Hindi Definition
+
+Sort key DynamoDB ki composite primary key ka optional attribute hota hai. Iski help se same partition key wale multiple items ko uniquely identify aur sort key value ke according query kiya ja sakta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari e-commerce application mein ek user ke multiple orders hain. Agar `userId` sirf partition key hoti, toh same table mein ek hi user ke multiple items ko alag-alag identify karna mushkil hota, kyunki partition key alone primary key hone par unique honi chahiye.
+
+Isliye `Orders` table mein tum `userId` ko partition key aur `orderId` ko sort key bana sakte ho. Ab ek hi `userId` ke saath multiple orders store ho sakte hain, kyunki har order ka `orderId` alag hai.
+
+Sort key values items ko order mein query karne aur range conditions, jaise `begins_with` ya supported comparison operators, use karne mein bhi help kar sakti hain.
+
+#### 4. Practical Example
+
+```text
+Table: Orders
+Partition key: userId
+Sort key:      orderId
+
+{ "userId": "user-101", "orderId": "order-001", "total": 1200 }
+{ "userId": "user-101", "orderId": "order-002", "total": 850 }
+{ "userId": "user-101", "orderId": "order-003", "total": 2100 }
+{ "userId": "user-202", "orderId": "order-004", "total": 500 }
+```
+
+Yahan `user-101` ke multiple orders hain. Tum partition key `userId = user-101` ke saath query karke us user ke orders retrieve kar sakte ho. Har item ki complete primary key combination—`userId` + `orderId`—unique honi chahiye.
+
+#### 5. Partition Key vs Sort Key
+
+| Basis | Partition Key | Sort Key |
+|---|---|---|
+| Role | Required part of the table primary key | Optional part of the table primary key |
+| Purpose | Distributes data and identifies a partition-key group | Distinguishes and orders items within that group |
+| Example | `userId` | `orderId` or timestamp |
+| Query use | Query items for a partition-key value | Filter/order matching items by sort-key conditions |
+
+#### 6. Important Points
+
+- A DynamoDB table can use a partition key alone or a composite primary key with partition key plus sort key.
+- When a sort key exists, the partition key can repeat, but the combination of partition key and sort key must be unique.
+- Sort key design should match the queries your application needs, such as orders for a user by date.
+- A sort key is not mandatory for every DynamoDB table.
+
+---
