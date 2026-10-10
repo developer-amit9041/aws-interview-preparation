@@ -14716,3 +14716,89 @@ Creating a cluster alone does not deploy an application. You still need a task d
 **Interview-ready answer:** An ECS cluster is a logical grouping used to organize and run ECS tasks and services. Tasks can use Fargate capacity or EC2 instances registered with the cluster. The cluster is not itself a container; task definitions describe the workload, tasks run it, and services maintain the desired number of running tasks.
 
 ---
+
+### Q194. What is ECS Task?
+
+#### 1. English Definition
+
+An **Amazon ECS task** is a running instance of an ECS task definition. It runs one or more containers together according to the configured images, CPU, memory, networking, and other settings.
+
+#### 2. Hindi Definition
+
+ECS Task, task definition ka running instance hota hai. Ismein ek ya multiple containers run ho sakte hain, jo task definition mein configure kiye gaye hote hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumne Node.js API ke liye Docker image banayi aur ECS task definition mein configure kiya ki kaunsi image run hogi, kitni CPU/memory chahiye, kaunsa port use hoga aur environment variables kya honge.
+
+Ab jab ECS us definition ko run karta hai, toh jo running workload banta hai use **Task** kehte hain.
+
+- **Task definition:** Blueprint / configuration.
+- **Task:** Us blueprint ka running instance.
+- **Service:** Desired number of tasks running maintain karti hai.
+
+Example: agar ECS service ka desired count 3 hai, toh ECS teen task instances run karne ki koshish karega. Har task mein task definition ke hisaab se ek ya multiple containers ho sakte hain.
+
+#### 4. Practical Architecture
+
+```text
+Task Definition: node-api
+  - Image: ECR Node.js API image
+  - Port: 3000
+  - CPU / Memory
+  - Environment variables
+          | run
+          v
+      ECS Task
+       /     \
+      v       v
+  App container  Optional sidecar container
+
+ECS Service (desired count = 3) -> maintains 3 task instances
+```
+
+#### 5. Practical AWS CLI Commands
+
+List tasks in a cluster:
+
+```bash
+aws ecs list-tasks \
+  --cluster mern-production-cluster \
+  --region ap-south-1
+```
+
+Describe a task:
+
+```bash
+aws ecs describe-tasks \
+  --cluster mern-production-cluster \
+  --tasks "<TASK_ARN>" \
+  --region ap-south-1
+```
+
+Run a one-off task from an existing task definition (requires valid networking/configuration for your launch type):
+
+```bash
+aws ecs run-task \
+  --cluster mern-production-cluster \
+  --launch-type FARGATE \
+  --task-definition node-api:1 \
+  --network-configuration 'awsvpcConfiguration={subnets=[<SUBNET_ID>],securityGroups=[<SECURITY_GROUP_ID>],assignPublicIp=DISABLED}' \
+  --region ap-south-1
+```
+
+Replace placeholders with your actual subnet and security-group IDs. For Fargate, use `awsvpc` networking and ensure the task has the necessary network access and IAM permissions.
+
+#### 6. Summary Table
+
+| ECS Term | Meaning |
+|---|---|
+| Task definition | Configuration blueprint for containers |
+| Task | Running instance of a task definition |
+| Container | Application process packaged as an image |
+| Service | Maintains desired count of tasks |
+| One-off task | Task launched for a finite job without a service maintaining it |
+
+**Interview-ready answer:** An ECS task is a running instance of a task definition. The definition specifies the container image, CPU, memory, networking, and other settings. A task can contain one or more containers, and an ECS service can maintain a desired number of task instances for a continuously running application.
+
+---
