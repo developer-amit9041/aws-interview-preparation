@@ -4730,3 +4730,52 @@ Exact ports and sources depend on your architecture. Avoid opening SSH (`22`) or
 - A Security Group does not replace route tables or a Network ACL; all required networking paths and rules must be configured.
 
 ---
+
+### Q70. Security Group vs NACL?
+
+#### 1. English Definition
+
+**A Security Group is a stateful virtual firewall associated with supported resources or network interfaces, while a Network ACL (NACL) is a stateless firewall applied at the subnet level.**
+
+#### 2. Hindi Definition
+
+Security Group ek stateful firewall hai jo EC2 jaise resources ke network interfaces par traffic control karta hai. Network ACL (NACL) ek stateless firewall hai jo subnet level par traffic control karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, dono AWS mein network traffic ko control karte hain, lekin inka level aur behaviour alag hai.
+
+- **Security Group:** Resource level par kaam karta hai. Ye sirf allow rules use karta hai aur stateful hota hai. Agar allowed connection ka response hai, toh response traffic automatically allow hota hai.
+- **NACL:** Subnet level par kaam karta hai. Ismein allow aur deny dono rules bana sakte ho. Ye stateless hota hai, isliye inbound aur outbound traffic ko separately allow karna padta hai, including required response traffic.
+
+#### 4. Difference Table
+
+| Feature | Security Group | Network ACL (NACL) |
+|---|---|---|
+| Applies at | Resource / network interface level | Subnet level |
+| State | Stateful | Stateless |
+| Rules | Allow rules only | Allow and deny rules |
+| Response traffic | Automatically allowed for an established allowed flow | Must be permitted by the applicable rule in the opposite direction |
+| Rule evaluation | Applicable allow rules are aggregated; no explicit deny rules | Rules evaluated in ascending rule-number order; first matching rule applies |
+| Default behavior | New Security Groups deny inbound by default; outbound rules are commonly allow-all by default | Default NACL allows all inbound and outbound; custom NACL denies traffic unless rules allow it |
+| Common use | Restrict access to an EC2 app or database port | Add subnet-level traffic filtering or explicit deny rules |
+
+#### 5. Practical MERN Example
+
+Maan lo Node.js EC2 private subnet mein hai aur database alag private subnet mein hai:
+
+- Backend Security Group: database port par inbound access sirf backend ki required identity/network se allow karo.
+- Database Security Group: database port par inbound access sirf backend Security Group se allow karo.
+- NACL: subnet ke liye additional allow/deny rules configure kar sakte ho, lekin stateless hone ki wajah se return traffic ke rules bhi plan karne honge.
+
+Example ke taur par, agar backend database se TCP connection start karta hai, toh Security Groups connection ka response automatically permit karte hain, provided initiating traffic allowed hai. NACL use kar rahe ho toh request aur response dono directions ke required ports/ranges allow hone chahiye.
+
+#### 6. Important Points
+
+- Security Group aur NACL ek-doosre ke alternatives nahi; dono ek saath apply ho sakte hain.
+- Security Group stateful hai; NACL stateless hai.
+- Security Group mein explicit deny rule nahi hota; NACL mein deny rules supported hain.
+- NACL rule order important hai: lowest numbered matching rule pehle evaluate hota hai.
+- Dono ko least-privilege principle ke saath configure karo; unnecessary ports aur broad CIDR ranges avoid karo.
+
+---
