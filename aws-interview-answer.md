@@ -7114,3 +7114,66 @@ Database connection established
 - The exact connection code and TLS settings depend on the database engine and client library.
 
 ---
+
+### Q109. What is Amazon Aurora?
+
+#### 1. English Definition
+
+**Amazon Aurora is a fully managed relational database engine compatible with MySQL and PostgreSQL, designed to provide high performance, availability, and durability within Amazon RDS and AWS.**
+
+#### 2. Hindi Definition
+
+Amazon Aurora AWS ka managed relational database engine hai jo MySQL aur PostgreSQL ke saath compatible hai. Isse AWS database infrastructure, availability, backups aur maintenance ko manage karne mein help karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, Amazon Aurora ko AWS ka cloud-based relational database samjho. Ismein tum tables, rows, relationships aur SQL queries use kar sakte ho, jaise MySQL ya PostgreSQL mein karte ho.
+
+Aurora MySQL-compatible aur PostgreSQL-compatible editions provide karta hai. AWS iske underlying database infrastructure aur storage ko manage karta hai, aur supported configurations mein high availability aur scaling capabilities deta hai.
+
+MERN application mein Node.js backend Aurora se connect kar sakta hai using a compatible database driver/ORM. Dhyan rahe, Aurora MongoDB nahi hai; ye relational SQL database hai. Agar tumhara application MongoDB use karta hai, toh Aurora direct MongoDB replacement nahi hai.
+
+#### 4. Practical Example
+
+```text
+React Frontend
+      |
+      v
+Node.js / Express Backend
+      |
+      | SQL queries using a compatible driver
+      v
+Amazon Aurora (MySQL-compatible or PostgreSQL-compatible)
+      |
+      v
+Tables, rows, relationships
+```
+
+Example: E-commerce application mein users, products, orders aur payments ko relational tables mein store kar sakte ho. Node.js backend SQL queries ke through data insert, update aur fetch karta hai.
+
+#### 5. Amazon Aurora vs Amazon RDS
+
+| Basis | Amazon Aurora | Amazon RDS (general) |
+|---|---|---|
+| What it is | A specific managed relational database engine | A managed service supporting multiple database engines |
+| Engines | Aurora MySQL-compatible and Aurora PostgreSQL-compatible | Supports several engines, including Aurora, MySQL, PostgreSQL, MariaDB, Oracle, and SQL Server (availability varies) |
+| Storage architecture | Aurora uses its distributed cloud storage architecture | Architecture and storage depend on the chosen RDS engine |
+| Scaling and availability | Offers Aurora-specific scaling and availability features | Features depend on the selected engine and configuration |
+| Cost | Pricing depends on instance/serverless capacity, storage, I/O and configuration | Pricing depends on engine, instance, storage and configuration |
+
+#### 6. Benefits of Amazon Aurora
+
+- **Managed service:** AWS handles many database administration tasks.
+- **High availability:** Supports resilient architectures with replicas and failover options.
+- **Performance:** Designed for cloud workloads; actual performance depends on schema, queries, instance/capacity and configuration.
+- **Compatibility:** Supports MySQL-compatible and PostgreSQL-compatible applications, subject to compatibility differences.
+- **Scaling options:** Offers different compute and read-scaling options depending on configuration.
+
+#### 7. Important Points
+
+- Aurora is a relational SQL database, not a NoSQL database like MongoDB or DynamoDB.
+- Aurora is available through Amazon RDS; do not confuse Aurora with the whole RDS service.
+- MySQL/PostgreSQL compatibility does not mean every extension, feature, or behavior is identical to the upstream engine.
+- Choose Aurora based on workload, availability needs, compatibility, operational requirements, and cost—not only because it is an AWS service.
+
+---
