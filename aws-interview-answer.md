@@ -1182,4 +1182,59 @@ Example: tumhari MERN application ke liye ek standard server setup ready hai. Cu
 
 **Yaad rakhne ki trick:** AMI = server ka blueprint; EC2 = us blueprint se bana virtual server.
 
+---
+
+### Q19. AMI vs EC2 Instance?
+
+#### 1. English Definition
+
+**An AMI is a template used to launch an EC2 instance, while an EC2 instance is the virtual server that runs your operating system and applications.**
+
+#### 2. Hindi Definition
+
+AMI ek template ya blueprint hai jisse EC2 instance launch hota hai. EC2 instance actual virtual server hai jahan hum operating system aur applications run karte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, isko simple example se samjho: ghar banane ke liye pehle ek naksha hota hai, phir us nakshe ke basis par actual ghar banta hai.
+
+- **AMI = Ghar ka naksha (blueprint).**
+- **EC2 Instance = Actual ghar.**
+
+AWS mein AMI mein operating system aur configured software ka base image ho sakta hai. Jab tum us AMI ko select karke instance launch karte ho, AWS ek EC2 virtual server create karta hai.
+
+#### 4. Practical Example
+
+```text
+Custom AMI
+(Ubuntu + Node.js + Nginx base setup)
+             |
+             | Launch instance
+             v
+       EC2 Instance #1
+             |
+             | Same AMI se another launch
+             v
+       EC2 Instance #2
+```
+
+MERN project mein tum custom AMI se multiple EC2 instances launch kar sakte ho, jisse servers ka base setup consistent rahe. Har instance ki networking, environment variables, secrets aur application deployment ko phir bhi appropriately configure karna hota hai.
+
+#### 5. Difference Table
+
+| Feature | AMI | EC2 Instance |
+|---|---|---|
+| Meaning | Machine image / template | Virtual server |
+| Main purpose | EC2 launch karne ka base provide karna | Application aur software run karna |
+| Is it a running server? | No | Instance running ya stopped ho sakta hai |
+| Creation | AWS-provided, Marketplace, community, ya custom image | AMI se launch kiya jata hai |
+| Example | Ubuntu + required software ka base image | Ubuntu par running Node.js API server |
+| Relationship | Ek AMI se multiple instances launch ho sakte hain | Instance launch ke waqt ek AMI use karta hai |
+
+#### 6. Interview Summary
+
+**AMI is the blueprint; EC2 instance is the virtual server launched from that blueprint.**
+
+**Yaad rakhne ki trick:** AMI = Naksha, EC2 = Bana hua ghar.
+
 ---\n
