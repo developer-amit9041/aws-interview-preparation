@@ -10886,3 +10886,110 @@ Route 53 console mein:
 **Remember:** A record domain/hostname ko IPv4 address se map karta hai; IPv6 ke liye AAAA record use hota hai.
 
 ---
+
+### Q158. What is a CNAME Record?
+
+#### 1. English Definition
+
+**A CNAME (Canonical Name) record is a DNS record that maps one hostname to another hostname, rather than directly to an IP address.**
+
+#### 2. Hindi Definition
+
+CNAME record ek DNS record hai jo ek hostname ko doosre hostname se map karta hai. Ismein destination ke roop mein hostname diya jata hai, direct IP address nahi.
+
+#### 3. Hinglish Explanation
+
+Maan lo tum chahte ho ki `www.myapp.com` tumhare main domain `myapp.com` par resolve ho. Tum CNAME record use kar sakte ho:
+
+```text
+www.myapp.com  ->  myapp.com
+```
+
+DNS phir `myapp.com` ke records ko resolve karta hai aur uska address find karta hai.
+
+**Important points:**
+- CNAME ka target doosra hostname hota hai, IPv4 address nahi.
+- CNAME records aam taur par subdomains ke liye use hote hain, jaise `www` ya `api`.
+- DNS standards ke according, jis hostname par CNAME record ho, usi name par normally doosre record types (jaise A ya MX) nahi rakh sakte.
+- Root/apex domain, jaise `myapp.com`, par standard CNAME generally use nahi hota. AWS Route 53 mein supported targets ke liye **Alias record** use kar sakte ho.
+
+#### 4. Practical Example
+
+Maan lo tumhari frontend website CloudFront par host hai aur tum chahte ho ki `www.myapp.com` CloudFront distribution ke hostname par point kare.
+
+Example record:
+
+| Field | Value |
+|---|---|
+| Record name | `www.myapp.com` |
+| Record type | `CNAME` |
+| Target | `d123example.cloudfront.net` |
+
+`d123example.cloudfront.net` illustrative hostname hai. Actual deployment mein apni CloudFront distribution ka domain use karna.
+
+Route 53 mein agar tum `myapp.com` jaise root domain ko CloudFront par point kar rahe ho, to supported setup mein A-type Alias record use karo; `www.myapp.com` jaise subdomain ke liye CNAME suitable ho sakta hai.
+
+#### 5. Architecture Diagram — CNAME Resolution
+
+```text
+Browser requests www.myapp.com
+              |
+              v
+        DNS Resolver
+              |
+              v
+       CNAME Record
+www.myapp.com -> d123example.cloudfront.net
+              |
+              v
+      Resolve target hostname
+              |
+              v
+      CloudFront IP address(es)
+              |
+              v
+       Website is requested
+```
+
+**Flow:** Browser `www.myapp.com` resolve karta hai → DNS CNAME target hostname batata hai → resolver target ka address find karta hai → browser resolved address par connection banata hai.
+
+#### 6. Practical Command / Configuration
+
+CNAME record check karne ke liye:
+
+```bash
+nslookup -type=CNAME www.myapp.com
+```
+
+Linux/macOS par:
+
+```bash
+dig www.myapp.com CNAME
+```
+
+Route 53 records dekhne ke liye:
+
+```bash
+aws route53 list-resource-record-sets \
+  --hosted-zone-id YOUR_HOSTED_ZONE_ID
+```
+
+Route 53 console mein:
+1. Hosted Zone open karo.
+2. **Create record** select karo.
+3. Record name, jaise `www`, enter karo.
+4. Record type `CNAME` select karo.
+5. Target hostname enter karo aur record create karo.
+
+#### 7. Summary Table
+
+| Record type | Maps to | Example |
+|---|---|---|
+| A | IPv4 address | `api.myapp.com → 203.0.113.10` |
+| AAAA | IPv6 address | Hostname → IPv6 address |
+| CNAME | Another hostname | `www.myapp.com → d123example.cloudfront.net` |
+| Route 53 Alias | Supported AWS resource or DNS target | Root domain → CloudFront |
+
+**Remember:** A Record hostname ko IPv4 address se map karta hai; CNAME hostname ko doosre hostname se map karta hai.
+
+---
