@@ -16739,3 +16739,93 @@ Exact stages and integrations depend on the deployment design. For EKS, the pipe
 **Interview-ready answer:** AWS CodePipeline is a managed CI/CD orchestration service that automates software release workflows. It connects source providers, build and test tools such as CodeBuild, and deployment actions such as ECS or CodeDeploy. For a MERN application, it can trigger when code changes, run tests, package the application, and deploy the validated build to AWS, with approval gates when needed.
 
 ---
+
+### Q215. What is AWS CodeBuild?
+
+#### 1. English Definition
+
+AWS CodeBuild is a fully managed build service that compiles source code, runs tests, and produces software artifacts. It can also build container images for use in deployment pipelines.
+
+#### 2. Hindi Definition
+
+AWS CodeBuild ek managed build service hai jo source code ki dependencies install kar sakti hai, tests run kar sakti hai aur deploy karne ke liye build artifacts ya Docker images bana sakti hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, CodePipeline aur CodeBuild ko confuse mat karna:
+
+- **CodePipeline** poori CI/CD workflow ko orchestrate karta hai.
+- **CodeBuild** us workflow mein build aur test ke actual commands run karta hai.
+
+Example: Tum Node.js application GitHub par push karte ho. Pipeline CodeBuild ko trigger karti hai. CodeBuild dependencies install karta hai, tests run karta hai aur zaroorat ho toh Docker image build karta hai. Phir pipeline image ko ECR mein push karne aur application deploy karne ke next stages chala sakti hai.
+
+CodeBuild build environments ko managed compute par run karta hai, isliye har build ke liye apna build server maintain karna zaroori nahi hota.
+
+#### 4. Practical MERN Example
+
+Create a `buildspec.yml` file in your repository:
+
+```yaml
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 22
+    commands:
+      - npm ci
+  build:
+    commands:
+      - npm test --if-present
+      - npm run build --if-present
+
+artifacts:
+  files:
+    - '**/*'
+  exclude-paths:
+    - node_modules/**/*
+```
+
+This is a basic Node.js buildspec example. Adjust runtime versions, commands, and artifact paths to match the project and the selected CodeBuild environment. For a Docker build, use a build environment with Docker support and configure the necessary permissions and ECR authentication.
+
+#### 5. Typical CI/CD Flow
+
+```text
+GitHub source
+    |
+    v
+CodePipeline
+    |
+    v
+CodeBuild
+    |-- Install dependencies
+    |-- Run tests
+    |-- Build application or Docker image
+    v
+Artifacts / Amazon ECR
+    |
+    v
+Deployment stage (ECS / EKS / other target)
+```
+
+#### 6. Benefits
+
+- No need to maintain dedicated build servers.
+- Runs automated tests and build commands consistently.
+- Supports scalable, on-demand build environments.
+- Integrates with CodePipeline, S3, ECR, and other AWS services.
+- Can produce build artifacts or container images for deployment.
+
+#### 7. Summary Table
+
+| Service / File | Purpose |
+|---|---|
+| CodeBuild | Executes build and test commands |
+| CodePipeline | Orchestrates release stages |
+| `buildspec.yml` | Defines CodeBuild build phases and commands |
+| Build artifact | Output from the build, such as files or packages |
+| Amazon ECR | Stores Docker container images |
+
+**Interview-ready answer:** AWS CodeBuild is a fully managed build service that compiles code, runs automated tests, and generates build artifacts or container images. It uses a `buildspec.yml` file to define build phases and commands. In a CI/CD pipeline, CodePipeline can invoke CodeBuild for testing and building, then pass the resulting artifacts to a deployment stage.
+
+---
