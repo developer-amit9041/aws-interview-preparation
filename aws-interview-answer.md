@@ -5888,3 +5888,67 @@ Agar load badhta hai, toh ASG instances add kar sakta hai, maximum capacity ke a
 - Auto Scaling instantly har traffic spike solve nahi karta; instance launch aur application startup mein time lag sakta hai. Correct health checks, scaling thresholds aur capacity limits configure karna important hai.
 
 ---
+
+### Q89. What is an Auto Scaling Group (ASG)?
+
+#### 1. English Definition
+
+**An Auto Scaling Group (ASG) is an AWS feature that manages a group of EC2 instances and maintains capacity according to configured minimum, desired, and maximum settings, scaling policies, and health checks.**
+
+#### 2. Hindi Definition
+
+Auto Scaling Group AWS ka feature hai jo EC2 instances ke group ko manage karta hai. Yeh configured minimum, desired aur maximum capacity, scaling policies, aur health checks ke according instances ki count maintain ya adjust karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, pichhle question mein humne Auto Scaling samjha tha. **Auto Scaling Group (ASG) woh group hai jiske through AWS multiple EC2 instances ko ek saath manage karta hai.**
+
+Maan lo tumhari MERN application ke liye normally 2 EC2 instances chahiye. Tum ASG mein minimum `2`, desired `2`, aur maximum `6` configure kar sakte ho. Agar scaling policy ko lagta hai ki load badh gaya hai, toh ASG additional instances launch kar sakta hai. Load kam hone par policy ke according instances reduce ho sakte hain.
+
+ASG instance health bhi monitor karta hai. Agar koi instance unhealthy ho aur ASG usse replace karne ke liye configured ho, toh ASG us instance ko replace karne ki koshish kar sakta hai.
+
+#### 4. Practical Example: MERN Application
+
+```text
+Application Load Balancer (ALB)
+             |
+             v
+     Auto Scaling Group
+       Min: 2 | Desired: 2 | Max: 6
+             |
+       +-----+-----+
+       |           |
+   EC2 #1       EC2 #2
+       |
+       +-- High load: ASG may launch EC2 #3
+```
+
+ALB incoming requests ko target group ke healthy instances tak route karta hai. ASG instance capacity manage karta hai. ASG ko target group ke saath associate karne par newly launched instances register ho sakte hain, aur removed instances deregister ho sakte hain.
+
+#### 5. Main Components / Settings of an ASG
+
+| Component | Purpose |
+|---|---|
+| Minimum capacity | Normal scaling operations mein group ko is configured minimum se neeche scale-in nahi karna chahiye. |
+| Desired capacity | Group jitni instances maintain karne ka target rakhta hai. |
+| Maximum capacity | Group ki configured upper capacity limit. |
+| Launch Template | Batata hai ki instance kaise launch hoga, including AMI, instance type, security groups, storage aur other launch settings. |
+| Scaling Policies | Decide karti hain ki demand ya metrics ke according kab aur kitna scale karna hai. |
+| Health Checks | Unhealthy instances identify karne aur replacement behavior trigger karne mein help karte hain. |
+
+#### 6. ASG vs Auto Scaling
+
+| Auto Scaling | Auto Scaling Group (ASG) |
+|---|---|
+| Resources ki capacity ko demand ke according adjust karne ki overall capability/process. | EC2 instances ka specific group jise AWS manage aur scale karta hai. |
+| Scaling policies aur mechanisms ko broadly refer kar sakta hai. | Minimum, desired, maximum capacity, launch configuration/template aur health-check behavior define karta hai. |
+
+#### 7. Important Points
+
+- ASG EC2 instances ki fleet ko manage karta hai; yeh application code execute karne wali service nahi hai.
+- ASG ko generally Launch Template ke saath configure kiya jata hai.
+- ASG ko ALB Target Group ke saath integrate kiya ja sakta hai.
+- ASG scaling policies aur health checks ke through availability aur elasticity improve karne mein help karta hai.
+- ASG configured maximum capacity se upar automatically scale nahi karta; capacity limits aur scaling settings ko workload ke according plan karna chahiye.
+
+---
