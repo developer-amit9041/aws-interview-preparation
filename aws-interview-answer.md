@@ -9443,3 +9443,102 @@ Clients / React Apps
 | Limitation | Authentication ya complete DDoS protection ka replacement nahi |
 
 ---
+
+### Q143. How do you handle CORS in API Gateway?
+
+#### 1. English Definition
+
+**Cross-Origin Resource Sharing (CORS) is a browser security mechanism that controls whether a web page from one origin can access resources from another origin. In API Gateway, CORS is configured to allow specified origins, methods, and headers for browser-based API requests.**
+
+#### 2. Hindi Definition
+
+CORS ek browser security mechanism hai jo control karta hai ki ek origin par chalne wali website doosre origin ki API ko access kar sakti hai ya nahi. API Gateway mein allowed origins, HTTP methods aur headers configure karke CORS handle kiya jata hai.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhara React frontend `http://localhost:3000` par run ho raha hai aur API Gateway ka endpoint alag origin par hai. Browser cross-origin request ke response ko block kar sakta hai agar API sahi CORS headers return nahi karti.
+
+API Gateway mein CORS configure karke browser ko batate hain:
+
+- Kaunse origins allowed hain.
+- Kaunse HTTP methods allowed hain.
+- Kaunse request headers allowed hain.
+- Zaroorat ho toh credentials allow hain ya nahi.
+
+**Important:** CORS browser enforce karta hai; yeh authentication ya API access control ka replacement nahi hai.
+
+#### 4. Practical Example — React + API Gateway
+
+Suppose frontend origin is `https://app.example.com` and the API is hosted on API Gateway.
+
+A browser may send a preflight request like:
+
+```http
+OPTIONS /users
+Origin: https://app.example.com
+Access-Control-Request-Method: GET
+Access-Control-Request-Headers: authorization,content-type
+```
+
+The API's CORS response should allow only the required origin, method, and headers, for example:
+
+```http
+Access-Control-Allow-Origin: https://app.example.com
+Access-Control-Allow-Methods: GET,POST,OPTIONS
+Access-Control-Allow-Headers: Authorization,Content-Type
+```
+
+These are illustrative headers. Configure them using API Gateway's CORS settings and ensure actual responses also include the required CORS headers.
+
+#### 5. How to Configure It
+
+**For API Gateway HTTP APIs:**
+
+1. Open API Gateway in the AWS Console and select your HTTP API.
+2. Open the CORS configuration.
+3. Add the exact frontend origin, such as `https://app.example.com`.
+4. Select only the required methods, such as `GET`, `POST`, and `OPTIONS`.
+5. Allow required headers, such as `Authorization` and `Content-Type`.
+6. Save changes and test from the browser.
+
+When CORS is configured on an HTTP API, API Gateway can handle preflight requests and add the configured CORS headers. Check the current API configuration because integration-level headers and API Gateway settings can interact.
+
+**For API Gateway REST APIs:**
+
+1. Configure CORS for the relevant resource/methods (the console can help create an `OPTIONS` method).
+2. Ensure the `OPTIONS` preflight response returns the appropriate CORS headers.
+3. Ensure actual method responses also return `Access-Control-Allow-Origin` and any other required headers. For Lambda proxy integrations, the Lambda response commonly needs to include these headers unless another supported layer supplies them.
+4. Deploy the REST API changes to the relevant stage.
+
+#### 6. CORS with Credentials
+
+If browser requests include cookies or other browser credentials:
+
+- Set `Access-Control-Allow-Credentials: true` where appropriate.
+- Use a specific allowed origin; wildcard `*` cannot be used as the allowed origin for credentialed CORS responses.
+- Configure cookies securely (for example, appropriate `Secure` and `SameSite` attributes).
+- Keep authentication and authorization checks on the server.
+
+#### 7. Common Mistakes
+
+- Allowing every origin in production without a real need.
+- Allowing the origin but forgetting the required method or request headers.
+- Handling the preflight `OPTIONS` response but not adding CORS headers to actual responses.
+- Assuming CORS prevents non-browser clients from calling the API.
+- Forgetting to redeploy REST API changes after updating configuration.
+- Returning wildcard origin together with credentialed browser requests.
+
+#### 8. Summary Table
+
+| Topic | Easy Meaning |
+|---|---|
+| CORS | Browser cross-origin access policy |
+| Allowed origin | Frontend website permitted to read the response |
+| Allowed methods | HTTP methods browser requests may use |
+| Allowed headers | Request headers permitted by the CORS policy |
+| Preflight | Browser's `OPTIONS` check for applicable requests |
+| HTTP API | Configure CORS in the API settings |
+| REST API | Configure preflight and actual method responses |
+| Security note | CORS is not authentication or authorization |
+
+---
