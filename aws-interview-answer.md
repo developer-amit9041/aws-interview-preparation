@@ -10690,3 +10690,95 @@ AWS Route 53 mein records manage karne ke liye hosted zone use hoti hai. DNS cha
 **Remember:** DNS domain name ko resolve karta hai; Route 53 AWS ki DNS service hai. DNS resolution ke baad browser actual website/API endpoint se connect karta hai.
 
 ---
+
+### Q156. What is a Hosted Zone?
+
+#### 1. English Definition
+
+**A hosted zone in Amazon Route 53 is a container for DNS records that define how queries for a domain or subdomain should be answered.**
+
+#### 2. Hindi Definition
+
+Route 53 mein Hosted Zone ek container hota hai jisme domain ke DNS records store aur manage kiye jaate hain. Ye records batate hain ki domain ya subdomain ki DNS query ka answer kya hona chahiye.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumhara domain `myapp.com` hai aur tum AWS Route 53 use kar rahe ho.
+
+Tumhe configure karna hai:
+- `myapp.com` ko CloudFront par point karna.
+- `api.myapp.com` ko Application Load Balancer (ALB) par point karna.
+- Zaroorat ke hisaab se TXT ya MX records add karna.
+
+In DNS records ko Route 53 ke hosted zone mein manage kar sakte ho.
+
+Hosted zone khud website host nahi karta; yeh domain ke DNS records ka container hai.
+
+**Types:**
+- **Public hosted zone:** Public internet par domain ke DNS queries ke authoritative answers provide karta hai.
+- **Private hosted zone:** Associated Amazon VPCs ke andar private DNS names resolve karne ke liye use hota hai.
+
+#### 4. Practical Example
+
+Maan lo tumhari MERN application mein React frontend CloudFront par aur Node.js backend ALB par hai. Public hosted zone `myapp.com` ke andar records configure kar sakte ho:
+- `myapp.com` → CloudFront distribution.
+- `api.myapp.com` → ALB.
+
+Private hosted zone ka example: internal service `orders.internal` ko VPC ke andar private endpoint se resolve karna.
+
+#### 5. Architecture Diagram — DNS Request Flow
+
+```text
+User requests myapp.com
+          |
+          v
+     DNS Resolver
+          |
+          v
+Route 53 Public Hosted Zone
+          |
+          +---- myapp.com -----> CloudFront
+          |
+          +---- api.myapp.com -> ALB
+```
+
+**Flow:** Domain query aati hai → Route 53 ki authoritative hosted zone matching record check karti hai → configured destination ka DNS answer return hota hai → browser destination se connect karta hai.
+
+#### 6. Practical Command / Configuration
+
+**Hosted zones list karo:**
+
+```bash
+aws route53 list-hosted-zones
+```
+
+**Hosted zone ke DNS records dekho:**
+
+```bash
+aws route53 list-resource-record-sets \
+  --hosted-zone-id YOUR_HOSTED_ZONE_ID
+```
+
+Configuration tips:
+1. Domain ke liye public ya private hosted zone create karo.
+2. Required DNS records add karo.
+3. Public domain ke liye registrar par hosted zone ke assigned name servers configure karo.
+4. Private hosted zone ke liye correct VPC associations set karo.
+5. DNS answers test karo aur TTL/caching ko dhyan mein rakho.
+
+AWS CLI ke liye credentials aur required IAM permissions configured honi chahiye. Existing domain par public hosted zone create karna apne aap DNS traffic ko Route 53 par switch nahi karta; registrar/delegation settings bhi sahi honi chahiye.
+
+#### 7. Summary Table
+
+| Term | Meaning |
+|---|---|
+| Hosted zone | Domain ke DNS records ka container |
+| Public hosted zone | Public internet ke DNS queries ke liye |
+| Private hosted zone | Associated VPCs ke private DNS names ke liye |
+| DNS record | Domain/subdomain aur destination ya other DNS data ki mapping |
+| Name servers (NS) | Hosted zone ke authoritative DNS servers |
+| TTL | DNS record response kitni der cache ho sakta hai |
+
+**Remember:** Hosted zone records ko organize aur serve karne ka DNS container hai. Public zone internet-facing DNS ke liye hoti hai; private zone associated VPCs ke internal DNS ke liye.
+
+---
