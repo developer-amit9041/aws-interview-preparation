@@ -7357,3 +7357,46 @@ MongoDB is convenient for querying nested fields and using aggregation pipelines
 - For a migration, redesign and test access patterns, indexes, consistency expectations, and application queries before switching.
 
 ---
+
+### Q113. What is a Partition Key?
+
+#### 1. English Definition
+
+**A partition key is the primary key attribute DynamoDB uses to determine how an item is distributed across partitions and to efficiently locate items in a table.**
+
+#### 2. Hindi Definition
+
+Partition key DynamoDB ka primary key attribute hota hai, jiska use items ko partitions mein distribute karne aur unhe efficiently locate karne ke liye kiya jaata hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, DynamoDB table mein har item ko identify karne ke liye primary key hoti hai. Partition key us key ka main attribute hai jo DynamoDB ko data distribute aur retrieve karne mein help karta hai.
+
+Example: Agar tum `Users` table banate ho aur `userId` ko partition key rakhte ho, toh har user item ka `userId` unique hona chahiye. DynamoDB isi key ke through us user ka data efficiently find kar sakta hai.
+
+Partition key choose karte waqt values ka distribution bhi important hai. Agar bahut saara traffic ek hi key par aa raha hai, toh hot partition ya uneven workload ka risk ho sakta hai. Isliye high-cardinality aur workload ke across reasonably distributed key values choose karo.
+
+#### 4. Practical Example
+
+```text
+Table: Users
+Partition key: userId
+
+{ "userId": "user-101", "name": "Amit" }
+{ "userId": "user-102", "name": "Neha" }
+{ "userId": "user-103", "name": "Rahul" }
+```
+
+Yahan `userId` partition key hai. DynamoDB `userId` ke basis par item locate kar sakta hai. Is example mein partition key alone table ki primary key hai, isliye `userId` unique hona chahiye.
+
+Agar table mein sort key bhi defined ho, toh primary key composite hoti hai: partition key + sort key. Us case mein multiple items same partition key share kar sakte hain, provided unki sort key values different hon.
+
+#### 5. Important Points
+
+- Partition key DynamoDB primary key ka required part hai.
+- Table primary key partition key alone ya partition key plus sort key ho sakti hai.
+- Partition key values ko workload ke across achhe se distribute karna important hai.
+- Partition key query design ko affect karti hai; indexes other access patterns support kar sakte hain.
+- Poorly chosen keys can create hot partitions and reduce effective throughput.
+
+---
