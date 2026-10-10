@@ -4938,3 +4938,64 @@ Public Internet
 - Security Groups, NACLs and route tables still need correct configuration.
 
 ---
+
+### Q74. Why should databases usually be placed in private subnets?
+
+#### 1. English Definition
+
+**Databases are usually placed in private subnets to reduce direct exposure to the public internet and allow access only from authorized application servers or trusted networks.**
+
+#### 2. Hindi Definition
+
+Databases ko aam taur par private subnet mein rakha jata hai, taaki woh public internet se directly accessible na hon aur sirf authorized application servers ya trusted networks hi unse connect kar saken.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhara MERN application AWS par deployed hai. User browser se request bhejta hai, request backend API tak pahunchti hai, aur backend MongoDB ya kisi aur database se data read/write karta hai.
+
+Database ko public subnet mein rakhkar internet se directly reachable banana unnecessary risk create kar sakta hai. Agar database ka endpoint public ho aur security configuration galat ho, toh attackers database ko target kar sakte hain.
+
+Isliye common architecture mein:
+
+- **Public subnet:** Internet-facing resources, jaise public load balancer.
+- **Private application subnet:** Backend EC2 instances ya application services.
+- **Private database subnet:** Database instances, jinko application tier se hi required access diya jata hai.
+
+Database ke Security Group mein inbound access sirf application server ke Security Group se allow karo, aur sirf required database port par. Example: PostgreSQL ke liye TCP `5432`, MySQL ke liye TCP `3306`, ya MongoDB ke liye TCP `27017`—jo database tum use kar rahe ho.
+
+#### 4. Practical Example: MERN Application
+
+```text
+User's Browser
+      |
+      v
+Public Load Balancer (Public Subnet)
+      |
+      v
+Node.js / Express API (Private Subnet)
+      |
+      v
+MongoDB (Private Database Subnet)
+```
+
+Is design mein user directly MongoDB se connect nahi karta. Backend authentication, authorization aur validation ke baad database queries execute karta hai.
+
+#### 5. Important Security Points
+
+1. **No direct public exposure:** Database ko public IP ya public endpoint dene se bacho, jab tak koi well-justified requirement na ho.
+2. **Restrict inbound rules:** Database Security Group ka inbound source application tier ka Security Group hona chahiye, broad internet range `0.0.0.0/0` nahi.
+3. **Private subnet alone is not enough:** Route tables, Security Groups, NACLs, credentials, encryption, patching aur database permissions bhi correctly configure hone chahiye.
+4. **Administration:** Database manage karne ke liye VPN, bastion host, Systems Manager, ya another controlled private access method use kiya ja sakta hai.
+5. **Managed databases:** Amazon RDS ko private DB subnets mein deploy karke public accessibility disable rakhna aam best practice hai, unless a specific need requires otherwise.
+
+#### 6. Key Difference
+
+| Publicly reachable database | Private database |
+|---|---|
+| Can be exposed to direct internet connections if routing and rules permit | Not directly reachable from the public internet under the intended private design |
+| Larger attack surface | Reduced attack surface |
+| Requires strict exposure controls | Access can be limited to trusted application or admin paths |
+
+A private subnet reduces exposure, but it does not by itself guarantee database security.
+
+---
