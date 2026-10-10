@@ -2658,3 +2658,53 @@ EC2 console mein AMI create karte waqt **Reboot instance** option ho sakta hai. 
 **To create an AMI, I select the EC2 instance, choose Actions → Image and templates → Create image, provide a name, review the volume settings, and create it. Once the AMI status becomes available, I can use it to launch new EC2 instances with the same captured base configuration. I also verify whether a reboot is required for data consistency and configure networking and security settings for the new instance.**
 
 ---
+
+### Q40. What is the difference between Launch Template vs AMI?
+
+#### 1. English Definition
+
+- **AMI (Amazon Machine Image):** A template containing the operating system, installed software, and root-volume data used to launch an EC2 instance.
+- **Launch Template:** A reusable configuration that specifies how to launch an EC2 instance, including the AMI, instance type, networking, security groups, storage, and other launch parameters.
+
+#### 2. Hindi Definition
+
+- **AMI:** Ek image jo server ka operating system, installed software aur captured root-volume data provide karti hai.
+- **Launch Template:** Ek configuration jo define karti hai ki naya EC2 instance kis AMI, instance type, network, security group aur doosri settings ke saath launch hoga.
+
+#### 3. Hinglish Explanation
+
+Maan lo tumne AWS par apna MERN project deploy kiya hai. Tumne EC2 par Node.js, Nginx aur PM2 install karke configure kar liye. Future mein same setup ke multiple servers launch karne hain.
+
+- **AMI:** Configured server ka reusable image template hai.
+- **Launch Template:** AMI ke saath instance type, security groups, key pair aur doosri launch settings ko ek jagah save karta hai.
+
+A Launch Template can reference an AMI, but it is not itself a machine image. It stores launch configuration; the AMI supplies the image used to initialize the instance's volumes.
+
+#### 4. Difference Table
+
+| Feature | AMI | Launch Template |
+|---|---|---|
+| Main purpose | Image used to create an EC2 instance | Defines the settings used to launch an EC2 instance |
+| Contains | OS image, installed software, root-volume snapshot references and image metadata | AMI ID, instance type, networking, security groups, storage settings, IAM instance profile and other launch parameters |
+| Stores the OS and installed software image? | Yes, through the image and associated snapshots | No; it references an AMI |
+| Can specify instance type? | No, not as its main purpose | Yes |
+| Can specify security groups/network settings? | Not as its main purpose | Yes |
+| Can be reused? | Yes, to launch multiple instances | Yes, to launch instances with repeatable settings |
+| Versions | AMI IDs identify images; new images are created for updated image content | Supports numbered versions of launch configuration |
+
+#### 5. Practical MERN Example
+
+Suppose you need several EC2 instances for your Node.js API:
+
+1. Configure one EC2 instance with the required OS packages, Node.js, Nginx and PM2.
+2. Create an AMI from that instance.
+3. Create a Launch Template that references the AMI and specifies the instance type, security group, subnet/network options, IAM role and storage settings.
+4. Launch new instances from the template. For scaling, an Auto Scaling group can use the Launch Template to create instances as needed.
+
+If you release a new base server image, create a new AMI and update the Launch Template to reference it, often by creating a new template version. Existing instances do not automatically replace their image just because the template version changes.
+
+#### 6. Interview Summary
+
+**An AMI provides the operating system and software image used to initialize an EC2 instance. A Launch Template defines how to launch the instance, including which AMI to use, instance type, network, security groups, storage and other settings. In production, I can create an AMI with my configured application environment and reference it from a Launch Template for repeatable deployments and Auto Scaling.**
+
+---
