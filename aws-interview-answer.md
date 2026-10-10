@@ -5153,3 +5153,69 @@ Example: agar do healthy backend instances hain, load balancer requests ko un in
 - A load balancer can distribute traffic, but it does not replace database replication, caching, or application-level fault handling.
 
 ---
+
+### Q77. Why do we need a Load Balancer?
+
+#### 1. English Definition
+
+**We use a load balancer to distribute incoming traffic across multiple healthy targets, helping prevent overload on a single server and improving application availability and scalability.**
+
+#### 2. Hindi Definition
+
+Hum Load Balancer ka use incoming traffic ko multiple healthy servers ke beech baantne ke liye karte hain, taaki ek server par zyada load na pade aur application ki availability aur scalability improve ho.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari Node.js API sirf ek EC2 instance par chal rahi hai. Jaise-jaise users badhenge, ek server par CPU, memory aur request load badh sakta hai. Agar woh server fail ho gaya, toh application unavailable bhi ho sakti hai.
+
+Load Balancer ek common entry point provide karta hai aur requests ko multiple backend instances tak forward karta hai. Woh health checks se unhealthy instances identify kar sakta hai aur unhe healthy hone tak traffic bhejna band kar sakta hai.
+
+Isliye hum Load Balancer use karte hain:
+
+1. **Traffic distribution:** Incoming requests ko multiple servers par baantne ke liye.
+2. **High availability:** Ek backend fail hone par healthy targets traffic serve kar saken.
+3. **Scalability:** Demand badhne par additional instances add karne ke liye.
+4. **Health checks:** Unhealthy targets ko traffic se temporarily remove karne ke liye.
+5. **TLS/HTTPS handling:** Supported configurations mein HTTPS connections ko Load Balancer par terminate karne ke liye.
+
+#### 4. Practical Example: MERN Application on AWS
+
+```text
+             Users
+               |
+               v
+      Application Load Balancer
+               |
+         +-----+-----+
+         |           |
+         v           v
+      EC2-1         EC2-2
+   Node.js API   Node.js API
+         |           |
+         +-----+-----+
+               |
+               v
+            Database
+```
+
+Suppose tumhare paas do backend EC2 instances hain. Load Balancer incoming requests ko available targets par distribute karega. Agar EC2-1 unhealthy ho jata hai, toh health checks ke basis par requests EC2-2 jaise healthy targets ko bheji ja sakti hain.
+
+Actual traffic distribution configured algorithm, target health aur application behavior par depend karta hai; har case mein exact 50/50 split guaranteed nahi hota.
+
+#### 5. Without vs With Load Balancer
+
+| Without Load Balancer | With Load Balancer |
+|---|---|
+| Clients may depend on a single server endpoint | Clients use a common load-balanced entry point |
+| Single server can become a bottleneck | Traffic can be distributed across multiple targets |
+| A server failure can interrupt service if no failover exists | Healthy targets can continue serving traffic if configured correctly |
+| Scaling and routing can be more manual | New targets can be added to the target group or Auto Scaling setup |
+
+#### 6. Important Points
+
+- A Load Balancer does not automatically create more servers; scaling requires additional targets or Auto Scaling configuration.
+- It cannot guarantee zero downtime by itself. Backend instances, Availability Zones, database and other dependencies must also be designed for resilience.
+- For a typical AWS-hosted MERN app using HTTP/HTTPS, an Application Load Balancer (ALB) is often a suitable option.
+- Configure the backend Security Group to accept application traffic from the Load Balancer's Security Group rather than opening the backend port to everyone.
+
+---
