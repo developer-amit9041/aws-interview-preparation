@@ -6956,3 +6956,57 @@ Is tarah database port ko arbitrary internet traffic ke liye open nahi kiya jaat
 - Exact features vary by RDS engine and configuration; verify TLS enforcement, IAM database authentication, log exports, and encryption options for your engine.
 
 ---
+
+### Q107. Why keep RDS in a private subnet?
+
+#### 1. English Definition
+
+**RDS is usually placed in private subnets to prevent direct public internet access and allow database connections only from authorized application resources within the VPC or through controlled private connectivity.**
+
+#### 2. Hindi Definition
+
+RDS ko usually private subnet mein isliye rakhte hain taaki database ko internet se directly access na kiya ja sake aur sirf authorized application resources ya controlled private connections ko access mile.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application AWS par deploy hai. Users website ko internet se access karte hain, lekin unhe database ko directly access karne ki zaroorat nahi hoti.
+
+Isliye architecture mein Node.js backend ko application layer par rakhte hain aur RDS ko private subnet mein rakhte hain. RDS ke Security Group mein sirf backend ke Security Group se required database port allow karte hain.
+
+Isse attacker ko database ka direct public endpoint milne ka risk kam hota hai. Lekin yaad rakho: private subnet ek security layer hai, complete security solution nahi. Security Groups, database authentication, least privilege, encryption aur monitoring bhi zaroori hain.
+
+#### 4. Practical Example
+
+```text
+Internet Users
+     |
+     v
+Application Load Balancer (public subnet)
+     |
+     v
+Node.js Backend (application subnet)
+     |
+     | Allowed by RDS Security Group
+     v
+RDS Database (private subnet)
+
+No direct public internet access to RDS
+```
+
+For example, PostgreSQL RDS ke inbound rule mein TCP port `5432` ka source Node.js backend ka Security Group ID rakho—not `0.0.0.0/0`. MySQL ke liye port `3306` use hota hai.
+
+#### 5. Benefits
+
+- **Reduced public exposure:** Database ko directly internet par expose karne se bachte hain.
+- **Controlled access:** Security Groups se sirf approved application resources ko connect karne dete hain.
+- **Layered security:** Public-facing load balancer aur backend se database layer ko separate rakhte hain.
+- **Compliance support:** Private network design regulated or sensitive workloads ke security requirements meet karne mein help kar sakta hai.
+
+#### 6. Important Points
+
+- Private subnet mein hone ka matlab ye nahi ki database automatically fully secure ho gaya; routing, security groups, credentials, and database permissions bhi matter karte hain.
+- RDS ko generally publicly accessible disable karke deploy karo unless a justified requirement exists and access is tightly restricted.
+- Administrators private access ke liye VPN, bastion/jump host, Systems Manager-supported approach, or other approved private connectivity use kar sakte hain, depending on architecture.
+- RDS ko internet se outbound access ki usually zaroorat nahi hoti; required updates and integrations should follow the chosen AWS service design.
+
+---
