@@ -1726,3 +1726,72 @@ Example: Node.js application ke temporary image-processing files ya cache ko Ins
 **EBS is persistent, separately managed block storage; Instance Store is local ephemeral storage intended for temporary or reproducible data.** Choose based on durability, performance needs, and whether the data can be recreated.
 
 ---
+
+### Q29. What is an EBS Snapshot?
+
+#### 1. English Definition
+
+**An EBS snapshot is a point-in-time backup of an Amazon EBS volume that can be used to restore data or create another EBS volume.**
+
+#### 2. Hindi Definition
+
+EBS Snapshot, EBS volume ka ek point-in-time backup hota hai. Iska use data recover karne ya backup se naya EBS volume create karne ke liye kiya ja sakta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhare EC2 instance ke saath ek EBS volume attached hai aur usmein important application files hain. Agar data delete ho jaye, galat change ho jaye ya recovery ki zaroorat pade, toh snapshot tumhe backup se data restore karne mein help kar sakta hai.
+
+Simple example: EBS ko hard disk samjho aur EBS Snapshot ko us disk ka backup point samjho. Snapshot EBS volume ka point-in-time backup hota hai aur AWS snapshots ko Amazon S3-backed storage infrastructure mein manage karta hai; tum ise normal S3 bucket ke andar file ki tarah browse nahi karte.
+
+Snapshots incremental hote hain: pehle snapshot mein volume ka required data capture hota hai, aur subsequent snapshots mein generally pichhle snapshot ke baad changed blocks store hote hain. AWS billing snapshot storage ke basis par hoti hai, pricing details Region aur snapshot features ke hisaab se vary kar sakti hain.
+
+#### 4. Practical Example — MERN Project
+
+```text
+EC2 Instance
+   |
+   v
+EBS Volume
+(Node.js app files / required data)
+   |
+   v
+Create EBS Snapshot
+   |
+   +----> Keep backup for recovery
+   |
+   +----> Create a new EBS volume from snapshot
+              |
+              v
+          Attach to compatible EC2
+```
+
+Example workflow:
+1. AWS Console mein EC2 > Volumes par jao.
+2. Required EBS volume select karo.
+3. Actions > Create snapshot choose karo.
+4. Snapshot ka description/tag add karo aur create karo.
+5. Recovery ke waqt snapshot se naya EBS volume create karke compatible instance se attach karo.
+
+For application-consistent backups, especially databases, plan the snapshot process carefully. Filesystem flush, application/database backup procedures, or quiescing may be needed to ensure consistency. A snapshot is not a replacement for testing your restore process.
+
+#### 5. EBS Volume vs EBS Snapshot
+
+| Feature | EBS Volume | EBS Snapshot |
+|---|---|---|
+| Purpose | EC2 ke saath attach hokar block storage provide karta hai | Volume ka point-in-time backup provide karta hai |
+| Usage | Read/write storage | Recovery ya new volume create karne ka source |
+| Attachment | EC2 instance se attach hota hai | Directly EC2 disk ki tarah attach nahi hota |
+| Data recovery | Current volume state | Snapshot se new volume create karke recover kar sakte ho |
+
+#### 6. Important Points
+
+- Snapshot ek EBS volume ka backup hota hai, poore EC2 instance ka complete backup automatically nahi.
+- Snapshot ko use karke naya EBS volume create kiya ja sakta hai; new volume ko correct Availability Zone mein create karna hota hai for attachment.
+- Snapshots incremental hote hain after the first snapshot, but AWS manages the underlying blocks.
+- Production recovery ke liye retention policy, encryption/access permissions, and restore testing plan karo.
+
+#### 7. Interview Summary
+
+**An EBS Snapshot is a point-in-time backup of an EBS volume that helps recover data or create a new volume from the saved state.**
+
+---
