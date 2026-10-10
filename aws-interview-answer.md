@@ -7507,3 +7507,72 @@ A Node.js application can query `OrdersByStatus` using DynamoDB's `Query` operat
 - Choose GSI keys based on real query patterns and expected traffic; a low-cardinality or very hot partition key may create uneven traffic.
 
 ---
+
+### Q116. What is a Local Secondary Index?
+
+#### 1. English Definition
+
+**A Local Secondary Index (LSI) is a DynamoDB index that uses the same partition key as the base table but a different sort key, allowing items to be queried in an alternate sort order within the same partition-key value.**
+
+#### 2. Hindi Definition
+
+Local Secondary Index (LSI) DynamoDB ka index hota hai jo base table ki wahi partition key use karta hai, lekin uski sort key alag hoti hai. Isse same partition key ke items ko doosre sort-key attribute ke basis par query kar sakte hain.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari `Orders` table mein partition key `userId` aur sort key `orderId` hai. Is design se tum ek user ke orders ko `orderId` ke basis par query kar sakte ho.
+
+Lekin tumhe same user ke orders ko `createdAt` ke basis par query ya sort karna hai. Iske liye LSI bana sakte ho:
+
+- Base table partition key: `userId`
+- Base table sort key: `orderId`
+- LSI partition key: `userId` (same as base table)
+- LSI sort key: `createdAt` (different attribute)
+
+Ab tum same `userId` ke orders ko `createdAt` ke basis par query kar sakte ho. LSI ka partition key base table ke partition key jaisa hi hota hai; isliye LSI naya partition-key access pattern provide nahi karta. Different partition-key attribute se query karni ho, toh GSI consider karo.
+
+#### 4. Practical Example
+
+```text
+Base table: Orders
+Partition key: userId
+Sort key:      orderId
+
+Local Secondary Index: OrdersByCreatedAt
+Partition key: userId       (same as base table)
+Sort key:      createdAt    (different)
+
+Query: userId = "user-101"
+       and createdAt within a chosen range
+```
+
+LSI example:
+
+```json
+{
+  "userId": "user-101",
+  "orderId": "order-001",
+  "createdAt": "2026-10-10T12:00:00Z",
+  "total": 1200
+}
+```
+
+#### 5. LSI vs GSI
+
+| Basis | LSI | GSI |
+|---|---|---|
+| Partition key | Must match base table partition key | Can be different from base table partition key |
+| Sort key | Different from base table sort key | Can be different from base table sort key |
+| When created | Must be created when the table is created; cannot add one later | Can be created after table creation, subject to service limits and configuration |
+| Read consistency | Supports eventual and strong consistency | Supports eventual consistency only |
+| Best use | Alternate sort/query pattern within same partition-key value | Additional query pattern using different key attributes |
+
+#### 6. Important Points
+
+- An LSI requires the base table to have a composite primary key (partition key plus sort key).
+- The LSI uses the same partition key as the base table and a different sort key.
+- LSIs must be defined when creating the table; you cannot add an LSI to an existing table later.
+- LSI item collections have a 10 GB size limit per partition-key value, including base-table and index data.
+- Use an LSI when you need another sort order for the same partition-key value; use a GSI when you need a different partition-key access pattern.
+
+---
