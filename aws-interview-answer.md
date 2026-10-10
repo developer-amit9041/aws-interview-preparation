@@ -4779,3 +4779,51 @@ Example ke taur par, agar backend database se TCP connection start karta hai, to
 - Dono ko least-privilege principle ke saath configure karo; unnecessary ports aur broad CIDR ranges avoid karo.
 
 ---
+
+### Q71. What is a Private IP?
+
+#### 1. English Definition
+
+**A private IP address is an IP address used for communication within a private network and is not directly routable over the public internet.**
+
+#### 2. Hindi Definition
+
+Private IP ek aisa IP address hota hai jo private network ke andar devices ya resources ke beech communication ke liye use hota hai. Ye public internet par directly routable nahi hota.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhare AWS VPC mein Node.js backend EC2 aur database hai. Backend database se connect karne ke liye database ka private IP use kar sakta hai, jab dono ke beech network routing aur security rules allow karte hon.
+
+Private IPv4 addresses ke standard ranges hain:
+
+- `10.0.0.0/8` — for example, `10.0.1.10`
+- `172.16.0.0/12` — for example, `172.16.5.20`
+- `192.168.0.0/16` — for example, `192.168.1.25`
+
+AWS VPC mein resources ko private IP addresses assign kiye ja sakte hain. Same VPC ke resources, ya connected networks (jaise correctly routed VPC Peering/VPN), private IPs se communicate kar sakte hain. Sirf private IP hone se connectivity guarantee nahi hoti; routes aur security rules bhi chahiye.
+
+#### 4. Practical AWS Example
+
+```text
+VPC: 10.0.0.0/16
+
+Node.js EC2
+Private IP: 10.0.2.10
+       |
+       | private network connection
+       v
+Database
+Private IP: 10.0.3.20
+```
+
+Is example mein Node.js backend database ke private IP `10.0.3.20` par connect kar sakta hai, provided route tables, security groups, database listener and application configuration allow the connection. Database ko direct public IP dena zaroori nahi hai.
+
+#### 5. Important Points
+
+- Private IP public internet par directly routable nahi hota.
+- RFC 1918 private IPv4 ranges hain `10.0.0.0/8`, `172.16.0.0/12`, aur `192.168.0.0/16`.
+- Private IP ka matlab encryption ya automatic security nahi hota; network controls still matter.
+- Private resources ko outbound internet access chahiye toh suitable routing, such as a NAT Gateway for common IPv4 setups, configure ki ja sakti hai.
+- Private IPs IPv4 aur IPv6 ke broader private/local addressing concepts se related hain; above ranges specifically RFC 1918 IPv4 ranges hain.
+
+---
