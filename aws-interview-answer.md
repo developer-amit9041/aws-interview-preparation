@@ -7807,3 +7807,78 @@ These are examples, not strict rules: either database can support many of these 
 - For a MERN app already built around MongoDB/Mongoose, switching to DynamoDB is not automatically beneficial; it may require redesigning data access patterns and application code.
 
 ---
+
+### Q121. What is AWS Lambda?
+
+#### 1. English Definition
+
+**AWS Lambda is a serverless compute service that runs your code in response to events without requiring you to provision or manage servers. You pay based on the compute time and requests used, subject to AWS pricing terms.**
+
+#### 2. Hindi Definition
+
+AWS Lambda ek serverless compute service hai jo events ke response mein tumhara code run karti hai. Ismein tumhe server create ya manage karne ki zaroorat nahi hoti; AWS execution infrastructure manage karta hai.
+
+#### 3. Hinglish Explanation
+
+Bhai, maan lo tumhari MERN application mein user image upload karta hai. Tumhe image resize karni hai ya DynamoDB mein order insert hone par notification process karni hai.
+
+Is kaam ke liye har baar alag EC2 server ko continuously run karne ke bajaye tum Lambda function bana sakte ho. Event aane par function execute hota hai, kaam karta hai, aur execution complete ho jata hai. AWS underlying servers aur scaling ka management karta hai.
+
+Lambda commonly in events se trigger ho sakta hai:
+- API Gateway se HTTP request
+- S3 mein file upload
+- DynamoDB Streams mein item change
+- EventBridge ke through scheduled ya application event
+
+Serverless ka matlab servers exist nahi karte aisa nahi hai; matlab AWS servers ko manage karta hai. Lambda function ke runtime, timeout, memory, permissions aur deployment package ko phir bhi configure karna hota hai.
+
+#### 4. Practical Example
+
+```text
+User uploads image to S3
+          |
+          v
+S3 event triggers AWS Lambda
+          |
+          v
+Lambda function processes image
+          |
+          v
+Save processed image / update metadata
+```
+
+Simple Node.js Lambda handler example:
+
+```javascript
+exports.handler = async (event) => {
+  console.log("Event received:", JSON.stringify(event));
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: "Lambda executed successfully" })
+  };
+};
+```
+
+Yeh handler event receive karta hai aur response return karta hai. HTTP response tabhi client tak isi form mein jayega jab Lambda ko API Gateway ya compatible invocation setup ke through call kiya ja raha ho.
+
+#### 5. AWS Lambda vs EC2
+
+| Basis | AWS Lambda | Amazon EC2 |
+|---|---|---|
+| Server management | AWS manages underlying infrastructure | You manage the instance OS and server setup |
+| Execution | Runs in response to invocations/events | Runs workloads while the instance is running |
+| Scaling | Managed, automatic scaling within service limits | Configure scaling, for example with an Auto Scaling Group |
+| Billing | Based on requests and compute duration, with applicable pricing details | Pay for instance usage while provisioned/running according to pricing rules |
+| Best fit | Event-driven functions and short-lived tasks | Long-running services and workloads needing OS-level control |
+
+#### 6. Important Points
+
+- AWS Lambda is a serverless compute service, not a database or a complete hosting platform by itself.
+- You can write functions in supported runtimes such as Node.js and Python.
+- Lambda can be invoked by AWS services or directly through supported APIs/SDKs.
+- Configure IAM permissions using least privilege.
+- Consider timeout, memory, concurrency, retries, logging, and idempotency when designing functions.
+- Lambda has execution limits and is not automatically the right choice for every long-running workload.
+
+---
